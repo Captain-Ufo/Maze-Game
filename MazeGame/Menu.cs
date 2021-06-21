@@ -70,6 +70,12 @@ namespace MazeGame
             return selectedIndex;
         }
 
+        public void UpdateMenuItems(string[] prompt, string[] options)
+        {
+            this.prompt = prompt;
+            this.options = options;
+        }
+
         private void DisplayOptions(int xPosition)
         {
             foreach (string s in prompt)

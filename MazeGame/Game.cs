@@ -27,6 +27,9 @@ namespace MazeGame
 
         private string gameVersion = "1.0";
 
+        private Menu mainMenu;
+        private Menu bribeMenu;
+
         public Difficulty DifficultyLevel { get; private set; }
 
         public void Start()
@@ -39,6 +42,8 @@ namespace MazeGame
             levelFilesPath = Directory.GetCurrentDirectory() + "\\Levels";
 
             SetupConsole();
+            CreateMainMenu();
+            CreateBribeMenu();
             RunMainMenu();
         }
 
@@ -379,6 +384,8 @@ namespace MazeGame
                 WriteLine(s);
             }
 
+            int xPos = (WindowWidth / 4) * 3;
+
             string[] prompt =
             {
                 "A guard caught you! Quick, maybe you can bribe them.",
@@ -391,9 +398,7 @@ namespace MazeGame
                 "Surrender"
             };
 
-            Menu bribeMenu = new Menu(prompt, options);
-
-            int xPos = (WindowWidth / 4) * 3;
+            bribeMenu.UpdateMenuItems(prompt, options);
 
             int selectedIndex = bribeMenu.Run(xPos);
 
@@ -435,15 +440,9 @@ namespace MazeGame
         #endregion
 
         #region Menus
-        private void RunMainMenu()
+
+        private void CreateMainMenu()
         {
-            Clear();
-            string gameVersionText = "Version " + gameVersion;
-
-            SetCursorPosition(WindowWidth - 5 - gameVersionText.Length, WindowHeight - 2);
-            WriteLine(gameVersionText);
-            SetCursorPosition(0, 0);
-
             string[] prompt = {
                 "                                                                  ",
                 "       ▓█████   ██████  ▄████▄   ▄▄▄       ██▓███  ▓█████         ",
@@ -481,7 +480,34 @@ namespace MazeGame
 
             string[] options = { "New Game", "Instructions", "Credits", "Quit" };
 
-            Menu mainMenu = new Menu(prompt, options);
+            mainMenu = new Menu(prompt, options);
+        }
+
+        private void CreateBribeMenu()
+        {
+            string[] prompt =
+            {
+                "A guard caught you! Quick, maybe you can bribe them.",
+                $"You have collected $0 so far.",
+            };
+
+            string[] options =
+            {
+                $"Bribe ($ 0)",
+                "Surrender"
+            };
+
+            bribeMenu = new Menu(prompt, options);
+        }
+
+        private void RunMainMenu()
+        {
+            Clear();
+            string gameVersionText = "Version " + gameVersion;
+
+            SetCursorPosition(WindowWidth - 5 - gameVersionText.Length, WindowHeight - 2);
+            WriteLine(gameVersionText);
+            SetCursorPosition(0, 0);
 
             int selectedIndex = mainMenu.Run(WindowWidth/2);
 

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "H50pQY9A/fWTf/u3ZtCHS5TIkXZG+iMnaTbvqwiDQf+DEObNL9Q7DL/lFYUpg7fOZBvsfYVfmxrjDPr7lVgH1A==",
+  "success": true,
+  "projectFilePath": "D:\\Prove Programmazione\\C# Tutorial\\Michael Hadley\\MazeGame\\MazeGame\\MazeGame.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Utente\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.13\\microsoft.netcore.app.host.win-x64.3.1.13.nupkg.sha512"
+  ],
+  "logs": []
+}

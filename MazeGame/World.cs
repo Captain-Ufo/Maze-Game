@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using static System.Console;
 
 namespace MazeGame
@@ -13,16 +13,19 @@ namespace MazeGame
         private int columns;
 
         private int xOffset;
+        private int yOffset;
 
         private Dictionary<Coordinates, Lever> leversDictionary;
 
         private Guard[] levelGuards;
 
+        private Stopwatch stopwatch;
+
         public bool IsLocked { get; set; }
         public int PlayerStartX { get; private set; }
         public int PlayerStartY { get; private set; }
 
-        public World(string[,] grid, bool hasKey, int startX, int startY, Dictionary<Coordinates, Lever> levers, Guard[] guards)
+        public World(string[,] grid, bool hasKey, int startX, int startY, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
 
@@ -30,28 +33,31 @@ namespace MazeGame
             columns = this.grid.GetLength(1);
 
             xOffset = (WindowWidth / 2) - (columns / 2);
+            yOffset = ((WindowHeight - 5) / 2) - (rows / 2);
+            //yOffset = 0;
 
             leversDictionary = new Dictionary<Coordinates, Lever>();
 
+            this.stopwatch = stopwatch;
+
             foreach(KeyValuePair<Coordinates, Lever> leverInfo in levers)
             {
-                Coordinates coordinatesWithOffset = new Coordinates(leverInfo.Key.X + xOffset, leverInfo.Key.Y);
+                Coordinates coordinatesWithOffset = new Coordinates(leverInfo.Key.X + xOffset, leverInfo.Key.Y + yOffset);
                 Lever lever = leverInfo.Value;
 
                 leversDictionary[coordinatesWithOffset] = lever;
             }
 
-            //leversDictionary = levers;
             levelGuards = guards;
 
             foreach( Guard guard in guards)
             {
-                guard.AssignXOffset(xOffset);
+                guard.AssignOffset(xOffset, yOffset);
             }
 
             IsLocked = hasKey;
             PlayerStartX = startX + xOffset;
-            PlayerStartY = startY;
+            PlayerStartY = startY + yOffset;
         }
 
         public void Draw()
@@ -61,7 +67,7 @@ namespace MazeGame
                 for (int x = 0; x < columns; x++)
                 {
                     string element = grid[y, x];
-                    SetCursorPosition(x + xOffset, y);
+                    SetCursorPosition(x + xOffset, y+yOffset);
                     if (element == SymbolsConfig.ExitChar.ToString())
                     {
                         if (IsLocked)
@@ -93,6 +99,7 @@ namespace MazeGame
         public bool IsPositionWalkable(int x, int y)
         {
             x -= xOffset;
+            y -= yOffset;
 
             if (x < 0 || y < 0 || x >= columns || y >= rows)
             {
@@ -115,12 +122,13 @@ namespace MazeGame
 
         public string GetElementAt(int x, int y)
         {
-            return grid[y, x - xOffset];
+            return grid[y - yOffset, x - xOffset];
         }
 
         public void ChangeElementAt(int x, int y, string newElement)
         {
             x -= xOffset;
+            y -= yOffset;
 
             grid[y, x] = newElement;
             Draw();
@@ -128,6 +136,8 @@ namespace MazeGame
 
         public void ToggleLevers(int x, int y)
         {
+            stopwatch.Stop();
+
             Beep(100, 100);
 
             Coordinates leverCoord = new Coordinates(x, y);
@@ -135,8 +145,9 @@ namespace MazeGame
             if (leversDictionary.ContainsKey(leverCoord))
             {
                 Lever lever = leversDictionary[leverCoord];
-                lever.Toggle(this, xOffset);
+                lever.Toggle(this, xOffset, yOffset);
             }
+            stopwatch.Start();
             Draw();
         }
 

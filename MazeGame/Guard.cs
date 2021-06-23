@@ -44,13 +44,18 @@ namespace MazeGame
             originPoint = new Coordinates(X, Y);
         }
 
-        public void AssignXOffset(int offset)
+        public void AssignOffset(int xOffset, int yOffset)
         {
-            X += offset;
+            X += xOffset;
+            Y += yOffset;
+
+            originPoint.X = X;
+            originPoint.Y = Y;
 
             for (int i = 0; i < patrolPath.Length; i++)
             {
-                patrolPath[i].X += offset;
+                patrolPath[i].X += xOffset;
+                patrolPath[i].Y += yOffset;
             }
         }
 
@@ -85,12 +90,12 @@ namespace MazeGame
 
             if (patrolPath.Length > 0)
             {
-                this.Clear(world.GetElementAt(X, Y));
-
                 if (patrolPath[nextPatrolPoint].X == 0 && patrolPath[nextPatrolPoint].Y == 0)
                 {
                     return;
                 }
+
+                this.Clear(world.GetElementAt(X, Y));
 
                 if (X != patrolPath[nextPatrolPoint].X)
                 {

@@ -9,7 +9,6 @@ namespace MazeGame
 {
     class Game
     {
-        private Stopwatch stopwatch;
         private List<World> worlds;
 
         private Player player;
@@ -31,10 +30,11 @@ namespace MazeGame
         private Menu bribeMenu;
 
         public Difficulty DifficultyLevel { get; private set; }
+        public Stopwatch MyStopwatch { get; private set; }
 
         public void Start()
         {
-            stopwatch = new Stopwatch();
+            MyStopwatch = new Stopwatch();
             playerHasBeenCaught = false;
             timesCaught = 0;
             totalGold = 0;
@@ -48,7 +48,7 @@ namespace MazeGame
         }
 
         #region SetUp
-        void DisplayLoading()
+        private void DisplayLoading()
         {
             string loadingText = "...Loading...";
             int posY = WindowHeight / 2;
@@ -60,7 +60,7 @@ namespace MazeGame
             WriteLine(loadingText);
         }
 
-        void InstantiateEntities()
+        private void InstantiateEntities()
         {
             worlds = new List<World>();
 
@@ -73,7 +73,7 @@ namespace MazeGame
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath);
 
                 worlds.Add(new World(levelInfo.Grid, levelInfo.HasKey, levelInfo.PlayerStartX, levelInfo.PlayerStartY, 
-                                     levelInfo.LeversDictionary, levelInfo.Guards));
+                                     levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
             }
@@ -109,8 +109,8 @@ namespace MazeGame
         #region Game
         private void RunGameLoop()
         {
-            stopwatch.Start();
-            long timeAtPreviousFrame = stopwatch.ElapsedMilliseconds;
+            MyStopwatch.Start();
+            long timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
             Clear();
 
@@ -126,8 +126,8 @@ namespace MazeGame
                     break;
                 }
 
-                int deltaTimeMS = (int)(stopwatch.ElapsedMilliseconds - timeAtPreviousFrame);
-                timeAtPreviousFrame = stopwatch.ElapsedMilliseconds;
+                int deltaTimeMS = (int)(MyStopwatch.ElapsedMilliseconds - timeAtPreviousFrame);
+                timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
                 if (!HandlePlayerInputs(currentRoom))
                 {
@@ -146,24 +146,19 @@ namespace MazeGame
                     Beep(1000, 80);
                     player.Booty += 100;
                 }
-
-                if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
+                else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
                     worlds[currentRoom].IsLocked = false;
                     Beep(800, 90);
                     worlds[currentRoom].ChangeElementAt(player.X, player.Y, SymbolsConfig.EmptySpace.ToString());
                 }
-
-                if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString() || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
+                else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
+                    || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
                     && player.HasPlayerMoved)
                 {
-                    stopwatch.Stop();
-                    Beep(100, 100);
                     worlds[currentRoom].ToggleLevers(player.X, player.Y);
-                    stopwatch.Start();
                 }
-                
-                if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[currentRoom].IsLocked)
+                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[currentRoom].IsLocked)
                 {
                     if (worlds.Count > currentRoom + 1)
                     {
@@ -243,7 +238,7 @@ namespace MazeGame
                         }
                         return true;
                     case ConsoleKey.Escape:
-                        stopwatch.Stop();
+                        MyStopwatch.Stop();
                         if (QuitGame())
                         {
                             return false;
@@ -251,7 +246,7 @@ namespace MazeGame
                         else
                         {
                             Clear();
-                            stopwatch.Start();
+                            MyStopwatch.Start();
                             worlds[currentLevel].Draw();
                             return true;
                         }
@@ -285,10 +280,10 @@ namespace MazeGame
             WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
             WriteLine("");
             Write($"  Tresure collected: $ {player.Booty}");
-            SetCursorPosition(CursorLeft + 10, CursorTop);
+            SetCursorPosition(32, CursorTop);
             Write($"Floor {currentLevel + 1}");
-            SetCursorPosition(CursorLeft + 5, CursorTop);
-            Write($"Difficulty Level: {DifficultyLevel.ToString()}");
+            SetCursorPosition(45, CursorTop);
+            Write($"Difficulty Level: {DifficultyLevel}");
             string quitInfo = "Press Escape to quit.";
             SetCursorPosition(WindowWidth - quitInfo.Length - 3, WindowHeight - 2);
             Write(quitInfo);
@@ -296,7 +291,7 @@ namespace MazeGame
 
         public void CapturePlayer(Guard guard)
         {
-            stopwatch.Stop();
+            MyStopwatch.Stop();
 
             if (DifficultyLevel == Difficulty.Hard || guard.HasBeenBribedBefore || !AttemptBribe())
             {
@@ -310,7 +305,7 @@ namespace MazeGame
             Clear();
             hasDrawnBackground = false;
 
-            stopwatch.Start();
+            MyStopwatch.Start();
         }
 
         private bool AttemptBribe()

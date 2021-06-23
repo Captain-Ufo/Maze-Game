@@ -13,7 +13,7 @@ namespace MazeGame
 
         private Coordinates[] connectedGates;
 
-        public void Toggle(World world, int xOffset)
+        public void Toggle(World world, int xOffset, int yOffset)
         {
             IsOn = !IsOn;
 
@@ -26,17 +26,17 @@ namespace MazeGame
 
             foreach (Coordinates coordinates in connectedGates)
             {
-                if (world.GetElementAt(coordinates.X + xOffset, coordinates.Y) == SymbolsConfig.GateChar.ToString())
+                if (world.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
                 {
-                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y, SymbolsConfig.EmptySpace.ToString());
+                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.EmptySpace.ToString());
                 }
                 else
                 {
-                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y, SymbolsConfig.GateChar.ToString());
+                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.GateChar.ToString());
                 }
             }
 
-            world.ChangeElementAt(x + xOffset, y, leverSymbol);
+            world.ChangeElementAt(x + xOffset, y + yOffset, leverSymbol);
         }
 
         public void SetLeverCoordinates(int x, int y)

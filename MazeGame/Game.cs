@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
+using System.Text.Json;
 using static System.Console;
 
 namespace MazeGame
@@ -23,14 +24,17 @@ namespace MazeGame
         private int currentRoom;
 
         private string levelFilesPath;
+        private string saveGamesPath;
 
-        private string gameVersion = "1.0";
+        private string gameVersion = "1.5";
 
         private Menu mainMenu;
         private Menu bribeMenu;
 
         public Difficulty DifficultyLevel { get; private set; }
         public Stopwatch MyStopwatch { get; private set; }
+
+
 
         public void Start()
         {
@@ -40,12 +44,15 @@ namespace MazeGame
             totalGold = 0;
 
             levelFilesPath = Directory.GetCurrentDirectory() + "\\Levels";
+            saveGamesPath = Directory.GetCurrentDirectory() + "\\Saves";
 
             SetupConsole();
             CreateMainMenu();
             CreateBribeMenu();
             RunMainMenu();
         }
+
+
 
         #region SetUp
         private void DisplayLoading()
@@ -60,7 +67,9 @@ namespace MazeGame
             WriteLine(loadingText);
         }
 
-        private void InstantiateEntities()
+
+
+        private void InstantiateEntities(int startBooty, int startLevel)
         {
             worlds = new List<World>();
 
@@ -78,8 +87,11 @@ namespace MazeGame
                 totalGold += levelInfo.TotalGold;
             }
 
-            player = new Player(worlds[0].PlayerStartX, worlds[0].PlayerStartY);
+            player = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
+            player.Booty = startBooty;
         }
+
+
 
         private void SetupConsole()
         {
@@ -95,6 +107,8 @@ namespace MazeGame
             }
         }
 
+
+
         private void DisplayConsoleSizeWarning()
         {
             WriteLine("Error setting the preferred console size.");
@@ -106,15 +120,27 @@ namespace MazeGame
         }
         #endregion
 
+
+
         #region Game
-        private void RunGameLoop()
+        private void PlayGame(int startRoom, int startBooty = 0)
+        {
+            Clear();
+            DisplayLoading();
+            InstantiateEntities(startBooty, startRoom);
+            RunGameLoop(startRoom);
+        }
+
+
+
+        private void RunGameLoop(int startRoom)
         {
             MyStopwatch.Start();
             long timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
             Clear();
 
-            currentRoom = 0;
+            currentRoom = startRoom;
             hasDrawnBackground = false;
 
             while (true)
@@ -166,10 +192,14 @@ namespace MazeGame
                         player.X = worlds[currentRoom].PlayerStartX;
                         player.Y = worlds[currentRoom].PlayerStartY;
                         hasDrawnBackground = false;
+
+                        GameData data = new GameData(player.Booty, currentRoom, timesCaught, DifficultyLevel);
+                        SaveGame(data);
                         Clear();
                     }
                     else
                     {
+                        DeleteSaveGame();
                         break;
                     }
                 }
@@ -185,6 +215,8 @@ namespace MazeGame
 
             DisplayOutro();
         }
+
+
 
         private bool HandlePlayerInputs(int currentLevel)
         {
@@ -257,6 +289,8 @@ namespace MazeGame
             return true;
         }
 
+
+
         private bool DrawFrame(int currentRoom, bool hasDrawnBackground)
         {
             if (!hasDrawnBackground)
@@ -270,6 +304,8 @@ namespace MazeGame
             CursorVisible = false;
             return hasDrawnBackground;
         }
+
+
 
         private void DrawUI(int currentLevel)
         {
@@ -289,17 +325,19 @@ namespace MazeGame
             Write(quitInfo);
         }
 
+
+
         public void CapturePlayer(Guard guard)
         {
             MyStopwatch.Stop();
 
-            if (DifficultyLevel == Difficulty.Hard || guard.HasBeenBribedBefore || !AttemptBribe())
+            if (DifficultyLevel == Difficulty.VeryHard || DifficultyLevel == Difficulty.Ironman || guard.HasBeenBribedBefore || !AttemptBribe())
             {
                 playerHasBeenCaught = true;
                 return;
             }
 
-            guard.BribeGuard(DifficultyLevel == Difficulty.Easy);
+            guard.BribeGuard(DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.VeryEasy);
 
             timesCaught++;
             Clear();
@@ -308,6 +346,8 @@ namespace MazeGame
             MyStopwatch.Start();
         }
 
+
+
         private bool AttemptBribe()
         {
             Clear();
@@ -315,10 +355,13 @@ namespace MazeGame
 
             int bribeCostIncrease = 50;
 
-            if (DifficultyLevel == Difficulty.Normal)
+            if (DifficultyLevel == Difficulty.Normal || DifficultyLevel == Difficulty.Hard)
             {
                 bribeCostIncrease = 100;
             }
+
+            //No setting for Very Hard or Ironman because in the current iteration of the design, at those difficulty levels 
+            //being caught means instant game over
 
             int bribeCost = 100 + (bribeCostIncrease * timesCaught);
 
@@ -434,8 +477,9 @@ namespace MazeGame
         }
         #endregion
 
-        #region Menus
 
+
+        #region Menus
         private void CreateMainMenu()
         {
             string[] prompt = {
@@ -478,6 +522,8 @@ namespace MazeGame
             mainMenu = new Menu(prompt, options);
         }
 
+
+
         private void CreateBribeMenu()
         {
             string[] prompt =
@@ -495,21 +541,76 @@ namespace MazeGame
             bribeMenu = new Menu(prompt, options);
         }
 
+
+
         private void RunMainMenu()
         {
             Clear();
+            string[] saveFiles = CheckForOngoingGames();
+
             string gameVersionText = "Version " + gameVersion;
 
             SetCursorPosition(WindowWidth - 5 - gameVersionText.Length, WindowHeight - 2);
             WriteLine(gameVersionText);
             SetCursorPosition(0, 0);
 
-            int selectedIndex = mainMenu.Run(WindowWidth/2);
+            if (saveFiles.Length > 0)
+            {
+                MainMenuWithContinue(saveFiles);
+            }
+            else
+            {
+                DefaultMainMenu();
+            }
+        }
+
+
+
+        private void MainMenuWithContinue(string[] saveFiles)
+        {
+            string[] options = { "Continue", "New Game", "Instructions", "Credits", "Quit" };
+
+            mainMenu.UpdateMenuOptions(options);
+
+            int selectedIndex = mainMenu.Run(WindowWidth / 2);
 
             switch (selectedIndex)
             {
                 case 0:
-                    SelectDifficulty();
+                    LoadSaveMenu(saveFiles);
+                    break;
+                case 1:
+                    SelectDifficulty(true);
+                    break;
+                case 2:
+                    DisplayInstructions();
+                    break;
+                case 3:
+                    DisplayAboutInfo();
+                    break;
+                case 4:
+                    if (!MainMenuQuitGame())
+                    {
+                        RunMainMenu();
+                    }
+                    break;
+            }
+        }
+
+
+
+        private void DefaultMainMenu()
+        {
+            string[] options = { "New Game", "Instructions", "Credits", "Quit" };
+
+            mainMenu.UpdateMenuOptions(options);
+
+            int selectedIndex = mainMenu.Run(WindowWidth / 2);
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    SelectDifficulty(false);
                     break;
                 case 1:
                     DisplayInstructions();
@@ -526,15 +627,93 @@ namespace MazeGame
             }
         }
 
-        private void SelectDifficulty()
+
+
+        private string[] CheckForOngoingGames()
+        {
+            if (!Directory.Exists(saveGamesPath))
+            {
+                Directory.CreateDirectory(saveGamesPath);
+            }
+
+            string[] files = Directory.GetFiles(saveGamesPath);
+
+            int extra = saveGamesPath.Length + 1; //+1 required to include the "\"
+
+            List<string> saves = new List<string>();
+
+            foreach (string file in files)
+            {
+                string fileName = file.Remove(0, extra);
+
+                if (!fileName.Contains(".sav"))
+                {
+                    continue;
+                }
+                saves.Add(fileName);
+            }
+
+            return saves.ToArray();
+        }
+
+
+
+        private void LoadSaveMenu(string[] availableSaves)
         {
             Clear();
-            SetCursorPosition(0, 10);
+
+            string[] prompt =
+            {
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
+                "~·~ Which game do you want to load? ~·~",
+                "  ",
+                "  ",
+            };
+
+            List<string> options = new List<string>();
+            options.Add("Back");
+
+            foreach (string s in availableSaves)
+            {
+                options.Add(s);
+            }
+
+            Menu loadSaveMenu = new Menu(prompt, options.ToArray());
+
+            int selectedIndex = loadSaveMenu.Run(WindowWidth/2);
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    Clear();
+                    RunMainMenu();
+                    break;
+                default:
+                    GameData saveGame = LoadGame(availableSaves[selectedIndex - 1]);
+                    timesCaught = saveGame.TimesCaught;
+                    DifficultyLevel = saveGame.DifficultyLevel;
+                    PlayGame(saveGame.CurrentLevel, saveGame.Booty);
+                    break;
+            }
+        }
+
+
+
+        private void SelectDifficulty(bool IsThereASavegame)
+        {
+            Clear();
 
             string[] prompt = 
-            { 
-                "  ",
-                "  ",
+            {
                 "  ",
                 "  ",
                 "  ",
@@ -546,9 +725,15 @@ namespace MazeGame
                 "~·~ Choose your difficulty level ~·~",
                 "  ",
                 "  ",
+                "  "
             };
 
-            string[] options = { "Easy", "Normal", "Hard", };
+            if (IsThereASavegame)
+            {
+                prompt[10] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
+            }
+
+            string[] options = { "Very Easy", "Easy", "Normal", "Hard", "Very Hard", "Ironman", "Back"};
 
             Menu difficultyMenu = new Menu(prompt, options);
 
@@ -557,26 +742,32 @@ namespace MazeGame
             switch (selectedIndex)
             {
                 case 0:
-                    DifficultyLevel = Difficulty.Easy;
+                    DifficultyLevel = Difficulty.VeryEasy;
                     break;
                 case 1:
-                    DifficultyLevel = Difficulty.Normal;
+                    DifficultyLevel = Difficulty.Easy;
                     break;
                 case 2:
+                    DifficultyLevel = Difficulty.Normal;
+                    break;
+                case 3:
                     DifficultyLevel = Difficulty.Hard;
                     break;
+                case 4:
+                    DifficultyLevel = Difficulty.VeryHard;
+                    break;
+                case 5:
+                    DifficultyLevel = Difficulty.Ironman;
+                    break;
+                case 6:
+                    RunMainMenu();
+                    return;
             }
 
-            PlayGame();
+            PlayGame(0);
         }
 
-        private void PlayGame()
-        {
-            Clear();
-            DisplayLoading();
-            InstantiateEntities();
-            RunGameLoop();
-        }
+
 
         private void DisplayInstructions()
         {
@@ -600,34 +791,39 @@ namespace MazeGame
                 WriteLine(s);
             }
 
-            WriteLine("\n\n\n~·~ INSTRUCTIONS: ~·~");
-            WriteLine("\n> Use the arrow keys to move.");
-            Write("\n> Try to reach the TRAPDOOR to the next level, which looks like this: ");
+            WriteLine("\n\n\n ~·~ INSTRUCTIONS: ~·~");
+            WriteLine("\n > Use the arrow keys to move.");
+            Write("\n > Try to reach the TRAPDOOR to the next level, which looks like this: ");
             ForegroundColor = ConsoleColor.Green;
             WriteLine(SymbolsConfig.ExitChar);
             ResetColor();
-            Write("\n> Sometimes before you reach the door you need to find a KEY, which looks like this: ");
+            Write("\n > Sometimes before you reach the door you need to find a KEY, which looks like this: ");
             ForegroundColor = ConsoleColor.DarkYellow;
             WriteLine(SymbolsConfig.KeyChar);
             ResetColor();
-            Write("\n> Avoid at all costs GUARDS, which looks like this: ");
+            Write("\n > Avoid at all costs GUARDS, which looks like this: ");
             ForegroundColor = ConsoleColor.DarkRed;
             WriteLine("@");
             ResetColor();
-            WriteLine("  Beware, Guards can catch you even if they just walk by your position. They don't need to actually bump against you.");
-            WriteLine("  Depending on the difficulty level you chose, you might be able to bribe them to look the other way. It will get more expansive the more you do it!");
-            WriteLine("\n> LEVERS, which looks like this: " + SymbolsConfig.LeverOffChar + " or this " + SymbolsConfig.LeverOnChar + 
+            WriteLine("   Beware, Guards can catch you even if they just walk by your position. They don't need to actually bump against you.");
+            WriteLine("   Depending on the difficulty level you chose, you might be able to bribe them to look the other way. It will get more expansive the more you do it!");
+            WriteLine("\n > LEVERS, which looks like this: " + SymbolsConfig.LeverOffChar + " or this " + SymbolsConfig.LeverOnChar + 
                       ", open GATES ( " +SymbolsConfig.GateChar + " )  in the current floor.");
-            Write("\n> (Optional) Try to collect as much treasure as you can: ");
+            Write("\n > (Optional) Try to collect as much treasure as you can: ");
             ForegroundColor = ConsoleColor.Yellow;
             WriteLine(SymbolsConfig.TreasureChar);
             ResetColor();
+            WriteLine("\n The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.");
             WriteLine("\n\n Difficulty levels:");
-            WriteLine("\n> EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.");
-            WriteLine("  Bribe cost increase by $50 each time");
-            WriteLine("\n> NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.");
-            WriteLine("  Bribe cost will increase by $100 each time");
-            WriteLine("\n> HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.");
+            WriteLine("\n > VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.");
+            WriteLine("   Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.");
+            WriteLine("\n > EASY: same conditions as very easy, but if you game over, you'll have to start from the first level.");
+            WriteLine("\n > NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.");
+            WriteLine("   Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.");
+            WriteLine("\n > HARD: same conditions as normal, but if you game over, you'll have to start from the first level.");
+            WriteLine("\n > VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.");
+            WriteLine("   You will still be able to load the last save and retry the same level.");
+            WriteLine("\n > IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.");
 
             SetCursorPosition(0, WindowHeight - 3);
             WriteLine("Press any key to return to the main menu...");
@@ -636,24 +832,29 @@ namespace MazeGame
             RunMainMenu();
         }
 
+
+
         private void DisplayAboutInfo()
         {
             Clear();
-            WriteLine("Escape from the Dungeon, a game by Cristian Baldi expanding on the lessons in Micheal Hadley's \"Intro To Programming in C#\" course:");
-            WriteLine("https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ");
-            WriteLine("\nProgramming: Cristian Baldi");
-            WriteLine("\nLevel desing: Cristian Baldi");
-            WriteLine("(Yes, I know it's bad. I'm not a level designer :P)");
-            WriteLine("\nAscii title from Text To Ascii Art Generator (https://www.patorjk.com/software/taag)");
-            WriteLine("Ascii art from Ascii Art Archive (https://www.asciiart.eu/):");
-            WriteLine("\nGuard art by Randall Nortman and Tua Xiong");
-            WriteLine("\nWin screen art by Henry Segerman");
-            WriteLine("\nGame over screen art based on art by Jgs");
-            WriteLine("\nPress any key to return to main menu...");
+            string authorName = "Cristian Baldi";
+            WriteLine($" Escape from the Dungeon, a game by {authorName} expanding on the lessons in Micheal Hadley's \"Intro To Programming in C#\" course:");
+            WriteLine(" https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ");
+            WriteLine($"\n Programming: {authorName}");
+            WriteLine($"\n Level desing: {authorName}");
+            WriteLine("  (Yes, I know it's bad. I'm not a level designer :P)");
+            WriteLine("\n Ascii title from Text To Ascii Art Generator (https://www.patorjk.com/software/taag)");
+            WriteLine(" Ascii art from Ascii Art Archive (https://www.asciiart.eu/):");
+            WriteLine("\n Guard art by Randall Nortman and Tua Xiong");
+            WriteLine("\n Win screen art by Henry Segerman");
+            WriteLine("\n Game over screen art based on art by Jgs");
+            WriteLine("\n Press any key to return to main menu...");
             ReadKey(true);
             Clear();
             RunMainMenu();
         }
+
+
 
         private bool QuitGame()
         {
@@ -670,7 +871,8 @@ namespace MazeGame
                 "  ",
                 "  ",
                 "  ",
-                "Are you sure you want to quit? All your progress will be lost.",
+                "Are you sure you want to quit?",
+                "The game automatically saved the last level you played, but all your progress in the current level will be lost.",
                 "  ",
                 "  ",
              };
@@ -687,6 +889,8 @@ namespace MazeGame
                 return false;
             }
         }
+
+
 
         private bool MainMenuQuitGame()
         {
@@ -722,6 +926,8 @@ namespace MazeGame
         }
         #endregion;
 
+
+
         private void DisplayOutro()
         {
             string[] outro =
@@ -737,6 +943,7 @@ namespace MazeGame
                 "You escaped the Baron's dungeon!",
                 "  ",
                 $"You collected $ {player.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You have been caught {timesCaught} times, but you always managed to convince the guard to look the other way.",
                 "  ",
                 "Thank you for playing."
             };
@@ -758,9 +965,12 @@ namespace MazeGame
             SetCursorPosition(0, WindowHeight - 2);
             WriteLine("Press any key to continue...");
             ReadKey(true);
+            ResetGame(true);
 
             DisplayAboutInfo();
         }
+
+
 
         private void GameOver()
         {
@@ -770,11 +980,13 @@ namespace MazeGame
             {
                 "Oh, no!",
                 "You have been caught and brought back to your cell!",
-                " ",
-                $"the guards searched you and sequestered $ {player.Booty} in treasures.",
+                "  ",
+                $"The guards searched you and sequestered $ {player.Booty} in treasures.",
+                "  ",
+                "Thank you for playing.",
                 "Try Again!",
-                " ",
-                " ",
+                "  ",
+                "  ",
                 "÷ GAME OVER ÷",
             };
 
@@ -849,15 +1061,26 @@ namespace MazeGame
             }
 
             GameOverSong();
+
+            if (DifficultyLevel == Difficulty.VeryEasy || DifficultyLevel == Difficulty.Normal || DifficultyLevel == Difficulty.Hard)
+            {
+                ResetGame(false);
+            }
+            else
+            {
+                ResetGame(true);
+            }
+
             SetCursorPosition(0, WindowHeight - 2);
-            ResetGame();
             Write("Press any key to continue...");
             ReadKey(true);
 
             DisplayAboutInfo();
         }
 
-        private void ResetGame()
+
+
+        private void ResetGame(bool deleteSave)
         {
             playerHasBeenCaught = false;
             timesCaught = 0;
@@ -868,7 +1091,56 @@ namespace MazeGame
             {
                 world.ResetGuards();
             }
+
+            if (deleteSave)
+            {
+                string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
+                string saveFilePath = saveGamesPath + saveGameName;
+                File.Delete(saveFilePath);
+            }
         }
+
+
+
+        private void SaveGame(GameData data)
+        {
+            string saveGame = JsonSerializer.Serialize(data);
+            string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
+            if (!Directory.Exists(saveGamesPath))
+            {
+                Directory.CreateDirectory(saveGamesPath);
+            }
+            string saveFilePath = saveGamesPath + saveGameName;
+            File.WriteAllText(saveFilePath, saveGame);
+        }
+
+
+
+        private GameData LoadGame(string saveFileToLoad)
+        {
+            if (!Directory.Exists(saveGamesPath))
+            {
+                throw new Exception("LoadGame - Save file directory does not exists!");
+            }
+
+            string fileToLoadPath = saveGamesPath + "\\" + saveFileToLoad;
+
+            string loadedData = File.ReadAllText(fileToLoadPath);
+            GameData data = JsonSerializer.Deserialize<GameData>(loadedData);
+
+            return data;
+        }
+
+
+
+        private void DeleteSaveGame()
+        {
+            string saveGameName = "\\" + DifficultyLevel + "Game.sav";
+            string saveFilePath = saveGamesPath + saveGamesPath;
+            File.Delete(saveFilePath);
+        }
+
+
 
         private void GameOverSong()
         {
@@ -891,5 +1163,33 @@ namespace MazeGame
         }
     }
 
-    public enum Difficulty { Easy, Normal, Hard, }
+
+
+    public enum Difficulty { VeryEasy, Easy, Normal, Hard, VeryHard, Ironman }
+
+
+
+    public class GameData
+    {
+        public int Booty { get; set; }
+        public int CurrentLevel { get; set; }
+        public int TimesCaught { get; set; }
+        public Difficulty DifficultyLevel { get; set; }
+
+
+
+        public GameData (int booty, int currentLevel, int timesCaught, Difficulty difficultyLevel)
+        {
+            Booty = booty;
+            CurrentLevel = currentLevel;
+            TimesCaught = timesCaught;
+            DifficultyLevel = difficultyLevel;
+        }
+
+
+
+        public GameData()
+        {
+        }
+    }
 }

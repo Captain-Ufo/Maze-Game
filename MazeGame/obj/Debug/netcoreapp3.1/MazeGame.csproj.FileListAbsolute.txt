@@ -16,3 +16,4 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor3.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\FloorsConfig.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\TestFloor.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor4.txt

@@ -76,6 +76,21 @@ namespace MazeGame
             this.options = options;
         }
 
+        public void UpdateMenuPrompt(string[] prompt)
+        {
+            this.prompt = prompt;
+        }
+
+        public void UpdateMenuPrompt(string prompt)
+        {
+            this.prompt = new string[] { prompt };
+        }
+
+        public void UpdateMenuOptions(string[] options)
+        {
+            this.options = options;
+        }
+
         private void DisplayOptions(int xPosition)
         {
             foreach (string s in prompt)

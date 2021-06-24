@@ -6,7 +6,7 @@ using System.IO;
 namespace MazeGame
 {
     /// <summary>
-    /// Contains the public stati method that parses the level from the text file provided
+    /// Contains the public static method that parses the level from the text file provided
     /// </summary>
     class LevelParser
     {
@@ -330,9 +330,9 @@ namespace MazeGame
         }
     }
 
-    ///<summary>
-    ///Just a helper class that holds all the information required to create a level
-    ///</summary>
+    /// <summary>
+    /// Just a helper class that holds all the information required to create a level
+    /// </summary>
     class LevelInfo
     {
         public string[,] Grid { get; }

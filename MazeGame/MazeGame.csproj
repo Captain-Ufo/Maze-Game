@@ -21,6 +21,9 @@
     <None Update="Levels\Floor3.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Levels\Floor4.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Levels\FloorsConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -33,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Levels\" />
+    <Folder Include="Saves\" />
   </ItemGroup>
 
 </Project>

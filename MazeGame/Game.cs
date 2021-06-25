@@ -1064,6 +1064,7 @@ namespace MazeGame
 
             if (DifficultyLevel == Difficulty.VeryEasy || DifficultyLevel == Difficulty.Normal || DifficultyLevel == Difficulty.Hard)
             {
+                RetryMenu();
                 ResetGame(false);
             }
             else
@@ -1076,6 +1077,56 @@ namespace MazeGame
             ReadKey(true);
 
             DisplayAboutInfo();
+        }
+
+
+
+        private void RetryMenu()
+        {
+            string[] prompt =
+            {
+                "  ",
+                "  ",
+                "Would you like to retry the last level?",
+                "  "
+            };
+
+            string[] options =
+            {
+                "Yes",
+                "No",
+            };
+
+            Menu retryMenu = new Menu(prompt, options);
+
+            int selectedIndex = retryMenu.Run(WindowWidth / 4);
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    Retry();
+                    break;
+                case 1:
+                    break;
+            }
+        }
+
+
+
+        private void Retry()
+        {
+            playerHasBeenCaught = false;
+
+            string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
+            string saveFilePath = saveGamesPath + saveGameName;
+
+            GameData saveGame = LoadGame(saveGameName);
+            timesCaught = saveGame.TimesCaught;
+            DifficultyLevel = saveGame.DifficultyLevel;
+            player.Booty = saveGame.Booty;
+            player.X = worlds[saveGame.CurrentLevel].PlayerStartX;
+            player.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
+            RunGameLoop(saveGame.CurrentLevel);
         }
 
 

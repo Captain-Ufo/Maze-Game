@@ -12,39 +12,38 @@ namespace MazeGame
     {
         private List<World> worlds;
 
-        private Player player;
-        public Player Player { get => player; }
-
         private bool playerHasBeenCaught;
         private bool hasDrawnBackground;
-        private int timesCaught;
 
         private int totalGold;
-
-        private int currentRoom;
-
+        
         private string levelFilesPath;
-        private string saveGamesPath;
 
         private string gameVersion = "1.5";
 
         private Menu mainMenu;
         private Menu bribeMenu;
 
+        private SaveSystem saveSystem;
+
+        public Player Player { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
+        public int CurrentRoom { get; private set; }
+        public int TimesCaught { get; private set; }
         public Stopwatch MyStopwatch { get; private set; }
 
 
 
         public void Start()
         {
+            saveSystem = new SaveSystem();
             MyStopwatch = new Stopwatch();
+
             playerHasBeenCaught = false;
-            timesCaught = 0;
+            TimesCaught = 0;
             totalGold = 0;
 
             levelFilesPath = Directory.GetCurrentDirectory() + "\\Levels";
-            saveGamesPath = Directory.GetCurrentDirectory() + "\\Saves";
 
             SetupConsole();
             CreateMainMenu();
@@ -87,8 +86,8 @@ namespace MazeGame
                 totalGold += levelInfo.TotalGold;
             }
 
-            player = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
-            player.Booty = startBooty;
+            Player = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
+            Player.Booty = startBooty;
         }
 
 
@@ -140,12 +139,12 @@ namespace MazeGame
 
             Clear();
 
-            currentRoom = startRoom;
+            CurrentRoom = startRoom;
             hasDrawnBackground = false;
 
             while (true)
             {
-                player.HasPlayerMoved = false;
+                Player.HasPlayerMoved = false;
 
                 if (playerHasBeenCaught)
                 {
@@ -155,51 +154,50 @@ namespace MazeGame
                 int deltaTimeMS = (int)(MyStopwatch.ElapsedMilliseconds - timeAtPreviousFrame);
                 timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
-                if (!HandlePlayerInputs(currentRoom))
+                if (!HandlePlayerInputs(CurrentRoom))
                 {
                     return;
                 }
 
-                worlds[currentRoom].UpdateGuards(deltaTimeMS, this);
+                worlds[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
-                hasDrawnBackground = DrawFrame(currentRoom, hasDrawnBackground);
+                hasDrawnBackground = DrawFrame(CurrentRoom, hasDrawnBackground);
 
-                string elementAtPlayerPosition = worlds[currentRoom].GetElementAt(player.X, player.Y);
+                string elementAtPlayerPosition = worlds[CurrentRoom].GetElementAt(Player.X, Player.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
                 {  
-                    worlds[currentRoom].ChangeElementAt(player.X, player.Y, SymbolsConfig.EmptySpace.ToString());
+                    worlds[CurrentRoom].ChangeElementAt(Player.X, Player.Y, SymbolsConfig.EmptySpace.ToString());
                     Beep(1000, 80);
-                    player.Booty += 100;
+                    Player.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
-                    worlds[currentRoom].IsLocked = false;
+                    worlds[CurrentRoom].IsLocked = false;
                     Beep(800, 90);
-                    worlds[currentRoom].ChangeElementAt(player.X, player.Y, SymbolsConfig.EmptySpace.ToString());
+                    worlds[CurrentRoom].ChangeElementAt(Player.X, Player.Y, SymbolsConfig.EmptySpace.ToString());
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
-                    && player.HasPlayerMoved)
+                    && Player.HasPlayerMoved)
                 {
-                    worlds[currentRoom].ToggleLevers(player.X, player.Y);
+                    worlds[CurrentRoom].ToggleLevers(Player.X, Player.Y);
                 }
-                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[currentRoom].IsLocked)
+                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[CurrentRoom].IsLocked)
                 {
-                    if (worlds.Count > currentRoom + 1)
+                    if (worlds.Count > CurrentRoom + 1)
                     {
-                        currentRoom++;
-                        player.X = worlds[currentRoom].PlayerStartX;
-                        player.Y = worlds[currentRoom].PlayerStartY;
+                        CurrentRoom++;
+                        Player.X = worlds[CurrentRoom].PlayerStartX;
+                        Player.Y = worlds[CurrentRoom].PlayerStartY;
                         hasDrawnBackground = false;
 
-                        GameData data = new GameData(player.Booty, currentRoom, timesCaught, DifficultyLevel);
-                        SaveGame(data);
+                        saveSystem.SaveGame(this);
                         Clear();
                     }
                     else
                     {
-                        DeleteSaveGame();
+                        saveSystem.DeleteSaveGame(this);
                         break;
                     }
                 }
@@ -232,41 +230,41 @@ namespace MazeGame
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.W:
                     case ConsoleKey.NumPad8:
-                        if (worlds[currentLevel].IsPositionWalkable(player.X, player.Y - 1))
+                        if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y - 1))
                         {
-                            player.ClearPlayer(worlds[currentLevel].GetElementAt(player.X, player.Y));
-                            player.Y--;
-                            player.HasPlayerMoved = true;
+                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Y--;
+                            Player.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.S:
                     case ConsoleKey.NumPad2:
-                        if (worlds[currentLevel].IsPositionWalkable(player.X, player.Y + 1))
+                        if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y + 1))
                         {
-                            player.ClearPlayer(worlds[currentLevel].GetElementAt(player.X, player.Y));
-                            player.Y++;
-                            player.HasPlayerMoved = true;
+                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Y++;
+                            Player.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.A:
                     case ConsoleKey.NumPad4:
-                        if (worlds[currentLevel].IsPositionWalkable(player.X - 1, player.Y))
+                        if (worlds[currentLevel].IsPositionWalkable(Player.X - 1, Player.Y))
                         {
-                            player.ClearPlayer(worlds[currentLevel].GetElementAt(player.X, player.Y));
-                            player.X--;
-                            player.HasPlayerMoved = true;
+                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.X--;
+                            Player.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.RightArrow:
                     case ConsoleKey.D:
                     case ConsoleKey.NumPad6:
-                        if (worlds[currentLevel].IsPositionWalkable(player.X + 1, player.Y))
+                        if (worlds[currentLevel].IsPositionWalkable(Player.X + 1, Player.Y))
                         {
-                            player.ClearPlayer(worlds[currentLevel].GetElementAt(player.X, player.Y));
-                            player.X++;
-                            player.HasPlayerMoved = true;
+                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.X++;
+                            Player.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.Escape:
@@ -299,7 +297,7 @@ namespace MazeGame
                 hasDrawnBackground = true;
             }
             worlds[currentRoom].DrawGuards();
-            player.Draw();
+            Player.Draw();
             DrawUI(currentRoom);
             CursorVisible = false;
             return hasDrawnBackground;
@@ -315,7 +313,7 @@ namespace MazeGame
 
             WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
             WriteLine("");
-            Write($"  Tresure collected: $ {player.Booty}");
+            Write($"  Tresure collected: $ {Player.Booty}");
             SetCursorPosition(32, CursorTop);
             Write($"Floor {currentLevel + 1}");
             SetCursorPosition(45, CursorTop);
@@ -339,7 +337,7 @@ namespace MazeGame
 
             guard.BribeGuard(DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.VeryEasy);
 
-            timesCaught++;
+            TimesCaught++;
             Clear();
             hasDrawnBackground = false;
 
@@ -363,7 +361,7 @@ namespace MazeGame
             //No setting for Very Hard or Ironman because in the current iteration of the design, at those difficulty levels 
             //being caught means instant game over
 
-            int bribeCost = 100 + (bribeCostIncrease * timesCaught);
+            int bribeCost = 100 + (bribeCostIncrease * TimesCaught);
 
             string[] guardArt =
             {
@@ -427,7 +425,7 @@ namespace MazeGame
             string[] prompt =
             {
                 "A guard caught you! Quick, maybe you can bribe them.",
-                $"You have collected ${player.Booty} so far.",
+                $"You have collected ${Player.Booty} so far.",
             };
 
             string[] options =
@@ -446,7 +444,7 @@ namespace MazeGame
 
                     string message;
 
-                    if (player.Booty >= bribeCost) 
+                    if (Player.Booty >= bribeCost) 
                     {
                         message = "The guard pockets your money and grumbles";
                         SetCursorPosition(xPos - message.Length/2, CursorTop + 4);
@@ -457,7 +455,7 @@ namespace MazeGame
                         message = "'I won't be so kind next time.'";
                         SetCursorPosition(xPos - message.Length / 2, CursorTop);
                         WriteLine(message);
-                        player.Booty -= bribeCost;
+                        Player.Booty -= bribeCost;
                         ReadKey(true);
                         return true;
                     }
@@ -546,7 +544,7 @@ namespace MazeGame
         private void RunMainMenu()
         {
             Clear();
-            string[] saveFiles = CheckForOngoingGames();
+            string[] saveFiles = saveSystem.CheckForOngoingGames();
 
             string gameVersionText = "Version " + gameVersion;
 
@@ -629,35 +627,6 @@ namespace MazeGame
 
 
 
-        private string[] CheckForOngoingGames()
-        {
-            if (!Directory.Exists(saveGamesPath))
-            {
-                Directory.CreateDirectory(saveGamesPath);
-            }
-
-            string[] files = Directory.GetFiles(saveGamesPath);
-
-            int extra = saveGamesPath.Length + 1; //+1 required to include the "\"
-
-            List<string> saves = new List<string>();
-
-            foreach (string file in files)
-            {
-                string fileName = file.Remove(0, extra);
-
-                if (!fileName.Contains(".sav"))
-                {
-                    continue;
-                }
-                saves.Add(fileName);
-            }
-
-            return saves.ToArray();
-        }
-
-
-
         private void LoadSaveMenu(string[] availableSaves)
         {
             Clear();
@@ -698,8 +667,8 @@ namespace MazeGame
                     RunMainMenu();
                     break;
                 default:
-                    GameData saveGame = LoadGame(availableSaves[selectedIndex - 1]);
-                    timesCaught = saveGame.TimesCaught;
+                    GameData saveGame = saveSystem.LoadGame(availableSaves[selectedIndex - 1]);
+                    TimesCaught = saveGame.TimesCaught;
                     DifficultyLevel = saveGame.DifficultyLevel;
                     PlayGame(saveGame.CurrentLevel, saveGame.Booty);
                     break;
@@ -942,8 +911,8 @@ namespace MazeGame
                 "  ",
                 "You escaped the Baron's dungeon!",
                 "  ",
-                $"You collected $ {player.Booty} in treasures, out of a total of $ {totalGold}.",
-                $"You have been caught {timesCaught} times, but you always managed to convince the guard to look the other way.",
+                $"You collected $ {Player.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You have been caught {TimesCaught} times, but you always managed to convince the guard to look the other way.",
                 "  ",
                 "Thank you for playing."
             };
@@ -981,7 +950,7 @@ namespace MazeGame
                 "Oh, no!",
                 "You have been caught and brought back to your cell!",
                 "  ",
-                $"The guards searched you and sequestered $ {player.Booty} in treasures.",
+                $"The guards searched you and sequestered $ {Player.Booty} in treasures.",
                 "  ",
                 "Thank you for playing.",
                 "Try Again!",
@@ -1101,13 +1070,9 @@ namespace MazeGame
 
             int selectedIndex = retryMenu.Run(WindowWidth / 4);
 
-            switch (selectedIndex)
+            if (selectedIndex == 0)
             {
-                case 0:
-                    Retry();
-                    break;
-                case 1:
-                    break;
+                Retry();
             }
         }
 
@@ -1117,15 +1082,12 @@ namespace MazeGame
         {
             playerHasBeenCaught = false;
 
-            string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
-            string saveFilePath = saveGamesPath + saveGameName;
-
-            GameData saveGame = LoadGame(saveGameName);
-            timesCaught = saveGame.TimesCaught;
+            GameData saveGame = saveSystem.LoadGame(this);
+            TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
-            player.Booty = saveGame.Booty;
-            player.X = worlds[saveGame.CurrentLevel].PlayerStartX;
-            player.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
+            Player.Booty = saveGame.Booty;
+            Player.X = worlds[saveGame.CurrentLevel].PlayerStartX;
+            Player.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
             RunGameLoop(saveGame.CurrentLevel);
         }
 
@@ -1134,9 +1096,9 @@ namespace MazeGame
         private void ResetGame(bool deleteSave)
         {
             playerHasBeenCaught = false;
-            timesCaught = 0;
-            player.Booty = 0;
-            currentRoom = 0;
+            TimesCaught = 0;
+            Player.Booty = 0;
+            CurrentRoom = 0;
             totalGold = 0;
             foreach (World world in worlds)
             {
@@ -1145,50 +1107,8 @@ namespace MazeGame
 
             if (deleteSave)
             {
-                string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
-                string saveFilePath = saveGamesPath + saveGameName;
-                File.Delete(saveFilePath);
+                saveSystem.DeleteSaveGame(this);
             }
-        }
-
-
-
-        private void SaveGame(GameData data)
-        {
-            string saveGame = JsonSerializer.Serialize(data);
-            string saveGameName = "\\" + DifficultyLevel + "_Game.sav";
-            if (!Directory.Exists(saveGamesPath))
-            {
-                Directory.CreateDirectory(saveGamesPath);
-            }
-            string saveFilePath = saveGamesPath + saveGameName;
-            File.WriteAllText(saveFilePath, saveGame);
-        }
-
-
-
-        private GameData LoadGame(string saveFileToLoad)
-        {
-            if (!Directory.Exists(saveGamesPath))
-            {
-                throw new Exception("LoadGame - Save file directory does not exists!");
-            }
-
-            string fileToLoadPath = saveGamesPath + "\\" + saveFileToLoad;
-
-            string loadedData = File.ReadAllText(fileToLoadPath);
-            GameData data = JsonSerializer.Deserialize<GameData>(loadedData);
-
-            return data;
-        }
-
-
-
-        private void DeleteSaveGame()
-        {
-            string saveGameName = "\\" + DifficultyLevel + "Game.sav";
-            string saveFilePath = saveGamesPath + saveGamesPath;
-            File.Delete(saveFilePath);
         }
 
 
@@ -1217,30 +1137,4 @@ namespace MazeGame
 
 
     public enum Difficulty { VeryEasy, Easy, Normal, Hard, VeryHard, Ironman }
-
-
-
-    public class GameData
-    {
-        public int Booty { get; set; }
-        public int CurrentLevel { get; set; }
-        public int TimesCaught { get; set; }
-        public Difficulty DifficultyLevel { get; set; }
-
-
-
-        public GameData (int booty, int currentLevel, int timesCaught, Difficulty difficultyLevel)
-        {
-            Booty = booty;
-            CurrentLevel = currentLevel;
-            TimesCaught = timesCaught;
-            DifficultyLevel = difficultyLevel;
-        }
-
-
-
-        public GameData()
-        {
-        }
-    }
 }

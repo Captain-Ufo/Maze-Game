@@ -16,3 +16,4 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Release
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Release\netcoreapp3.1\MazeGame.dll
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Release\netcoreapp3.1\MazeGame.pdb
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Release\netcoreapp3.1\MazeGame.genruntimeconfig.cache
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Release\netcoreapp3.1\Levels\Floor4.txt

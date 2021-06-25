@@ -4,6 +4,7 @@ D:\Release\netcoreapp3.1\publish\Levels\Floor3.txt
 D:\Release\netcoreapp3.1\publish\Levels\FloorsConfig.txt
 D:\Release\netcoreapp3.1\publish\Levels\TestFloor.txt
 D:\Release\netcoreapp3.1\publish\MazeGame.exe
+D:\Release\netcoreapp3.1\publish\Levels\Floor4.txt
 D:\Release\netcoreapp3.1\publish\MazeGame.dll
 D:\Release\netcoreapp3.1\publish\MazeGame.deps.json
 D:\Release\netcoreapp3.1\publish\MazeGame.runtimeconfig.json

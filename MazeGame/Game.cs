@@ -478,6 +478,177 @@ namespace MazeGame
                     return false;
             }
         }
+
+
+
+        private void GameOver()
+        {
+            Clear();
+
+            string[] gameOverArt =
+            {
+                "                                                                            ",
+                "                                                                            ",
+                "       ____ __|__   ____    _ ________|__ _________ ______ _____            ",
+                "       |           |o  o|      |           |  \\__      |                    ",
+                "                   | c)%,      |                 \\     |                    ",
+                "                   |o__o'%                 |                       |        ",
+                "    ___|______________ _  %  ,mM  _________|__ ________|__ ____ ___|__      ",
+                "             |            %  |  n    |           |           |              ",
+                "             |      -__/   %  Y /    |           |   ____    |              ",
+                "             |      /       %J_]     |           |  |o  o|   |              ",
+                "   _ _____ __|__ ________|  / /  ____|__ _______    ,%(C | __|__  __ __     ",
+                "       |           |       / /             |        %o__o|         |        ",
+                "                          / /     ,-~~,      Mm,   %               |        ",
+                "       |          ____   / /    ,r/^V\\,\\    n  |  %    |           |        ",
+                "   ____|_______  |o  o|  \\ \\    ('_ ~ ( )   \\ Y  %  ___|_______ ___|__ _    ",
+                "             |   | c)%|   \\/\\   ()--()-))    [_t%            |              ",
+                "             |   |o__%|   /  \\   \\ _(x)88     \\ \\            |              ",
+                "             |        %   \\  !`-. \\ _/|8       \\ \\           |   _/         ",
+                "   _ _____ __|__ ____  %   \\    ,%J___]>---.____\\ \\  ________|___\\_____     ",
+                "       |  \\_       |    %,  \\ `,%         '    (__/    |           |        ",
+                "       |    \\      |     `%-%-%/           / =\\|88                 |        ",
+                "                   |          |           /888         |                    ",
+                "    ___|________ __|_______   |           |8  _________|_______ ___|__      ",
+                "             |           |     \\          /8     |           |              ",
+                "             |           |     |         |8      |           |              ",
+                "             |           |     |         |8                  |              ",
+                "   _ _____ __|___ _______|____ /          \\_ _    ________ __|__  ___ _     ",
+                "       |           |           J\\:______/ \\            |\\__        |        ",
+                "                   |           |           |           | | \\       |        ",
+                "       |           |          /            \\           |           |        ",
+                "    ___|__ ________|_______  /     \\_       \\ _____ ___|__ ____ ___|__ _    ",
+                "             |           |  /      /88\\      \\   |           |              ",
+                "                         | /      /8   \\      \\  |           |              ",
+                "             |            /      /8  |  \\      \\                            ",
+                "   _ _____ __|__ ______  /      /8___|__ \\      \\  _ ________|__ _____ _    ",
+                "       |           |    /     .'8         '.     \\     |           |        ",
+                "       | _         |   /     /8|            \\     \\    |                    ",
+                "       |  \\_       |  /__ __/8 |           | \\_____\\   |           |        ",
+                "   ____|__/________  /   |888__|__ ____  __|__ 8|   \\ _|_______ ___|__ _    ",
+                "             |      /   /8           |           \\   \\       |              ",
+                "                   /  .'8            |            '.  \\      |              ",
+                "             |    /__/8  |           |             8\\__\\     |              ",
+                "     ____ __ |_  |  /8___|__ _____ __|__ ________|_ 8\\  l __|__ _____ _     ",
+                "      |         /> /8          |           |         8\\ <\\         |        ",
+                "  ____          />_/8           |   y       |          8\\_<\\         ____    ",
+                " |o  o|       ,%J__]            |   \\       |           [__t %,     | o  o | ",
+                " | c)%,      ,%> )(8__ ___ ___  |___/___ ___| ______ ___8)(  <%,    _,% (c | ",
+                "| o__o`%-%-%' __ ]8                                     [ __  '%-%-%`o__o | ",
+            };
+
+            SetCursorPosition(0, 2);
+
+            foreach (string s in gameOverArt)
+            {
+                SetCursorPosition(WindowWidth - s.Length - 6, CursorTop);
+                WriteLine(s);
+            }
+
+            string[] gameOverOutro =
+            {
+                "Oh, no!",
+                "You have been caught and brought back to your cell!",
+                "  ",
+                $"The guards searched you and sequestered $ {Player.Booty} in treasures.",
+                "  ",
+                "Thank you for playing.",
+                "Try Again!",
+                "  ",
+                "  ",
+                "÷ GAME OVER ÷",
+            };
+
+            SetCursorPosition(0, (WindowHeight / 3) - (gameOverOutro.Length / 2));
+
+            for (int i = 0; i < gameOverOutro.Length; i++)
+            {
+                SetCursorPosition((WindowWidth / 4) - (gameOverOutro[i].Length / 2), CursorTop);
+                if (i == gameOverOutro.Length - 1) { ForegroundColor = ConsoleColor.Red; }
+                WriteLine(gameOverOutro[i]);
+                ResetColor();
+            }
+
+            GameOverSong();
+
+            if (CurrentRoom == 0 || DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.Hard || DifficultyLevel == Difficulty.Ironman)
+            {
+                RestartMenu();
+                ResetGame(true);
+            }
+            else if (DifficultyLevel == Difficulty.VeryEasy || DifficultyLevel == Difficulty.Normal || DifficultyLevel == Difficulty.VeryHard)
+            {
+                RetryMenu();
+                ResetGame(false);
+            }
+
+            SetCursorPosition(0, WindowHeight - 2);
+            Write("Press any key to continue...");
+            ReadKey(true);
+
+            DisplayAboutInfo();
+        }
+
+
+
+        private void DisplayOutro()
+        {
+            string[] outro =
+            {
+                "~·~ CONGRATULATIONS! ~·~",
+                "  ",
+                "  ",
+                "You escaped the Baron's dungeon!",
+                "  ",
+                $"You collected $ {Player.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You have been caught {TimesCaught} times, but you always managed to convince the guard to look the other way.",
+                "  ",
+                "Thank you for playing."
+            };
+
+            Clear();
+
+            WriteLine(SymbolsConfig.OutroArt);
+
+            SetCursorPosition(0, (WindowHeight / 3) - (outro.Length / 2) + 5);
+
+            for (int i = 0; i < outro.Length; i++)
+            {
+                SetCursorPosition(((WindowWidth / 3) * 2) - (outro[i].Length / 2), CursorTop);
+                if (i == 0) { ForegroundColor = ConsoleColor.Green; }
+                WriteLine(outro[i]);
+                ResetColor();
+            }
+
+            SetCursorPosition(0, WindowHeight - 2);
+            WriteLine("Press any key to continue...");
+            ReadKey(true);
+            ResetGame(true);
+
+            DisplayAboutInfo();
+        }
+
+
+
+        private void ResetGame(bool deleteSave)
+        {
+            playerHasBeenCaught = false;
+            TimesCaught = 0;
+            Player.Booty = 0;
+            Player.X = worlds[0].PlayerStartX;
+            Player.Y = worlds[0].PlayerStartY;
+            CurrentRoom = 0;
+            totalGold = 0;
+            foreach (World world in worlds)
+            {
+                world.ResetGuards();
+            }
+
+            if (deleteSave)
+            {
+                saveSystem.DeleteSaveGame(this);
+            }
+        }
         #endregion
 
 
@@ -824,6 +995,7 @@ namespace MazeGame
             int selection = quitMenu.Run(WindowWidth/2, 10, 2);
             if (selection == 0)
             {
+                Environment.Exit(0);
                 return true;
             }
             else
@@ -847,6 +1019,7 @@ namespace MazeGame
             int selection = quitMenu.Run(WindowWidth/2, 10, 2);
             if (selection == 0)
             {
+                Environment.Exit(0);
                 return true;
             }
             else
@@ -857,165 +1030,32 @@ namespace MazeGame
 
 
 
-        private void DisplayOutro()
+        private void RestartMenu()
         {
-            string[] outro =
+            string prompt = "Would you like to restart the game?";
+
+            string[] options =
             {
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "~·~ CONGRATULATIONS! ~·~",
-                "  ",
-                "  ",
-                "You escaped the Baron's dungeon!",
-                "  ",
-                $"You collected $ {Player.Booty} in treasures, out of a total of $ {totalGold}.",
-                $"You have been caught {TimesCaught} times, but you always managed to convince the guard to look the other way.",
-                "  ",
-                "Thank you for playing."
+                "Yes",
+                "No",
             };
 
-            Clear();
+            Menu retryMenu = new Menu(prompt, options);
 
-            WriteLine(SymbolsConfig.OutroArt);
+            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1);
 
-            SetCursorPosition(0, (WindowHeight / 3) - (outro.Length / 2));
-
-            for (int i = 0; i < outro.Length; i++)
-            {
-                SetCursorPosition(((WindowWidth/3)*2) - (outro[i].Length / 2), CursorTop);
-                if (i == 0) { ForegroundColor = ConsoleColor.Green; }
-                WriteLine(outro[i]);
-                ResetColor();
-            }
-
-            SetCursorPosition(0, WindowHeight - 2);
-            WriteLine("Press any key to continue...");
-            ReadKey(true);
-            ResetGame(true);
-
-            DisplayAboutInfo();
-        }
-
-
-
-        private void GameOver()
-        {
-            Clear();
-
-            string[] gameOverOutro =
-            {
-                "Oh, no!",
-                "You have been caught and brought back to your cell!",
-                "  ",
-                $"The guards searched you and sequestered $ {Player.Booty} in treasures.",
-                "  ",
-                "Thank you for playing.",
-                "Try Again!",
-                "  ",
-                "  ",
-                "÷ GAME OVER ÷",
-            };
-
-            SetCursorPosition(0, (WindowHeight / 3) - (gameOverOutro.Length/2));
-
-            for (int i = 0; i < gameOverOutro.Length; i++)
-            {
-                SetCursorPosition((WindowWidth / 4) - (gameOverOutro[i].Length / 2), CursorTop);
-                if (i == gameOverOutro.Length - 1) { ForegroundColor = ConsoleColor.Red; }
-                WriteLine(gameOverOutro[i]);
-                ResetColor();
-            }
-
-            string[] gameOverArt =
-            {
-                "                                                                            ",
-                "                                                                            ",
-                "       ____ __|__   ____    _ ________|__ _________ ______ _____            ",
-                "       |           |o  o|      |           |  \\__      |                    ",
-                "                   | c)%,      |                 \\     |                    ",
-                "                   |o__o'%                 |                       |        ",
-                "    ___|______________ _  %  ,mM  _________|__ ________|__ ____ ___|__      ",
-                "             |            %  |  n    |           |           |              ",
-                "             |      -__/   %  Y /    |           |   ____    |              ",
-                "             |      /       %J_]     |           |  |o  o|   |              ",
-                "   _ _____ __|__ ________|  / /  ____|__ _______    ,%(C | __|__  __ __     ",
-                "       |           |       / /             |        %o__o|         |        ",
-                "                          / /     ,-~~,      Mm,   %               |        ",
-                "       |          ____   / /    ,r/^V\\,\\    n  |  %    |           |        ",
-                "   ____|_______  |o  o|  \\ \\    ('_ ~ ( )   \\ Y  %  ___|_______ ___|__ _    ",
-                "             |   | c)%|   \\/\\   ()--()-))    [_t%            |              ",
-                "             |   |o__%|   /  \\   \\ _(x)88     \\ \\            |              ",
-                "             |        %   \\  !`-. \\ _/|8       \\ \\           |   _/         ",
-                "   _ _____ __|__ ____  %   \\    ,%J___]>---.____\\ \\  ________|___\\_____     ",
-                "       |  \\_       |    %,  \\ `,%         '    (__/    |           |        ",
-                "       |    \\      |     `%-%-%/           / =\\|88                 |        ",
-                "                   |          |           /888         |                    ",
-                "    ___|________ __|_______   |           |8  _________|_______ ___|__      ",
-                "             |           |     \\          /8     |           |              ",
-                "             |           |     |         |8      |           |              ",
-                "             |           |     |         |8                  |              ",
-                "   _ _____ __|___ _______|____ /          \\_ _    ________ __|__  ___ _     ",
-                "       |           |           J\\:______/ \\            |\\__        |        ",
-                "                   |           |           |           | | \\       |        ",
-                "       |           |          /            \\           |           |        ",
-                "    ___|__ ________|_______  /     \\_       \\ _____ ___|__ ____ ___|__ _    ",
-                "             |           |  /      /88\\      \\   |           |              ",
-                "                         | /      /8   \\      \\  |           |              ",
-                "             |            /      /8  |  \\      \\                            ",
-                "   _ _____ __|__ ______  /      /8___|__ \\      \\  _ ________|__ _____ _    ",
-                "       |           |    /     .'8         '.     \\     |           |        ",
-                "       | _         |   /     /8|            \\     \\    |                    ",
-                "       |  \\_       |  /__ __/8 |           | \\_____\\   |           |        ",
-                "   ____|__/________  /   |888__|__ ____  __|__ 8|   \\ _|_______ ___|__ _    ",
-                "             |      /   /8           |           \\   \\       |              ",
-                "                   /  .'8            |            '.  \\      |              ",
-                "             |    /__/8  |           |             8\\__\\     |              ",
-                "     ____ __ |_  |  /8___|__ _____ __|__ ________|_ 8\\  l __|__ _____ _     ",
-                "      |         /> /8          |           |         8\\ <\\         |        ",
-                "  ____          />_/8           |   y       |          8\\_<\\         ____    ",
-                " |o  o|       ,%J__]            |   \\       |           [__t %,     | o  o | ",
-                " | c)%,      ,%> )(8__ ___ ___  |___/___ ___| ______ ___8)(  <%,    _,% (c | ",
-                "| o__o`%-%-%' __ ]8                                     [ __  '%-%-%`o__o | ",
-            };
-
-            SetCursorPosition(0, 2);
-
-            foreach (string s in gameOverArt)
-            {
-                SetCursorPosition(WindowWidth - s.Length - 6, CursorTop);
-                WriteLine(s);
-            }
-
-            GameOverSong();
-
-            if (DifficultyLevel == Difficulty.VeryEasy || DifficultyLevel == Difficulty.Normal || DifficultyLevel == Difficulty.Hard)
-            {
-                RetryMenu();
-                ResetGame(false);
-            }
-            else
+            if (selectedIndex == 0)
             {
                 ResetGame(true);
+                RunGameLoop(0);
             }
-
-            SetCursorPosition(0, WindowHeight - 2);
-            Write("Press any key to continue...");
-            ReadKey(true);
-
-            DisplayAboutInfo();
         }
 
-
-
+        
+        
         private void RetryMenu()
         {
-            string[] prompt =
-            {
-                "Would you like to retry the last level?",
-            };
+            string prompt = "Would you like to retry the last level?";
 
             string[] options =
             {
@@ -1046,26 +1086,6 @@ namespace MazeGame
             Player.X = worlds[saveGame.CurrentLevel].PlayerStartX;
             Player.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
             RunGameLoop(saveGame.CurrentLevel);
-        }
-
-
-
-        private void ResetGame(bool deleteSave)
-        {
-            playerHasBeenCaught = false;
-            TimesCaught = 0;
-            Player.Booty = 0;
-            CurrentRoom = 0;
-            totalGold = 0;
-            foreach (World world in worlds)
-            {
-                world.ResetGuards();
-            }
-
-            if (deleteSave)
-            {
-                saveSystem.DeleteSaveGame(this);
-            }
         }
         #endregion;
 

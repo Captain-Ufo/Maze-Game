@@ -5,6 +5,9 @@ using static System.Console;
 
 namespace MazeGame
 {
+    /// <summary>
+    /// Holds informations about the current level
+    /// </summary>
     class World
     {
         private string[,] grid;
@@ -21,10 +24,30 @@ namespace MazeGame
 
         private Stopwatch stopwatch;
 
+        /// <summary>
+        /// Whether the exit is open (either because there's no key in the level or because the player has collected the key) or not
+        /// </summary>
         public bool IsLocked { get; set; }
+
+        /// <summary>
+        /// The X coordinate of the player's starting position
+        /// </summary>
         public int PlayerStartX { get; private set; }
+        /// <summary>
+        /// The Y coordinate of the player's starting position
+        /// </summary>
         public int PlayerStartY { get; private set; }
 
+        /// <summary>
+        /// Instantiates a World object
+        /// </summary>
+        /// <param name="grid">The grid of sumbols that represents the level, in the form of a bi-dimensional string array</param>
+        /// <param name="hasKey">Whether the level has a key and the exit is initially locked or not</param>
+        /// <param name="startX">The player's starting X coordinate</param>
+        /// <param name="startY">The player's starting Y coordinate</param>
+        /// <param name="levers">The collection of levers in the level</param>
+        /// <param name="guards">The collection of guards in the level</param>
+        /// <param name="stopwatch">The game's Stopwatch field</param>
         public World(string[,] grid, bool hasKey, int startX, int startY, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
@@ -60,6 +83,9 @@ namespace MazeGame
             PlayerStartY = startY + yOffset;
         }
 
+        /// <summary>
+        /// Draws the map on screen, automatically centered
+        /// </summary>
         public void Draw()
         {
             for (int y = 0; y < rows; y++)
@@ -96,6 +122,12 @@ namespace MazeGame
             }
         }
 
+        /// <summary>
+        /// Checks if a certain position on the grid contains a symbol that can be traversed by the player or the guards
+        /// </summary>
+        /// <param name="x">The X coordinate of the position to check</param>
+        /// <param name="y">The Y coordinate of the position to check</param>
+        /// <returns>Returns true if walkable, false if not</returns>
         public bool IsPositionWalkable(int x, int y)
         {
             x -= xOffset;
@@ -120,11 +152,23 @@ namespace MazeGame
                    grid[y, x] == SymbolsConfig.LeverOnChar.ToString();
         }
 
+        /// <summary>
+        /// Gets which symbol is present in a given location
+        /// </summary>
+        /// <param name="x">The X coordinate of the position to check</param>
+        /// <param name="y">The Y coordinate of the position to check</param>
+        /// <returns>Returns the symbol found at these coordinates on the grid</returns>
         public string GetElementAt(int x, int y)
         {
             return grid[y - yOffset, x - xOffset];
         }
 
+        /// <summary>
+        /// Replaces a symbol in a given location
+        /// </summary>
+        /// <param name="x">The X coordinate of the symbol to replace</param>
+        /// <param name="y">The X coordinate of the symbol to replace</param>
+        /// <param name="newElement">The new symbol</param>
         public void ChangeElementAt(int x, int y, string newElement)
         {
             x -= xOffset;
@@ -134,7 +178,12 @@ namespace MazeGame
             Draw();
         }
 
-        public void ToggleLevers(int x, int y)
+        /// <summary>
+        /// Toggles the lever in a given position on the grid
+        /// </summary>
+        /// <param name="x">The X coordinate on the grid of the level to toggle</param>
+        /// <param name="y">The Y coordinate on the grid of the level to toggle</param>
+        public void ToggleLever(int x, int y)
         {
             stopwatch.Stop();
 
@@ -151,6 +200,11 @@ namespace MazeGame
             Draw();
         }
 
+        /// <summary>
+        /// Updates all the guards in the level. moving them along their patrols
+        /// </summary>
+        /// <param name="deltaDimeMS">The time passed since last check, to set the guard's speed</param>
+        /// <param name="game">The current game</param>
         public void UpdateGuards(int deltaDimeMS, Game game)
         {
             if (levelGuards.Length > 0)
@@ -162,6 +216,9 @@ namespace MazeGame
             }
         }
 
+        /// <summary>
+        /// Resets all guards to their state at the beginning of the level
+        /// </summary>
         public void ResetGuards()
         {
             foreach (Guard guard in levelGuards)
@@ -170,6 +227,9 @@ namespace MazeGame
             }
         }
 
+        /// <summary>
+        /// Draws all guards
+        /// </summary>
         public void DrawGuards()
         {
             if (levelGuards.Length > 0)
@@ -182,11 +242,19 @@ namespace MazeGame
         }
     }
 
+    /// <summary>
+    /// Helper struct that holds a int X, int Y pair
+    /// </summary>
     public struct Coordinates
     {
         public int X;
         public int Y;
 
+        /// <summary>
+        /// Creates a Coordinate
+        /// </summary>
+        /// <param name="x">The X coordinate</param>
+        /// <param name="y">the Y coordinate</param>
         public Coordinates(int x, int y)
         {
             X = x;

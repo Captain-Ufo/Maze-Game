@@ -4,6 +4,9 @@ using System.Text;
 
 namespace MazeGame
 {
+    /// <summary>
+    /// A helper class that holds in a centralized place all the gameplay relevant symbols
+    /// </summary>
     public static class SymbolsConfig
     {
         public const char ExitChar = 'Ð';

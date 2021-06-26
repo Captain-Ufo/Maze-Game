@@ -8,6 +8,9 @@ using static System.Console;
 
 namespace MazeGame
 {
+    /// <summary>
+    /// The game itself. Contains the logic, the navigation menues, and the visuals
+    /// </summary>
     class Game
     {
         private List<World> worlds;
@@ -33,7 +36,9 @@ namespace MazeGame
         public Stopwatch MyStopwatch { get; private set; }
 
 
-
+        /// <summary>
+        /// Initializes all the required elements and run the game
+        /// </summary>
         public void Start()
         {
             saveSystem = new SaveSystem();
@@ -181,7 +186,7 @@ namespace MazeGame
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
                     && Player.HasPlayerMoved)
                 {
-                    worlds[CurrentRoom].ToggleLevers(Player.X, Player.Y);
+                    worlds[CurrentRoom].ToggleLever(Player.X, Player.Y);
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[CurrentRoom].IsLocked)
                 {
@@ -232,7 +237,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad8:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y - 1))
                         {
-                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
                             Player.Y--;
                             Player.HasPlayerMoved = true;
                         }
@@ -242,7 +247,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad2:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y + 1))
                         {
-                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
                             Player.Y++;
                             Player.HasPlayerMoved = true;
                         }
@@ -252,7 +257,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad4:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X - 1, Player.Y))
                         {
-                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
                             Player.X--;
                             Player.HasPlayerMoved = true;
                         }
@@ -262,7 +267,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad6:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X + 1, Player.Y))
                         {
-                            Player.ClearPlayer(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
                             Player.X++;
                             Player.HasPlayerMoved = true;
                         }
@@ -436,7 +441,7 @@ namespace MazeGame
 
             bribeMenu.UpdateMenuItems(prompt, options);
 
-            int selectedIndex = bribeMenu.Run(xPos);
+            int selectedIndex = bribeMenu.Run(xPos, 5, 2);
 
             switch (selectedIndex)
             {
@@ -570,7 +575,7 @@ namespace MazeGame
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 1, 2);
 
             switch (selectedIndex)
             {
@@ -603,7 +608,7 @@ namespace MazeGame
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 1, 2);
 
             switch (selectedIndex)
             {
@@ -631,22 +636,7 @@ namespace MazeGame
         {
             Clear();
 
-            string[] prompt =
-            {
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "~·~ Which game do you want to load? ~·~",
-                "  ",
-                "  ",
-            };
+            string prompt = "~·~ Which game do you want to load? ~·~";
 
             List<string> options = new List<string>();
             options.Add("Back");
@@ -658,7 +648,7 @@ namespace MazeGame
 
             Menu loadSaveMenu = new Menu(prompt, options.ToArray());
 
-            int selectedIndex = loadSaveMenu.Run(WindowWidth/2);
+            int selectedIndex = loadSaveMenu.Run(WindowWidth/2, 10, 2);
 
             switch (selectedIndex)
             {
@@ -683,15 +673,8 @@ namespace MazeGame
 
             string[] prompt = 
             {
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
                 "~·~ Choose your difficulty level ~·~",
+                "  ",
                 "  ",
                 "  ",
                 "  "
@@ -699,14 +682,14 @@ namespace MazeGame
 
             if (IsThereASavegame)
             {
-                prompt[10] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
+                prompt[2] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
             }
 
             string[] options = { "Very Easy", "Easy", "Normal", "Hard", "Very Hard", "Ironman", "Back"};
 
             Menu difficultyMenu = new Menu(prompt, options);
 
-            int selectedIndex = difficultyMenu.Run(WindowWidth / 2);
+            int selectedIndex = difficultyMenu.Run(WindowWidth / 2, 8, 0);
 
             switch (selectedIndex)
             {
@@ -745,7 +728,7 @@ namespace MazeGame
             string[] backStory =
             {
                 " ",
-                "You are Gareth, the master thief.",
+                "You are Gareth, the non-copyright infringing master thief.",
                 "The last job you were tasked to do turned out to be a trap set up by the Watch.",
                 "You have been captured and locked deep in the dungeon of the Baron's castle.",
                 "They stripped you of all your gear, but they didn't check your clothes in depth. That was a mistake on their part.",
@@ -807,7 +790,8 @@ namespace MazeGame
         {
             Clear();
             string authorName = "Cristian Baldi";
-            WriteLine($" Escape from the Dungeon, a game by {authorName} expanding on the lessons in Micheal Hadley's \"Intro To Programming in C#\" course:");
+            WriteLine("\n\n ~·~ CREDITS: ~·~");
+            WriteLine($"\n\n Escape from the Dungeon, a game by {authorName} expanding on the lessons in Micheal Hadley's \"Intro To Programming in C#\" course:");
             WriteLine(" https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ");
             WriteLine($"\n Programming: {authorName}");
             WriteLine($"\n Level desing: {authorName}");
@@ -817,6 +801,7 @@ namespace MazeGame
             WriteLine("\n Guard art by Randall Nortman and Tua Xiong");
             WriteLine("\n Win screen art by Henry Segerman");
             WriteLine("\n Game over screen art based on art by Jgs");
+            SetCursorPosition(0, WindowHeight - 3);
             WriteLine("\n Press any key to return to main menu...");
             ReadKey(true);
             Clear();
@@ -830,25 +815,13 @@ namespace MazeGame
             Clear();
             string[] quitMenuPrompt =
              {
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
                 "Are you sure you want to quit?",
                 "The game automatically saved the last level you played, but all your progress in the current level will be lost.",
-                "  ",
-                "  ",
              };
             string[] options = { "Yes", "No" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2);
+            int selection = quitMenu.Run(WindowWidth/2, 10, 2);
             if (selection == 0)
             {
                 return true;
@@ -866,24 +839,12 @@ namespace MazeGame
             Clear();
             string[] quitMenuPrompt =
             {
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
-                "  ",
                 "Are you sure you want to quit?",
-                "  ",
-                "  ",
             };
             string[] options = { "Yes", "No" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2);
+            int selection = quitMenu.Run(WindowWidth/2, 10, 2);
             if (selection == 0)
             {
                 return true;
@@ -893,7 +854,6 @@ namespace MazeGame
                 return false;
             }
         }
-        #endregion;
 
 
 
@@ -1054,10 +1014,7 @@ namespace MazeGame
         {
             string[] prompt =
             {
-                "  ",
-                "  ",
                 "Would you like to retry the last level?",
-                "  "
             };
 
             string[] options =
@@ -1068,7 +1025,7 @@ namespace MazeGame
 
             Menu retryMenu = new Menu(prompt, options);
 
-            int selectedIndex = retryMenu.Run(WindowWidth / 4);
+            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1);
 
             if (selectedIndex == 0)
             {
@@ -1110,6 +1067,7 @@ namespace MazeGame
                 saveSystem.DeleteSaveGame(this);
             }
         }
+        #endregion;
 
 
 

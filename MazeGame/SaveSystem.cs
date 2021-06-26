@@ -12,6 +12,10 @@ namespace MazeGame
     {
         private string saveGamesPath;
 
+        /// <summary>
+        /// Initializes a new instance of the SaveSystem class. 
+        /// It also makes sure that the save files folder exists, so that the SaveSystem instance can function properly.
+        /// </summary>
         public SaveSystem()
         {
             saveGamesPath = Directory.GetCurrentDirectory() + "\\Saves";

@@ -5,6 +5,9 @@ using static System.Console;
 
 namespace MazeGame
 {
+    /// <summary>
+    /// A gameplay element that (optionally) patrols the level and catches the player if moved within range.
+    /// </summary>
     class Guard
     {
         private Coordinates[] patrolPath;
@@ -12,7 +15,11 @@ namespace MazeGame
 
         private int bribeTimer;
         private bool hasBeenBribed;
+        /// <summary>
+        /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
+        /// </summary>
         public bool HasBeenBribedBefore { get; private set; }
+
         private bool easyGame;
         
         private string guardMarker = "@";
@@ -23,9 +30,19 @@ namespace MazeGame
 
         private Coordinates originPoint;
 
+        /// <summary>
+        /// The X coordinate of the Guard
+        /// </summary>
         public int X { get; private set; }
+
+        /// <summary>
+        /// The Y coordinate of the guard
+        /// </summary>
         public int Y { get; private set; }
 
+        /// <summary>
+        /// Instantiates a Guard Object and sets its parameters
+        /// </summary>
         public Guard()
         {
             nextPatrolPoint = 0;
@@ -36,6 +53,11 @@ namespace MazeGame
             easyGame = false;
         }
 
+        /// <summary>
+        /// Assigns the Guard's initial position when the level is first loaded. To be used only when parsing the level file.
+        /// </summary>
+        /// <param name="x">The X position</param>
+        /// <param name="y">The Y position</param>
         public void AssignOriginPoint(int x, int y)
         {
             X = x;
@@ -44,6 +66,11 @@ namespace MazeGame
             originPoint = new Coordinates(X, Y);
         }
 
+        /// <summary>
+        /// Assigns the offsets to account for map centering. To be used only at the beginning of the game
+        /// </summary>
+        /// <param name="xOffset">The X offset (from 0)</param>
+        /// <param name="yOffset">The Y offset (from 0)</param>
         public void AssignOffset(int xOffset, int yOffset)
         {
             X += xOffset;
@@ -59,11 +86,21 @@ namespace MazeGame
             }
         }
 
+        /// <summary>
+        /// Assigns the patrol path
+        /// </summary>
+        /// <param name="path">An array of patrol path points in the form of a Coordinates objects</param>
         public void AssignPatrol(Coordinates[] path)
         {
             patrolPath = path;
         }
 
+        /// <summary>
+        /// Updates the Guard's movement along its patrol and catches the player if within range
+        /// </summary>
+        /// <param name="world">The level the guard is patrolling</param>
+        /// <param name="game">The current game</param>
+        /// <param name="deltaTimeMS">Frame timing, to handle movement speeds</param>
         public void Patrol(World world, Game game, int deltaTimeMS)
         {
             timeSinceLastMove += deltaTimeMS;
@@ -155,18 +192,25 @@ namespace MazeGame
 
             if (world.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
             {
-                world.ToggleLevers(X, Y);
+                world.ToggleLever(X, Y);
             }
 
             timeSinceLastMove -= timeBetweenMoves;
         }
 
+        /// <summary>
+        /// Prevents a Game Over
+        /// </summary>
+        /// <param name="IsGameEasy">Sets the flag that is used to determine how many times a guard can be bribed</param>
         public void BribeGuard(bool IsGameEasy)
         {
             hasBeenBribed = true;
             easyGame = IsGameEasy;
         }
 
+        /// <summary>
+        /// Restores the guard to its conditions at the beginning of the level. To be used only when retrying levels
+        /// </summary>
         public void Reset()
         {
             nextPatrolPoint = 0;
@@ -179,6 +223,9 @@ namespace MazeGame
             easyGame = false;
         }
 
+        /// <summary>
+        /// Draws the guard symbol
+        /// </summary>
         public void Draw()
         {
             ConsoleColor previousColor = ForegroundColor;
@@ -188,6 +235,10 @@ namespace MazeGame
             ForegroundColor = previousColor;
         }
 
+        /// <summary>
+        /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
+        /// </summary>
+        /// <param name="symbol">The map symbol to replace the guard's one</param>
         public void Clear(string symbol)
         {
             SetCursorPosition(X, Y);

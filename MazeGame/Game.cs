@@ -28,6 +28,7 @@ namespace MazeGame
         private Menu bribeMenu;
 
         private SaveSystem saveSystem;
+        private ChiptunePlayer chiptunePlayer;
 
         public Player Player { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
@@ -42,6 +43,7 @@ namespace MazeGame
         public void Start()
         {
             saveSystem = new SaveSystem();
+            chiptunePlayer = new ChiptunePlayer();
             MyStopwatch = new Stopwatch();
 
             playerHasBeenCaught = false;
@@ -216,7 +218,7 @@ namespace MazeGame
                 return;
             }
 
-            DisplayOutro();
+            WinGame();
         }
 
 
@@ -237,7 +239,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad8:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y - 1))
                         {
-                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel]);
                             Player.Y--;
                             Player.HasPlayerMoved = true;
                         }
@@ -247,7 +249,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad2:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y + 1))
                         {
-                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel]);
                             Player.Y++;
                             Player.HasPlayerMoved = true;
                         }
@@ -257,7 +259,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad4:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X - 1, Player.Y))
                         {
-                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel]);
                             Player.X--;
                             Player.HasPlayerMoved = true;
                         }
@@ -267,7 +269,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad6:
                         if (worlds[currentLevel].IsPositionWalkable(Player.X + 1, Player.Y))
                         {
-                            Player.Clear(worlds[currentLevel].GetElementAt(Player.X, Player.Y));
+                            Player.Clear(worlds[currentLevel]);
                             Player.X++;
                             Player.HasPlayerMoved = true;
                         }
@@ -569,7 +571,7 @@ namespace MazeGame
                 ResetColor();
             }
 
-            GameOverSong();
+            chiptunePlayer.PlayGameOverTune();
 
             if (CurrentRoom == 0 || DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.Hard || DifficultyLevel == Difficulty.Ironman)
             {
@@ -585,14 +587,16 @@ namespace MazeGame
             SetCursorPosition(0, WindowHeight - 2);
             Write("Press any key to continue...");
             ReadKey(true);
-
+            chiptunePlayer.StopTune();
             DisplayAboutInfo();
         }
 
 
 
-        private void DisplayOutro()
+        private void WinGame()
         {
+            chiptunePlayer.PlayGameWinTune();
+
             string[] outro =
             {
                 "~·~ CONGRATULATIONS! ~·~",
@@ -601,10 +605,16 @@ namespace MazeGame
                 "You escaped the Baron's dungeon!",
                 "  ",
                 $"You collected $ {Player.Booty} in treasures, out of a total of $ {totalGold}.",
-                $"You have been caught {TimesCaught} times, but you always managed to convince the guard to look the other way.",
+                $"You have been caught {TimesCaught} times.",
                 "  ",
-                "Thank you for playing."
+                "  ",
+                "Thank you for playing!"
             };
+
+            if (TimesCaught > 0)
+            {
+                outro[7] = "Nevertheless, you always managed to convince the guard to look the other way.";
+            }
 
             Clear();
 
@@ -624,7 +634,7 @@ namespace MazeGame
             WriteLine("Press any key to continue...");
             ReadKey(true);
             ResetGame(true);
-
+            chiptunePlayer.StopTune();
             DisplayAboutInfo();
         }
 
@@ -1046,6 +1056,7 @@ namespace MazeGame
 
             if (selectedIndex == 0)
             {
+                chiptunePlayer.StopTune();
                 ResetGame(true);
                 RunGameLoop(0);
             }
@@ -1069,6 +1080,7 @@ namespace MazeGame
 
             if (selectedIndex == 0)
             {
+                chiptunePlayer.StopTune();
                 Retry();
             }
         }
@@ -1088,28 +1100,6 @@ namespace MazeGame
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;
-
-
-
-        private void GameOverSong()
-        {
-            Beep(660, 1000);
-            Beep(528, 1000);
-            Beep(594, 1000);
-            Beep(495, 1000);
-            Beep(528, 1000);
-            Beep(440, 1000);
-            Beep(419, 1000);
-            Beep(495, 1000);
-            Beep(660, 1000);
-            Beep(528, 1000);
-            Beep(594, 1000);
-            Beep(495, 1000);
-            Beep(660, 500);
-            Beep(528, 500);
-            Beep(670, 1000);
-            Beep(638, 2000);
-        }
     }
 
 

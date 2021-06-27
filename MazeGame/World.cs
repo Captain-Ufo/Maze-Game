@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using static System.Console;
 
 namespace MazeGame
@@ -134,11 +135,6 @@ namespace MazeGame
             y -= yOffset;
 
             if (x < 0 || y < 0 || x >= columns || y >= rows)
-            {
-                return false;
-            }
-
-            if(IsLocked && grid[y, x] == SymbolsConfig.ExitChar.ToString())
             {
                 return false;
             }

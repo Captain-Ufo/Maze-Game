@@ -132,7 +132,7 @@ namespace MazeGame
                     return;
                 }
 
-                this.Clear(world.GetElementAt(X, Y));
+                this.Clear(world);
 
                 if (X != patrolPath[nextPatrolPoint].X)
                 {
@@ -238,11 +238,31 @@ namespace MazeGame
         /// <summary>
         /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
         /// </summary>
-        /// <param name="symbol">The map symbol to replace the guard's one</param>
-        public void Clear(string symbol)
+        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(World world)
         {
+            string symbol = world.GetElementAt(X, Y);
+
             SetCursorPosition(X, Y);
+
+            if (symbol == "$")
+            {
+                ForegroundColor = ConsoleColor.Yellow;
+            }
+
+            if (symbol == SymbolsConfig.ExitChar.ToString())
+            {
+                if (world.IsLocked)
+                {
+                    ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    ForegroundColor = ConsoleColor.Green;
+                }
+            }
             Write(symbol);
+            ResetColor();
         }
     }
 }

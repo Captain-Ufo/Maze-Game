@@ -61,11 +61,23 @@ namespace MazeGame
         /// <summary>
         /// Replaces the player's symbol with whatever map symbol should be present in that position
         /// </summary>
-        /// <param name="symbol">The symbol to replace the player's with</param>
-        public void Clear(string symbol)
+        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(World world)
         {
+            string symbol = world.GetElementAt(X, Y);
+
             SetCursorPosition(X, Y);
+
+            if (symbol == SymbolsConfig.ExitChar.ToString())
+            {
+                if (world.IsLocked)
+                {
+                    ForegroundColor = ConsoleColor.Red;
+                }
+            }
+
             Write(symbol);
+            ResetColor();
         }
     }
 }

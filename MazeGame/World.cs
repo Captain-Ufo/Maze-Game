@@ -19,6 +19,8 @@ namespace MazeGame
         private int xOffset;
         private int yOffset;
 
+        private LevelLock levelLock;
+
         private Dictionary<Coordinates, Lever> leversDictionary;
 
         private Guard[] levelGuards;
@@ -28,7 +30,7 @@ namespace MazeGame
         /// <summary>
         /// Whether the exit is open (either because there's no key in the level or because the player has collected the key) or not
         /// </summary>
-        public bool IsLocked { get; set; }
+        public bool IsLocked { get; private set; }
 
         /// <summary>
         /// The X coordinate of the player's starting position
@@ -49,7 +51,7 @@ namespace MazeGame
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public World(string[,] grid, bool hasKey, int startX, int startY, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
+        public World(string[,] grid, int startX, int startY, LevelLock levelLock, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
 
@@ -79,7 +81,10 @@ namespace MazeGame
                 guard.AssignOffset(xOffset, yOffset);
             }
 
-            IsLocked = hasKey;
+            this.levelLock = levelLock;
+
+            IsLocked = levelLock.IsLocked();
+
             PlayerStartX = startX + xOffset;
             PlayerStartY = startY + yOffset;
         }
@@ -159,16 +164,32 @@ namespace MazeGame
             return grid[y - yOffset, x - xOffset];
         }
 
+        public string GetElementAt(int x, int y, bool withOffset = true)
+        {
+            if (withOffset)
+            {
+                y -= yOffset;
+
+                x -= xOffset;
+            }
+
+            return grid[y, x];
+        }
+
         /// <summary>
         /// Replaces a symbol in a given location
         /// </summary>
         /// <param name="x">The X coordinate of the symbol to replace</param>
         /// <param name="y">The X coordinate of the symbol to replace</param>
         /// <param name="newElement">The new symbol</param>
-        public void ChangeElementAt(int x, int y, string newElement)
+        /// <param name="withOffset">(optional) default true, set to false if the indicated coordinates are without the offset applied</param>
+        public void ChangeElementAt(int x, int y, string newElement, bool withOffset = true)
         {
-            x -= xOffset;
-            y -= yOffset;
+            if (withOffset)
+            {
+                x -= xOffset;
+                y -= yOffset;
+            }
 
             grid[y, x] = newElement;
             Draw();
@@ -183,8 +204,6 @@ namespace MazeGame
         {
             stopwatch.Stop();
 
-            Beep(100, 100);
-
             Coordinates leverCoord = new Coordinates(x, y);
 
             if (leversDictionary.ContainsKey(leverCoord))
@@ -193,6 +212,12 @@ namespace MazeGame
                 lever.Toggle(this, xOffset, yOffset);
             }
             stopwatch.Start();
+            Draw();
+        }
+
+        public void CollectKeyPiece(int x, int y)
+        {
+            IsLocked = levelLock.CollectKeyPiece(this, x, y);
             Draw();
         }
 
@@ -207,7 +232,7 @@ namespace MazeGame
             {
                 foreach (Guard guard in levelGuards)
                 {
-                    guard.Patrol(this, game, deltaDimeMS);
+                    guard.Update(this, game, deltaDimeMS);
                 }
             }
         }

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html><head>
+  <title>Bresenham's Line Algorithm in C# / ericw.ca Eric Woroshow</title>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="The site and blog of Eric Woroshow">
+  <meta name="author" content="Eric Woroshow">
+
+  <link rel="stylesheet" type="text/css" media="all" href="Bresenham's%20Line%20Algorithm%20in%20C%23%20_%20ericw.ca%20Eric%20Woroshow_files/reset.css">
+  <link rel="stylesheet" type="text/css" media="all" href="Bresenham's%20Line%20Algorithm%20in%20C%23%20_%20ericw.ca%20Eric%20Woroshow_files/screen.css">
+  <link rel="stylesheet" type="text/css" media="all" href="Bresenham's%20Line%20Algorithm%20in%20C%23%20_%20ericw.ca%20Eric%20Woroshow_files/code.css">
+
+  <link rel="alternate" type="application/atom+xml" href="http://ericw.ca/atom.xml">
+</head>
+<body>
+  <div id="header">
+    <h1><a href="http://ericw.ca/">eric<span class="highlight">w</span>.</a></h1>
+  </div>
+  <div id="container">
+    <div class="post">
+  <h1 class="title">Bresenham's Line Algorithm in C# <span class="date">20 May 2010</span></h1>
+  <div class="body">
+  <p>I recently implemented <a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham’s line
+algorithm</a> in C# as
+part of a new game I am developing. I thought I would share my implementation.
+I particularly like the interface of returning the points on the line as an
+IEnumerable.</p>
+
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp">    <span class="k">public</span> <span class="k">static</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Point</span><span class="p">&gt;</span> <span class="nf">GetPointsOnLine</span><span class="p">(</span><span class="kt">int</span> <span class="n">x0</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y0</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x1</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y1</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">bool</span> <span class="n">steep</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">y1</span> <span class="p">-</span> <span class="n">y0</span><span class="p">)</span> <span class="p">&gt;</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">x1</span> <span class="p">-</span> <span class="n">x0</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">steep</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+            <span class="n">t</span> <span class="p">=</span> <span class="n">x0</span><span class="p">;</span> <span class="c1">// swap x0 and y0</span>
+            <span class="n">x0</span> <span class="p">=</span> <span class="n">y0</span><span class="p">;</span>
+            <span class="n">y0</span> <span class="p">=</span> <span class="n">t</span><span class="p">;</span>
+            <span class="n">t</span> <span class="p">=</span> <span class="n">x1</span><span class="p">;</span> <span class="c1">// swap x1 and y1</span>
+            <span class="n">x1</span> <span class="p">=</span> <span class="n">y1</span><span class="p">;</span>
+            <span class="n">y1</span> <span class="p">=</span> <span class="n">t</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">x0</span> <span class="p">&gt;</span> <span class="n">x1</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+            <span class="n">t</span> <span class="p">=</span> <span class="n">x0</span><span class="p">;</span> <span class="c1">// swap x0 and x1</span>
+            <span class="n">x0</span> <span class="p">=</span> <span class="n">x1</span><span class="p">;</span>
+            <span class="n">x1</span> <span class="p">=</span> <span class="n">t</span><span class="p">;</span>
+            <span class="n">t</span> <span class="p">=</span> <span class="n">y0</span><span class="p">;</span> <span class="c1">// swap y0 and y1</span>
+            <span class="n">y0</span> <span class="p">=</span> <span class="n">y1</span><span class="p">;</span>
+            <span class="n">y1</span> <span class="p">=</span> <span class="n">t</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="kt">int</span> <span class="n">dx</span> <span class="p">=</span> <span class="n">x1</span> <span class="p">-</span> <span class="n">x0</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">dy</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">y1</span> <span class="p">-</span> <span class="n">y0</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">error</span> <span class="p">=</span> <span class="n">dx</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">ystep</span> <span class="p">=</span> <span class="p">(</span><span class="n">y0</span> <span class="p">&lt;</span> <span class="n">y1</span><span class="p">)</span> <span class="p">?</span> <span class="m">1</span> <span class="p">:</span> <span class="p">-</span><span class="m">1</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">y</span> <span class="p">=</span> <span class="n">y0</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="p">=</span> <span class="n">x0</span><span class="p">;</span> <span class="n">x</span> <span class="p">&lt;=</span> <span class="n">x1</span><span class="p">;</span> <span class="n">x</span><span class="p">++)</span>
+        <span class="p">{</span>
+            <span class="k">yield</span> <span class="k">return</span> <span class="k">new</span> <span class="nf">Point</span><span class="p">((</span><span class="n">steep</span> <span class="p">?</span> <span class="n">y</span> <span class="p">:</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">steep</span> <span class="p">?</span> <span class="n">x</span> <span class="p">:</span> <span class="n">y</span><span class="p">));</span>
+            <span class="n">error</span> <span class="p">=</span> <span class="n">error</span> <span class="p">-</span> <span class="n">dy</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">error</span> <span class="p">&lt;</span> <span class="m">0</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">y</span> <span class="p">+=</span> <span class="n">ystep</span><span class="p">;</span>
+                <span class="n">error</span> <span class="p">+=</span> <span class="n">dx</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">yield</span> <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    </code></pre></figure>
+
+
+  </div>
+</div>
+
+    <p id="footer">
+      ericw.ca / Content © 2009-2021 Eric Woroshow. All rights reserved.
+      <br>Code under <a href="http://ericw.ca/license.html">MIT license</a> unless otherwise noted.
+    </p>
+  </div>
+
+  <script type="text/javascript" async="" src="Bresenham's%20Line%20Algorithm%20in%20C%23%20_%20ericw.ca%20Eric%20Woroshow_files/ga.js"></script><script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-26512303-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+</body></html>

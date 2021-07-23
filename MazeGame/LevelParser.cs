@@ -28,10 +28,12 @@ namespace MazeGame
 
             string[,] grid = new string[rows, columns];
 
-            bool hasKey = false;
+            //bool hasKey = false;
             int playerStartX = 0;
             int playerStartY = 0;
             int totalGold = 0;
+
+            LevelLock levLock = new LevelLock();
 
             Dictionary<Coordinates, Lever> leversDictionary = new Dictionary<Coordinates, Lever>();
             
@@ -152,9 +154,27 @@ namespace MazeGame
                             playerStartY = y;
                             currentChar = SymbolsConfig.EmptySpace;
                             break;
-                        //the key that opens the exit
+                        //keys
                         case SymbolsConfig.KeyChar:
-                            hasKey = true;
+                            levLock.AddRevealedKeyPiece();
+                            break;
+                        case '1':
+                        case '2':
+                        case '3':
+                            currentChar = SymbolsConfig.KeyChar;
+                            levLock.AddRevealedKeyPiece();
+                            break;
+                        case '¹':
+                            currentChar = SymbolsConfig.EmptySpace;
+                            levLock.AddHiddenKeyPiece(x, y, 0);
+                            break;
+                        case '²':
+                            currentChar = SymbolsConfig.EmptySpace;
+                            levLock.AddHiddenKeyPiece(x, y, 1);
+                            break;
+                        case '³':
+                            currentChar = SymbolsConfig.EmptySpace;
+                            levLock.AddHiddenKeyPiece(x, y, 2);
                             break;
                         //treasures
                         case '$':
@@ -247,7 +267,7 @@ namespace MazeGame
             guard9.AssignPatrol(ArrangePatrolPoints(guard9, guard9Patrol).ToArray());
             guard10.AssignPatrol(ArrangePatrolPoints(guard10, guard10Patrol).ToArray());
 
-            LevelInfo levelInfo = new LevelInfo(grid, hasKey, playerStartX, playerStartY, totalGold, leversDictionary, levelGuards.ToArray());
+            LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, levLock, leversDictionary, levelGuards.ToArray());
 
             return levelInfo;
         }
@@ -336,17 +356,17 @@ namespace MazeGame
     class LevelInfo
     {
         public string[,] Grid { get; }
-        public bool HasKey { get; }
+        public LevelLock LevLock { get; }
         public int PlayerStartX { get; }
         public int PlayerStartY { get; }
         public int TotalGold { get; }
         public Dictionary<Coordinates, Lever> LeversDictionary { get; }
         public Guard[] Guards { get; }
 
-        public LevelInfo(string[,] grid, bool hasKey, int playerStartX, int playerStartY, int totalGold, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
+        public LevelInfo(string[,] grid, int playerStartX, int playerStartY, int totalGold, LevelLock levelLock, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
         {
             Grid = grid;
-            HasKey = hasKey;
+            LevLock = levelLock;
             PlayerStartX = playerStartX;
             PlayerStartY = playerStartY;
             TotalGold = totalGold;

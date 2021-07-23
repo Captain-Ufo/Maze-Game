@@ -30,7 +30,7 @@ namespace MazeGame
         private SaveSystem saveSystem;
         private ChiptunePlayer chiptunePlayer;
 
-        public Player Player { get; private set; }
+        public Player MyPlayer { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
         public int CurrentRoom { get; private set; }
         public int TimesCaught { get; private set; }
@@ -87,14 +87,14 @@ namespace MazeGame
 
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath);
 
-                worlds.Add(new World(levelInfo.Grid, levelInfo.HasKey, levelInfo.PlayerStartX, levelInfo.PlayerStartY, 
+                worlds.Add(new World(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
             }
 
-            Player = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
-            Player.Booty = startBooty;
+            MyPlayer = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
+            MyPlayer.Booty = startBooty;
         }
 
 
@@ -151,7 +151,7 @@ namespace MazeGame
 
             while (true)
             {
-                Player.HasPlayerMoved = false;
+                MyPlayer.HasPlayerMoved = false;
 
                 if (playerHasBeenCaught)
                 {
@@ -170,33 +170,33 @@ namespace MazeGame
 
                 hasDrawnBackground = DrawFrame(CurrentRoom, hasDrawnBackground);
 
-                string elementAtPlayerPosition = worlds[CurrentRoom].GetElementAt(Player.X, Player.Y);
+                string elementAtPlayerPosition = worlds[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
-                {  
-                    worlds[CurrentRoom].ChangeElementAt(Player.X, Player.Y, SymbolsConfig.EmptySpace.ToString());
-                    Beep(1000, 80);
-                    Player.Booty += 100;
+                {
+                    chiptunePlayer.PlaySFX(1000, 100);
+                    worlds[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
+                    MyPlayer.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
-                    worlds[CurrentRoom].IsLocked = false;
-                    Beep(800, 90);
-                    worlds[CurrentRoom].ChangeElementAt(Player.X, Player.Y, SymbolsConfig.EmptySpace.ToString());
+                    chiptunePlayer.PlaySFX(800, 100);
+                    worlds[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
-                    && Player.HasPlayerMoved)
+                    && MyPlayer.HasPlayerMoved)
                 {
-                    worlds[CurrentRoom].ToggleLever(Player.X, Player.Y);
+                    chiptunePlayer.PlaySFX(100, 100);
+                    worlds[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[CurrentRoom].IsLocked)
                 {
                     if (worlds.Count > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        Player.X = worlds[CurrentRoom].PlayerStartX;
-                        Player.Y = worlds[CurrentRoom].PlayerStartY;
+                        MyPlayer.X = worlds[CurrentRoom].PlayerStartX;
+                        MyPlayer.Y = worlds[CurrentRoom].PlayerStartY;
                         hasDrawnBackground = false;
 
                         saveSystem.SaveGame(this);
@@ -237,41 +237,41 @@ namespace MazeGame
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.W:
                     case ConsoleKey.NumPad8:
-                        if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y - 1))
+                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
                         {
-                            Player.Clear(worlds[currentLevel]);
-                            Player.Y--;
-                            Player.HasPlayerMoved = true;
+                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Y--;
+                            MyPlayer.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.S:
                     case ConsoleKey.NumPad2:
-                        if (worlds[currentLevel].IsPositionWalkable(Player.X, Player.Y + 1))
+                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
                         {
-                            Player.Clear(worlds[currentLevel]);
-                            Player.Y++;
-                            Player.HasPlayerMoved = true;
+                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Y++;
+                            MyPlayer.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.A:
                     case ConsoleKey.NumPad4:
-                        if (worlds[currentLevel].IsPositionWalkable(Player.X - 1, Player.Y))
+                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
                         {
-                            Player.Clear(worlds[currentLevel]);
-                            Player.X--;
-                            Player.HasPlayerMoved = true;
+                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.X--;
+                            MyPlayer.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.RightArrow:
                     case ConsoleKey.D:
                     case ConsoleKey.NumPad6:
-                        if (worlds[currentLevel].IsPositionWalkable(Player.X + 1, Player.Y))
+                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
                         {
-                            Player.Clear(worlds[currentLevel]);
-                            Player.X++;
-                            Player.HasPlayerMoved = true;
+                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.X++;
+                            MyPlayer.HasPlayerMoved = true;
                         }
                         return true;
                     case ConsoleKey.Escape:
@@ -304,7 +304,7 @@ namespace MazeGame
                 hasDrawnBackground = true;
             }
             worlds[currentRoom].DrawGuards();
-            Player.Draw();
+            MyPlayer.Draw();
             DrawUI(currentRoom);
             CursorVisible = false;
             return hasDrawnBackground;
@@ -320,7 +320,7 @@ namespace MazeGame
 
             WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
             WriteLine("");
-            Write($"  Tresure collected: $ {Player.Booty}");
+            Write($"  Tresure collected: $ {MyPlayer.Booty}");
             SetCursorPosition(32, CursorTop);
             Write($"Floor {currentLevel + 1}");
             SetCursorPosition(45, CursorTop);
@@ -432,7 +432,7 @@ namespace MazeGame
             string[] prompt =
             {
                 "A guard caught you! Quick, maybe you can bribe them.",
-                $"You have collected ${Player.Booty} so far.",
+                $"You have collected ${MyPlayer.Booty} so far.",
             };
 
             string[] options =
@@ -451,7 +451,7 @@ namespace MazeGame
 
                     string message;
 
-                    if (Player.Booty >= bribeCost) 
+                    if (MyPlayer.Booty >= bribeCost) 
                     {
                         message = "The guard pockets your money and grumbles";
                         SetCursorPosition(xPos - message.Length/2, CursorTop + 4);
@@ -462,7 +462,7 @@ namespace MazeGame
                         message = "'I won't be so kind next time.'";
                         SetCursorPosition(xPos - message.Length / 2, CursorTop);
                         WriteLine(message);
-                        Player.Booty -= bribeCost;
+                        MyPlayer.Booty -= bribeCost;
                         ReadKey(true);
                         return true;
                     }
@@ -552,7 +552,7 @@ namespace MazeGame
                 "Oh, no!",
                 "You have been caught and brought back to your cell!",
                 "  ",
-                $"The guards searched you and sequestered $ {Player.Booty} in treasures.",
+                $"The guards searched you and sequestered $ {MyPlayer.Booty} in treasures.",
                 "  ",
                 "Thank you for playing.",
                 "Try Again!",
@@ -604,7 +604,7 @@ namespace MazeGame
                 "  ",
                 "You escaped the Baron's dungeon!",
                 "  ",
-                $"You collected $ {Player.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You collected $ {MyPlayer.Booty} in treasures, out of a total of $ {totalGold}.",
                 $"You have been caught {TimesCaught} times.",
                 "  ",
                 "  ",
@@ -644,9 +644,9 @@ namespace MazeGame
         {
             playerHasBeenCaught = false;
             TimesCaught = 0;
-            Player.Booty = 0;
-            Player.X = worlds[0].PlayerStartX;
-            Player.Y = worlds[0].PlayerStartY;
+            MyPlayer.Booty = 0;
+            MyPlayer.X = worlds[0].PlayerStartX;
+            MyPlayer.Y = worlds[0].PlayerStartY;
             CurrentRoom = 0;
             totalGold = 0;
             foreach (World world in worlds)
@@ -1094,9 +1094,9 @@ namespace MazeGame
             GameData saveGame = saveSystem.LoadGame(this);
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
-            Player.Booty = saveGame.Booty;
-            Player.X = worlds[saveGame.CurrentLevel].PlayerStartX;
-            Player.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
+            MyPlayer.Booty = saveGame.Booty;
+            MyPlayer.X = worlds[saveGame.CurrentLevel].PlayerStartX;
+            MyPlayer.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

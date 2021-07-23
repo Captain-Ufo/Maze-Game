@@ -12,6 +12,8 @@ namespace MazeGame
         private string[] options;
         private string[] prompt;
 
+        private ChiptunePlayer ctp;
+
         /// <summary>
         /// Instantiates a Menu object
         /// </summary>
@@ -22,6 +24,7 @@ namespace MazeGame
             this.prompt = new string[] { prompt };
             this.options = options;
             selectedIndex = 0;
+            ctp = new ChiptunePlayer();
         }
 
         /// <summary>
@@ -34,6 +37,7 @@ namespace MazeGame
             this.prompt = prompt;
             this.options = options;
             selectedIndex = 0;
+            ctp = new ChiptunePlayer();
         }
 
 
@@ -69,7 +73,8 @@ namespace MazeGame
                         {
                             selectedIndex = options.Length - 1;
                         }
-                        Beep(1000, 100);
+                        ctp.PlaySFX(1000, 100);
+                        //Beep(1000, 100);
                         break;
 
                     case ConsoleKey.DownArrow:
@@ -81,7 +86,8 @@ namespace MazeGame
                         {
                             selectedIndex = 0;
                         }
-                        Beep(1000, 100);
+                        ctp.PlaySFX(1000, 100);
+                        //Beep(1000, 100);
                         break;
                 }
             }

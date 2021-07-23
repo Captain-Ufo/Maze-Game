@@ -46,28 +46,33 @@ namespace MazeGame
             Task.Run(() => GameWonTune(cts.Token));
         }
 
+        public void PlaySFX(int frequency, int duration)
+        {
+            Task.Run(() => Beep(frequency, duration));
+        }
+
         private void GameWonTune(CancellationToken token)
         {
             Coordinates[] tune =
             {
-                new Coordinates(540, 170),
-                new Coordinates(590, 170),
+                new Coordinates(540, 120),
+                new Coordinates(590, 140),
                 new Coordinates(640, 170),
                 new Coordinates(690, 500),
                 new Coordinates(640, 500),
                 new Coordinates(590, 200),
-                new Coordinates(640, 170),
-                new Coordinates(690, 170),
+                new Coordinates(640, 120),
+                new Coordinates(690, 150),
                 new Coordinates(740, 500),
                 new Coordinates(690, 500),
                 new Coordinates(640, 200),
-                new Coordinates(690, 170),
-                new Coordinates(740, 170),
+                new Coordinates(690, 120),
+                new Coordinates(740, 150),
                 new Coordinates(790, 500),
                 new Coordinates(740, 500),
                 new Coordinates(790, 200),
-                new Coordinates(840, 170),
-                new Coordinates(890, 170),
+                new Coordinates(840, 120),
+                new Coordinates(890, 140),
                 new Coordinates(940, 170),
                 new Coordinates(990, 2000),
             };

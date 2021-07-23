@@ -10,8 +10,12 @@ namespace MazeGame
     /// </summary>
     class Guard
     {
+        private enum Directions { up, right, down, left }
+
+        private Directions direction = Directions.down;
         private Coordinates[] patrolPath;
         private int nextPatrolPoint;
+        private int aggroDistance = 5;
 
         private int bribeTimer;
         private bool hasBeenBribed;
@@ -22,13 +26,14 @@ namespace MazeGame
 
         private bool easyGame;
         
-        private string guardMarker = "@";
-        private ConsoleColor guardColor = ConsoleColor.DarkRed;
+        private string guardMarker = "V";
+        private ConsoleColor guardSymbolColor = ConsoleColor.Black;
+        private ConsoleColor guardTileColor = ConsoleColor.DarkRed;
 
         private int timeBetweenMoves = 150;
         private int timeSinceLastMove = 0;
 
-        private Coordinates originPoint;
+        private Coordinates originPoint; 
 
         /// <summary>
         /// The X coordinate of the Guard
@@ -96,12 +101,12 @@ namespace MazeGame
         }
 
         /// <summary>
-        /// Updates the Guard's movement along its patrol and catches the player if within range
+        /// Updates the guard's AI behavior
         /// </summary>
-        /// <param name="world">The level the guard is patrolling</param>
+        /// <param name="world">The level the guard is in</param>
         /// <param name="game">The current game</param>
-        /// <param name="deltaTimeMS">Frame timing, to handle movement speeds</param>
-        public void Patrol(World world, Game game, int deltaTimeMS)
+        /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
+        public void Update(World world, Game game, int deltaTimeMS)
         {
             timeSinceLastMove += deltaTimeMS;
 
@@ -110,6 +115,166 @@ namespace MazeGame
                 return;
             }
 
+            Patrol(world, deltaTimeMS);
+            CatchPlayer(game, world);
+
+            timeSinceLastMove -= timeBetweenMoves;
+        }
+
+        private void CatchPlayer(Game game, World world)
+        {
+            switch (direction)
+            {
+                case Directions.up:
+                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + aggroDistance
+                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + 1)
+                    {
+                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+
+                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        {
+                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            {
+                                guardTileColor = ConsoleColor.DarkRed;
+                                return;
+                            }
+                        }
+                        guardTileColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        guardTileColor = ConsoleColor.DarkRed;
+                    }
+                     break;
+                case Directions.right:
+                    if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + aggroDistance
+                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + aggroDistance)
+                    {
+                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+
+                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        {
+                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            {
+                                guardTileColor = ConsoleColor.DarkRed;
+                                return;
+                            }
+                        }
+                        guardTileColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        guardTileColor = ConsoleColor.DarkRed;
+                    }
+                    break;
+                 case Directions.down:
+                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + aggroDistance
+                        && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + aggroDistance)
+                    {
+                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+
+                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        {
+                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            {
+                                guardTileColor = ConsoleColor.DarkRed;
+                                return;
+                            }
+                        }
+                        guardTileColor = ConsoleColor.Red; ;
+                    }
+                    else
+                    {
+                        guardTileColor = ConsoleColor.DarkRed;
+                    }
+                    break;
+                 case Directions.left:
+                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + 1
+                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + aggroDistance)
+                    {
+                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+
+                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        {
+                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            {
+                                guardTileColor = ConsoleColor.DarkRed;
+                                return;
+                            }
+                        }
+                        guardTileColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        guardTileColor = ConsoleColor.DarkRed;
+                    }
+                    break;
+            }
+
+            if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
+                && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
+            {
+                if (!hasBeenBribed)
+                {
+                    game.CapturePlayer(this);
+                }
+            }
+        }
+
+        public Coordinates[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)
+        {
+            bool isLineSteep = Math.Abs(playerY - guardY) > Math.Abs(playerX - guardX);
+
+            if (isLineSteep)
+            {
+                int temp = guardX;
+                guardX = guardY;
+                guardY = temp;
+                temp = playerX;
+                playerX = playerY;
+                playerY = temp;
+            }
+
+            if (guardX > playerX)
+            {
+                int temp = guardX;
+                guardX = guardY;
+                guardY = temp;
+                temp = playerX;
+                playerX = playerY;
+                playerY = temp;
+            }
+
+            int deltaX = playerX - guardX;
+            int deltaY = Math.Abs(playerY - guardY);
+            int error = deltaX / 2;
+            int yStep = (guardY < playerY) ? 1 : -1;
+            int y = guardY;
+
+            List<Coordinates> tilesBetweenGuardAndPlayer = new List<Coordinates>();
+
+            for (int x = guardX; x <= playerX; x++)
+            {
+                tilesBetweenGuardAndPlayer.Add(new Coordinates((isLineSteep ? y : x), (isLineSteep ? x : y)));
+                error = error - deltaY;
+                if (error < 0)
+                {
+                    y += yStep;
+                    error += deltaX;
+                }
+            }
+
+            return tilesBetweenGuardAndPlayer.ToArray();
+        }
+
+        /// <summary>
+        /// Updates the Guard's movement along its patrol and catches the player if within range
+        /// </summary>
+        /// <param name="world">The level the guard is patrolling</param>
+        /// <param name="game">The current game</param>
+        /// <param name="deltaTimeMS">Frame timing, to handle movement speeds</param>
+        private void Patrol(World world, int deltaTimeMS)
+        {
             if (hasBeenBribed)
             {
                 bribeTimer++;
@@ -141,6 +306,8 @@ namespace MazeGame
                         if (world.IsPositionWalkable(X - 1, Y))
                         {
                             X--;
+                            direction = Directions.left;
+                            guardMarker = "<";
                         }
                     }
                     else
@@ -148,6 +315,8 @@ namespace MazeGame
                         if (world.IsPositionWalkable(X + 1, Y))
                         {
                             X++;
+                            direction = Directions.right;
+                            guardMarker = ">";
                         }
                     }
                 }
@@ -158,6 +327,8 @@ namespace MazeGame
                         if (world.IsPositionWalkable(X, Y - 1))
                         {
                             Y--;
+                            direction = Directions.up;
+                            guardMarker = "^";
                         }
                     }
                     else
@@ -165,6 +336,8 @@ namespace MazeGame
                         if (world.IsPositionWalkable(X, Y + 1))
                         {
                             Y++;
+                            direction = Directions.down;
+                            guardMarker = "v";
                         }
                     }
                 }
@@ -181,21 +354,10 @@ namespace MazeGame
                 }
             }
 
-            if (game.Player.X >= X-1 && game.Player.X <= X+1
-                && game.Player.Y >= Y-1 && game.Player.Y <= Y+1)
-            {
-                if (!hasBeenBribed)
-                {
-                    game.CapturePlayer(this);
-                }
-            }
-
             if (world.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
             {
                 world.ToggleLever(X, Y);
             }
-
-            timeSinceLastMove -= timeBetweenMoves;
         }
 
         /// <summary>
@@ -228,11 +390,14 @@ namespace MazeGame
         /// </summary>
         public void Draw()
         {
-            ConsoleColor previousColor = ForegroundColor;
-            ForegroundColor = guardColor;
+            ConsoleColor previousFColor = ForegroundColor;
+            ConsoleColor previusBGColor = BackgroundColor;
+            ForegroundColor = guardSymbolColor;
+            BackgroundColor = guardTileColor;
             SetCursorPosition(X, Y);
             Write(guardMarker);
-            ForegroundColor = previousColor;
+            ForegroundColor = previousFColor;
+            BackgroundColor = previusBGColor;
         }
 
         /// <summary>

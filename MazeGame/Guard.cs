@@ -15,10 +15,12 @@ namespace MazeGame
         private Directions direction = Directions.down;
         private Coordinates[] patrolPath;
         private int nextPatrolPoint;
-        private int aggroDistance = 5;
+        private int verticalAggroDistance = 5;
+        private int horizontalAggroDistance = 10;
 
         private int bribeTimer;
         private bool hasBeenBribed;
+
         /// <summary>
         /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
         /// </summary>
@@ -126,8 +128,8 @@ namespace MazeGame
             switch (direction)
             {
                 case Directions.up:
-                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + aggroDistance
-                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + 1)
+                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
+                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + 1)
                     {
                         Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
@@ -147,8 +149,8 @@ namespace MazeGame
                     }
                      break;
                 case Directions.right:
-                    if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + aggroDistance
-                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + aggroDistance)
+                    if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + horizontalAggroDistance
+                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
                         Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
@@ -168,8 +170,8 @@ namespace MazeGame
                     }
                     break;
                  case Directions.down:
-                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + aggroDistance
-                        && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + aggroDistance)
+                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
+                        && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
                         Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
@@ -189,8 +191,8 @@ namespace MazeGame
                     }
                     break;
                  case Directions.left:
-                    if (game.MyPlayer.X >= X - aggroDistance && game.MyPlayer.X <= X + 1
-                        && game.MyPlayer.Y >= Y - aggroDistance && game.MyPlayer.Y <= Y + aggroDistance)
+                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + 1
+                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
                         Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
@@ -211,14 +213,14 @@ namespace MazeGame
                     break;
             }
 
-            if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
+            /*if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
                 && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
             {
                 if (!hasBeenBribed)
                 {
                     game.CapturePlayer(this);
                 }
-            }
+            }*/
         }
 
         public Coordinates[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)

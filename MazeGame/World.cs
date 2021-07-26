@@ -183,7 +183,7 @@ namespace MazeGame
         /// <param name="y">The X coordinate of the symbol to replace</param>
         /// <param name="newElement">The new symbol</param>
         /// <param name="withOffset">(optional) default true, set to false if the indicated coordinates are without the offset applied</param>
-        public void ChangeElementAt(int x, int y, string newElement, bool withOffset = true)
+        public void ChangeElementAt(int x, int y, string newElement, bool withOffset = true, bool redrawScene = true)
         {
             if (withOffset)
             {
@@ -192,7 +192,11 @@ namespace MazeGame
             }
 
             grid[y, x] = newElement;
-            Draw();
+
+            if (redrawScene)
+            {
+                Draw();
+            }
         }
 
         /// <summary>

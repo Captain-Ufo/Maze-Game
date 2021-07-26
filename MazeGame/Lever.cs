@@ -40,11 +40,11 @@ namespace MazeGame
             {
                 if (world.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
                 {
-                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.EmptySpace.ToString());
+                    world.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
                 }
                 else
                 {
-                    world.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.GateChar.ToString());
+                    world.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.GateChar.ToString(), false, false);
                 }
             }
 

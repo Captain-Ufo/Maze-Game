@@ -123,6 +123,7 @@ namespace MazeGame
             timeSinceLastMove -= timeBetweenMoves;
         }
 
+
         private void CatchPlayer(Game game, World world)
         {
             switch (direction)
@@ -148,6 +149,7 @@ namespace MazeGame
                         guardTileColor = ConsoleColor.DarkRed;
                     }
                      break;
+
                 case Directions.right:
                     if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + horizontalAggroDistance
                         && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
@@ -169,6 +171,7 @@ namespace MazeGame
                         guardTileColor = ConsoleColor.DarkRed;
                     }
                     break;
+
                  case Directions.down:
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
                         && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + verticalAggroDistance)
@@ -190,6 +193,7 @@ namespace MazeGame
                         guardTileColor = ConsoleColor.DarkRed;
                     }
                     break;
+
                  case Directions.left:
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + 1
                         && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
@@ -213,17 +217,17 @@ namespace MazeGame
                     break;
             }
 
-            /*if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
+            if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
                 && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
             {
                 if (!hasBeenBribed)
                 {
                     game.CapturePlayer(this);
                 }
-            }*/
+            }
         }
 
-        public Coordinates[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)
+        private Coordinates[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)
         {
             bool isLineSteep = Math.Abs(playerY - guardY) > Math.Abs(playerX - guardX);
 
@@ -240,10 +244,10 @@ namespace MazeGame
             if (guardX > playerX)
             {
                 int temp = guardX;
-                guardX = guardY;
-                guardY = temp;
-                temp = playerX;
-                playerX = playerY;
+                guardX = playerX;
+                playerX = temp;
+                temp = guardY;
+                guardY = playerY;
                 playerY = temp;
             }
 

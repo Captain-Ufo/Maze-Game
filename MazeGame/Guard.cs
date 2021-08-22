@@ -118,13 +118,83 @@ namespace MazeGame
             }
 
             Patrol(world, deltaTimeMS);
-            CatchPlayer(game, world);
+            SpotPlayer(game, world);
+            CatchPlayer(game);
 
             timeSinceLastMove -= timeBetweenMoves;
         }
 
+        /// <summary>
+        /// Prevents a Game Over
+        /// </summary>
+        /// <param name="IsGameEasy">Sets the flag that is used to determine how many times a guard can be bribed</param>
+        public void BribeGuard(bool IsGameEasy)
+        {
+            hasBeenBribed = true;
+            easyGame = IsGameEasy;
+        }
 
-        private void CatchPlayer(Game game, World world)
+        /// <summary>
+        /// Restores the guard to its conditions at the beginning of the level. To be used only when retrying levels
+        /// </summary>
+        public void Reset()
+        {
+            nextPatrolPoint = 0;
+            bribeTimer = 0;
+            hasBeenBribed = false;
+            X = originPoint.X;
+            Y = originPoint.Y;
+            timeSinceLastMove = 0;
+            HasBeenBribedBefore = false;
+            easyGame = false;
+        }
+
+        /// <summary>
+        /// Draws the guard symbol
+        /// </summary>
+        public void Draw()
+        {
+            ConsoleColor previousFColor = ForegroundColor;
+            ConsoleColor previusBGColor = BackgroundColor;
+            ForegroundColor = guardSymbolColor;
+            BackgroundColor = guardTileColor;
+            SetCursorPosition(X, Y);
+            Write(guardMarker);
+            ForegroundColor = previousFColor;
+            BackgroundColor = previusBGColor;
+        }
+
+        /// <summary>
+        /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
+        /// </summary>
+        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(World world)
+        {
+            string symbol = world.GetElementAt(X, Y);
+
+            SetCursorPosition(X, Y);
+
+            if (symbol == "$")
+            {
+                ForegroundColor = ConsoleColor.Yellow;
+            }
+
+            if (symbol == SymbolsConfig.ExitChar.ToString())
+            {
+                if (world.IsLocked)
+                {
+                    ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    ForegroundColor = ConsoleColor.Green;
+                }
+            }
+            Write(symbol);
+            ResetColor();
+        }
+
+        private void SpotPlayer(Game game, World world)
         {
             switch (direction)
             {
@@ -216,7 +286,20 @@ namespace MazeGame
                     }
                     break;
             }
+        }
 
+        private void FindPathToPlayer()
+        {
+
+        }
+
+        private void PersuePlayer()
+        {
+
+        }
+
+        private void CatchPlayer(Game game)
+        {
             if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
                 && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
             {
@@ -273,12 +356,6 @@ namespace MazeGame
             return tilesBetweenGuardAndPlayer.ToArray();
         }
 
-        /// <summary>
-        /// Updates the Guard's movement along its patrol and catches the player if within range
-        /// </summary>
-        /// <param name="world">The level the guard is patrolling</param>
-        /// <param name="game">The current game</param>
-        /// <param name="deltaTimeMS">Frame timing, to handle movement speeds</param>
         private void Patrol(World world, int deltaTimeMS)
         {
             if (hasBeenBribed)
@@ -364,76 +441,6 @@ namespace MazeGame
             {
                 world.ToggleLever(X, Y);
             }
-        }
-
-        /// <summary>
-        /// Prevents a Game Over
-        /// </summary>
-        /// <param name="IsGameEasy">Sets the flag that is used to determine how many times a guard can be bribed</param>
-        public void BribeGuard(bool IsGameEasy)
-        {
-            hasBeenBribed = true;
-            easyGame = IsGameEasy;
-        }
-
-        /// <summary>
-        /// Restores the guard to its conditions at the beginning of the level. To be used only when retrying levels
-        /// </summary>
-        public void Reset()
-        {
-            nextPatrolPoint = 0;
-            bribeTimer = 0;
-            hasBeenBribed = false;
-            X = originPoint.X;
-            Y = originPoint.Y;
-            timeSinceLastMove = 0;
-            HasBeenBribedBefore = false;
-            easyGame = false;
-        }
-
-        /// <summary>
-        /// Draws the guard symbol
-        /// </summary>
-        public void Draw()
-        {
-            ConsoleColor previousFColor = ForegroundColor;
-            ConsoleColor previusBGColor = BackgroundColor;
-            ForegroundColor = guardSymbolColor;
-            BackgroundColor = guardTileColor;
-            SetCursorPosition(X, Y);
-            Write(guardMarker);
-            ForegroundColor = previousFColor;
-            BackgroundColor = previusBGColor;
-        }
-
-        /// <summary>
-        /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
-        /// </summary>
-        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
-        public void Clear(World world)
-        {
-            string symbol = world.GetElementAt(X, Y);
-
-            SetCursorPosition(X, Y);
-
-            if (symbol == "$")
-            {
-                ForegroundColor = ConsoleColor.Yellow;
-            }
-
-            if (symbol == SymbolsConfig.ExitChar.ToString())
-            {
-                if (world.IsLocked)
-                {
-                    ForegroundColor = ConsoleColor.Red;
-                }
-                else
-                {
-                    ForegroundColor = ConsoleColor.Green;
-                }
-            }
-            Write(symbol);
-            ResetColor();
         }
     }
 }

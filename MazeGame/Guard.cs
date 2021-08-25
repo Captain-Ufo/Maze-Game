@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static System.Console;
 
@@ -20,6 +21,7 @@ namespace MazeGame
 
         private int bribeTimer;
         private bool hasBeenBribed;
+        private bool isAlerted;
 
         /// <summary>
         /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
@@ -54,6 +56,7 @@ namespace MazeGame
         {
             nextPatrolPoint = 0;
             hasBeenBribed = false;
+            isAlerted = false;
             HasBeenBribedBefore = false;
             bribeTimer = 0;
 
@@ -117,8 +120,20 @@ namespace MazeGame
                 return;
             }
 
-            Patrol(world, deltaTimeMS);
-            SpotPlayer(game, world);
+            if (SpotPlayer(game, world))
+            {
+                isAlerted = true;
+                ChasePlayer(game, world);
+            }
+            else if (isAlerted)
+            {
+                //stand in place for a while, until alert timer runs off
+            }
+            else
+            {
+                Patrol(world);
+            }
+
             CatchPlayer(game);
 
             timeSinceLastMove -= timeBetweenMoves;
@@ -194,7 +209,7 @@ namespace MazeGame
             ResetColor();
         }
 
-        private void SpotPlayer(Game game, World world)
+        private bool SpotPlayer(Game game, World world)
         {
             switch (direction)
             {
@@ -209,16 +224,17 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
-                                return;
+                                return false ;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        return false;
                     }
-                     break;
 
                 case Directions.right:
                     if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + horizontalAggroDistance
@@ -231,16 +247,17 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
-                                return;
+                                return false;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        return false;
                     }
-                    break;
 
                  case Directions.down:
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
@@ -253,16 +270,17 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
-                                return;
+                                return false;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red; ;
+                        guardTileColor = ConsoleColor.Red; 
+                        return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        return false;
                     }
-                    break;
 
                  case Directions.left:
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + 1
@@ -275,27 +293,74 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
-                                return;
+                                return false;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        return false;
                     }
-                    break;
+            }
+            return false;
+        }
+
+        private void Pathfind(World world, Tile pathStart, Tile destination)
+        {
+            pathStart.SetDistance(destination.X, destination.Y);
+            List<Tile> activeTiles = new List<Tile>();
+            activeTiles.Add(pathStart);
+            List<Tile> visitedTiles = new List<Tile>();
+
+            while (activeTiles.Any())
+            {
+                Tile tileToCheck = activeTiles.OrderBy(tile => tile.CostDistance).First();
+
+                if (tileToCheck.X == destination.X && tileToCheck.Y == destination.Y)
+                {
+                    return;
+                }
+
+                visitedTiles.Add(tileToCheck);
+                activeTiles.Remove(tileToCheck);
+
+                List<Tile> walkableNeighbors = world.GetWalkableNaighborsOfTile(tileToCheck, destination);
+
+                foreach (Tile neighbor in walkableNeighbors)
+                {
+                    if (visitedTiles.Any(tile => tile.X == neighbor.X && tile.Y == neighbor.Y))
+                    {
+                        //The tile was already evaluated by the pathfinding, so we skip it
+                        continue;
+                    }
+
+                    if (activeTiles.Any(tile => tile.X == neighbor.X && tile.Y == neighbor.Y))
+                    {
+                        //re-check a tile evaluated on a previous cycle to see if now it has a better value
+                        Tile existingTile = activeTiles.First(tile => tile.X == neighbor.X && tile.Y == neighbor.Y);
+
+                        if (existingTile.CostDistance > neighbor.CostDistance)
+                        {
+                            activeTiles.Remove(existingTile);
+                            activeTiles.Add(neighbor);
+                        }
+                    }
+                    else
+                    {
+                        activeTiles.Add(neighbor);
+                    }
+                }
             }
         }
 
-        private void FindPathToPlayer()
+        private void ChasePlayer(Game game, World world)
         {
-
-        }
-
-        private void PersuePlayer()
-        {
-
+            Tile guardTile = new Tile(X, Y);
+            Tile playerTile = new Tile(game.MyPlayer.X, game.MyPlayer.Y);
+            Pathfind(world, guardTile, playerTile);
         }
 
         private void CatchPlayer(Game game)
@@ -356,7 +421,7 @@ namespace MazeGame
             return tilesBetweenGuardAndPlayer.ToArray();
         }
 
-        private void Patrol(World world, int deltaTimeMS)
+        private void Patrol(World world)
         {
             if (hasBeenBribed)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -200,6 +201,36 @@ namespace MazeGame
         }
 
         /// <summary>
+        /// Pathfinding helper function. Returns the immediately adjecent walkable tiles (north, west, south and east) to the one provided
+        /// </summary>
+        /// <param name="currentTile">The Tile to find neighbors of</param>
+        /// <param name="targetTile">The destination of the pathfinding</param>
+        /// <returns></returns>
+        public List<Tile> GetWalkableNaighborsOfTile(Tile currentTile, Tile targetTile)
+        {
+            List<Tile> neighborsList = new List<Tile>()
+            {
+                new Tile(currentTile.X, currentTile.Y - 1),
+                new Tile(currentTile.X, currentTile.Y + 1),
+                new Tile(currentTile.X - 1, currentTile.Y),
+                new Tile(currentTile.X + 1, currentTile.Y)
+            };
+
+            foreach (Tile tile in neighborsList)
+            {
+                tile.Parent = currentTile;
+                tile.Cost = currentTile.Cost + 1;
+                tile.SetDistance(targetTile.X, targetTile.Y);
+            }
+
+            return neighborsList
+                                .Where(tile => tile.X >= 0 && tile.X < columns)
+                                .Where(tile => tile.Y >= 0 && tile.Y < rows)
+                                .Where(tile => IsPositionWalkable(tile.X, tile.Y))
+                                .ToList();
+        }
+
+        /// <summary>
         /// Toggles the lever in a given position on the grid
         /// </summary>
         /// <param name="x">The X coordinate on the grid of the level to toggle</param>
@@ -320,14 +351,12 @@ namespace MazeGame
         /// <summary>
         /// The tile the pathfinding algorithm comes from when reaching this one
         /// </summary>
-        public Tile Parent { get; private set; }
+        public Tile Parent { get; set; }
 
-        public Tile (int x, int y, Tile parent)
+        public Tile (int x, int y)
         {
             X = x;
             Y = y;
-
-            Parent = parent;
         }
 
         /// <summary>

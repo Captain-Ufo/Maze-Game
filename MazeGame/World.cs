@@ -206,28 +206,41 @@ namespace MazeGame
         /// <param name="currentTile">The Tile to find neighbors of</param>
         /// <param name="targetTile">The destination of the pathfinding</param>
         /// <returns></returns>
-        public List<Tile> GetWalkableNaighborsOfTile(Tile currentTile, Tile targetTile)
+        public List<Tile> GetWalkableNeighborsOfTile(Tile currentTile, Tile targetTile)
         {
-            List<Tile> neighborsList = new List<Tile>()
-            {
-                new Tile(currentTile.X, currentTile.Y - 1),
-                new Tile(currentTile.X, currentTile.Y + 1),
-                new Tile(currentTile.X - 1, currentTile.Y),
-                new Tile(currentTile.X + 1, currentTile.Y)
-            };
+            List<Tile> neighborsList = new List<Tile>();
 
-            foreach (Tile tile in neighborsList)
+            if (currentTile.Y - 1 >= 0 && IsPositionWalkable(currentTile.X, currentTile.Y - 1))
             {
+                neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y - 1));
+            }
+
+            if (currentTile.Y + 1 < columns && IsPositionWalkable(currentTile.X, currentTile.Y + 1))
+            {
+                neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y + 1));
+            }
+
+            if (currentTile.X - 1 >= 0 && IsPositionWalkable(currentTile.X - 1, currentTile.Y))
+            {
+                neighborsList.Add(CreateNewTile(currentTile.X - 1, currentTile.Y));
+            }
+
+            if (currentTile.X + 1 < rows && IsPositionWalkable(currentTile.X + 1, currentTile.Y))
+            {
+                neighborsList.Add(CreateNewTile(currentTile.X + 1, currentTile.Y));
+            }
+
+            return neighborsList;
+
+            Tile CreateNewTile(int x, int y)
+            {
+                Tile tile = new Tile(x, y);
                 tile.Parent = currentTile;
                 tile.Cost = currentTile.Cost + 1;
                 tile.SetDistance(targetTile.X, targetTile.Y);
-            }
 
-            return neighborsList
-                                .Where(tile => tile.X >= 0 && tile.X < columns)
-                                .Where(tile => tile.Y >= 0 && tile.Y < rows)
-                                .Where(tile => IsPositionWalkable(tile.X, tile.Y))
-                                .ToList();
+                return tile;
+            }
         }
 
         /// <summary>
@@ -346,7 +359,11 @@ namespace MazeGame
         /// <summary>
         /// Cost + Distance
         /// </summary>
-        public int CostDistance { get; set; }
+        public int CostDistance
+        {
+            get { return Cost + Distance; }
+            set { }
+        }
 
         /// <summary>
         /// The tile the pathfinding algorithm comes from when reaching this one
@@ -357,6 +374,9 @@ namespace MazeGame
         {
             X = x;
             Y = y;
+
+            Cost = 0;
+            Distance = 0;
         }
 
         /// <summary>

@@ -120,21 +120,26 @@ namespace MazeGame
                 return;
             }
 
+            UpdateBribe();
+
+            //SpotPlayer(game, world);
+            //Move(world, Patrol());
+
             if (SpotPlayer(game, world))
             {
                 isAlerted = true;
                 ChasePlayer(game, world);
             }
-            else if (isAlerted)
+            /*else if (isAlerted)
             {
                 //stand in place for a while, until alert timer runs off
-            }
+            }*/
             else
             {
-                Patrol(world);
+                Move(world, Patrol());
             }
 
-            CatchPlayer(game);
+            //CatchPlayer(game);
 
             timeSinceLastMove -= timeBetweenMoves;
         }
@@ -207,6 +212,24 @@ namespace MazeGame
             }
             Write(symbol);
             ResetColor();
+        }
+
+        private void UpdateBribe()
+        {
+            if (hasBeenBribed)
+            {
+                bribeTimer++;
+            }
+
+            if (bribeTimer > 4)
+            {
+                hasBeenBribed = false;
+                if (!easyGame)
+                {
+                    HasBeenBribedBefore = true;
+                }
+                bribeTimer = 0;
+            }
         }
 
         private bool SpotPlayer(Game game, World world)
@@ -308,7 +331,7 @@ namespace MazeGame
             return false;
         }
 
-        private void Pathfind(World world, Tile pathStart, Tile destination)
+        private Tile Pathfind(World world, Tile pathStart, Tile destination)
         {
             pathStart.SetDistance(destination.X, destination.Y);
             List<Tile> activeTiles = new List<Tile>();
@@ -321,13 +344,13 @@ namespace MazeGame
 
                 if (tileToCheck.X == destination.X && tileToCheck.Y == destination.Y)
                 {
-                    return;
+                    return tileToCheck.Parent;
                 }
 
                 visitedTiles.Add(tileToCheck);
                 activeTiles.Remove(tileToCheck);
 
-                List<Tile> walkableNeighbors = world.GetWalkableNaighborsOfTile(tileToCheck, destination);
+                List<Tile> walkableNeighbors = world.GetWalkableNeighborsOfTile(tileToCheck, destination);
 
                 foreach (Tile neighbor in walkableNeighbors)
                 {
@@ -354,13 +377,21 @@ namespace MazeGame
                     }
                 }
             }
+            return null;
         }
 
         private void ChasePlayer(Game game, World world)
         {
             Tile guardTile = new Tile(X, Y);
             Tile playerTile = new Tile(game.MyPlayer.X, game.MyPlayer.Y);
-            Pathfind(world, guardTile, playerTile);
+            Tile tileToMoveTo = Pathfind(world, guardTile, playerTile);
+
+            if (tileToMoveTo != null)
+            {
+                Coordinates movementCoordinates = new Coordinates(tileToMoveTo.X, tileToMoveTo.Y);
+
+                Move(world, movementCoordinates);
+            }
         }
 
         private void CatchPlayer(Game game)
@@ -421,73 +452,18 @@ namespace MazeGame
             return tilesBetweenGuardAndPlayer.ToArray();
         }
 
-        private void Patrol(World world)
+        private Coordinates Patrol()
         {
-            if (hasBeenBribed)
-            {
-                bribeTimer++;
-            }
-
-            if (bribeTimer > 4)
-            {
-                hasBeenBribed = false;
-                if (!easyGame)
-                {
-                    HasBeenBribedBefore = true;
-                }
-                bribeTimer = 0;
-            }
-
             if (patrolPath.Length > 0)
             {
                 if (patrolPath[nextPatrolPoint].X == 0 && patrolPath[nextPatrolPoint].Y == 0)
                 {
-                    return;
+                    return new Coordinates(X, Y);
                 }
 
-                this.Clear(world);
-
-                if (X != patrolPath[nextPatrolPoint].X)
+                if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
                 {
-                    if (X - patrolPath[nextPatrolPoint].X > 0)
-                    {
-                        if (world.IsPositionWalkable(X - 1, Y))
-                        {
-                            X--;
-                            direction = Directions.left;
-                            guardMarker = "<";
-                        }
-                    }
-                    else
-                    {
-                        if (world.IsPositionWalkable(X + 1, Y))
-                        {
-                            X++;
-                            direction = Directions.right;
-                            guardMarker = ">";
-                        }
-                    }
-                }
-                else if (Y != patrolPath[nextPatrolPoint].Y)
-                {
-                    if (Y - patrolPath[nextPatrolPoint].Y > 0)
-                    {
-                        if (world.IsPositionWalkable(X, Y - 1))
-                        {
-                            Y--;
-                            direction = Directions.up;
-                            guardMarker = "^";
-                        }
-                    }
-                    else
-                    {
-                        if (world.IsPositionWalkable(X, Y + 1))
-                        {
-                            Y++;
-                            direction = Directions.down;
-                            guardMarker = "v";
-                        }
-                    }
+                    return new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y);
                 }
                 else
                 {
@@ -498,6 +474,56 @@ namespace MazeGame
                     else
                     {
                         nextPatrolPoint = 0;
+                    }
+                }
+            }
+
+            return new Coordinates(X, Y);
+        }
+
+        private void Move(World world, Coordinates tileToMoveTo)
+        {
+            this.Clear(world);
+
+            if (X != tileToMoveTo.X)
+            {
+                if (X - tileToMoveTo.X > 0)
+                {
+                    if (world.IsPositionWalkable(X - 1, Y))
+                    {
+                        X--;
+                        direction = Directions.left;
+                        guardMarker = "<";
+                    }
+                }
+                else
+                {
+                    if (world.IsPositionWalkable(X + 1, Y))
+                    {
+                        X++;
+                        direction = Directions.right;
+                        guardMarker = ">";
+                    }
+                }
+            }
+            else if (Y != tileToMoveTo.Y)
+            {
+                if (Y - tileToMoveTo.Y > 0)
+                {
+                    if (world.IsPositionWalkable(X, Y - 1))
+                    {
+                        Y--;
+                        direction = Directions.up;
+                        guardMarker = "^";
+                    }
+                }
+                else
+                {
+                    if (world.IsPositionWalkable(X, Y + 1))
+                    {
+                        Y++;
+                        direction = Directions.down;
+                        guardMarker = "v";
                     }
                 }
             }

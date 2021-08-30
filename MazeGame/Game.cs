@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
-using System.Text.Json;
 using static System.Console;
 
 namespace MazeGame
@@ -161,7 +160,7 @@ namespace MazeGame
                 int deltaTimeMS = (int)(MyStopwatch.ElapsedMilliseconds - timeAtPreviousFrame);
                 timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
-                if (!HandlePlayerInputs(CurrentRoom))
+                if (!HandlePlayerInputs(CurrentRoom, deltaTimeMS))
                 {
                     return;
                 }
@@ -223,7 +222,7 @@ namespace MazeGame
 
 
 
-        private bool HandlePlayerInputs(int currentLevel)
+        private bool HandlePlayerInputs(int currentLevel, int deltaTimeMS)
         {
             ConsoleKey key;
 
@@ -239,9 +238,10 @@ namespace MazeGame
                     case ConsoleKey.NumPad8:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
                         {
-                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Move(worlds[currentLevel], Directions.up, deltaTimeMS);
+                            /*MyPlayer.Clear(worlds[currentLevel]);
                             MyPlayer.Y--;
-                            MyPlayer.HasPlayerMoved = true;
+                            MyPlayer.HasPlayerMoved = true;*/
                         }
                         return true;
                     case ConsoleKey.DownArrow:
@@ -249,9 +249,10 @@ namespace MazeGame
                     case ConsoleKey.NumPad2:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
                         {
-                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Move(worlds[currentLevel], Directions.down, deltaTimeMS);
+                            /*MyPlayer.Clear(worlds[currentLevel]);
                             MyPlayer.Y++;
-                            MyPlayer.HasPlayerMoved = true;
+                            MyPlayer.HasPlayerMoved = true;*/
                         }
                         return true;
                     case ConsoleKey.LeftArrow:
@@ -259,9 +260,10 @@ namespace MazeGame
                     case ConsoleKey.NumPad4:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
                         {
-                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Move(worlds[currentLevel], Directions.left, deltaTimeMS);
+                            /*MyPlayer.Clear(worlds[currentLevel]);
                             MyPlayer.X--;
-                            MyPlayer.HasPlayerMoved = true;
+                            MyPlayer.HasPlayerMoved = true;*/
                         }
                         return true;
                     case ConsoleKey.RightArrow:
@@ -269,9 +271,10 @@ namespace MazeGame
                     case ConsoleKey.NumPad6:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
                         {
-                            MyPlayer.Clear(worlds[currentLevel]);
+                            MyPlayer.Move(worlds[currentLevel], Directions.right, deltaTimeMS);
+                            /*MyPlayer.Clear(worlds[currentLevel]);
                             MyPlayer.X++;
-                            MyPlayer.HasPlayerMoved = true;
+                            MyPlayer.HasPlayerMoved = true;*/
                         }
                         return true;
                     case ConsoleKey.Escape:
@@ -935,8 +938,9 @@ namespace MazeGame
             WriteLine(SymbolsConfig.KeyChar);
             ResetColor();
             Write("\n > Avoid at all costs GUARDS, which looks like this: ");
-            ForegroundColor = ConsoleColor.DarkRed;
-            WriteLine("@");
+            BackgroundColor = ConsoleColor.DarkRed;
+            ForegroundColor = ConsoleColor.Black;
+            WriteLine("<");
             ResetColor();
             WriteLine("   Beware, Guards can catch you even if they just walk by your position. They don't need to actually bump against you.");
             WriteLine("   Depending on the difficulty level you chose, you might be able to bribe them to look the other way. It will get more expansive the more you do it!");

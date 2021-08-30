@@ -28,6 +28,8 @@ namespace MazeGame
         /// </summary>
         public bool HasPlayerMoved { get; set; }
 
+        private int timeSinceLastMove;
+        private int timeBetweenMoves;
         private string playerMarker;
         private ConsoleColor playerColor;
 
@@ -44,6 +46,46 @@ namespace MazeGame
             Y = startingY;
             playerMarker = marker;
             playerColor = color;
+
+            timeBetweenMoves = 100;
+            timeSinceLastMove = 0;
+        }
+
+        /// <summary>
+        /// Updates the player's coordinates, moving them by one tile at a time
+        /// </summary>
+        /// <param name="world">The level the player is moving in</param>
+        /// <param name="direction">The direction of the movement</param>
+        /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
+        public void Move(World world, Directions direction, int deltaTimeMS)
+        {
+            timeSinceLastMove += deltaTimeMS;
+
+            /*if (timeSinceLastMove < timeBetweenMoves)
+            {
+                return;
+            }*/
+
+            Clear(world);
+
+            switch (direction)
+            {
+                case Directions.up:
+                    Y--;
+                    break;
+                case Directions.down:
+                    Y++;
+                    break;
+                case Directions.left:
+                    X--;
+                    break;
+                case Directions.right:
+                    X++;
+                    break;
+            }
+
+            HasPlayerMoved = true;
+            timeSinceLastMove -= timeBetweenMoves;
         }
 
         /// <summary>
@@ -80,4 +122,6 @@ namespace MazeGame
             ResetColor();
         }
     }
+
+    public enum Directions { up, right, down, left }
 }

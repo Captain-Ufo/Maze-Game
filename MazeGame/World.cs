@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using static System.Console;
 
 namespace MazeGame
@@ -215,7 +213,7 @@ namespace MazeGame
                 neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y - 1));
             }
 
-            if (currentTile.Y + 1 < columns && IsPositionWalkable(currentTile.X, currentTile.Y + 1))
+            if (currentTile.Y + 1 < columns + yOffset && IsPositionWalkable(currentTile.X, currentTile.Y + 1))
             {
                 neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y + 1));
             }
@@ -225,7 +223,7 @@ namespace MazeGame
                 neighborsList.Add(CreateNewTile(currentTile.X - 1, currentTile.Y));
             }
 
-            if (currentTile.X + 1 < rows && IsPositionWalkable(currentTile.X + 1, currentTile.Y))
+            if (currentTile.X + 1 < rows + xOffset && IsPositionWalkable(currentTile.X + 1, currentTile.Y))
             {
                 neighborsList.Add(CreateNewTile(currentTile.X + 1, currentTile.Y));
             }

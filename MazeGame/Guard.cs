@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static System.Console;
 
 namespace MazeGame
@@ -11,8 +10,6 @@ namespace MazeGame
     /// </summary>
     class Guard
     {
-        private enum Directions { up, right, down, left }
-
         private Directions direction = Directions.down;
         private Coordinates[] patrolPath;
         private int nextPatrolPoint;
@@ -34,7 +31,9 @@ namespace MazeGame
         private ConsoleColor guardSymbolColor = ConsoleColor.Black;
         private ConsoleColor guardTileColor = ConsoleColor.DarkRed;
 
-        private int timeBetweenMoves = 150;
+        private int walkingSpeed = 150;
+        private int runningSpeed = 100;
+        private int timeBetweenMoves;
         private int timeSinceLastMove = 0;
 
         private Coordinates originPoint; 
@@ -59,6 +58,7 @@ namespace MazeGame
             isAlerted = false;
             HasBeenBribedBefore = false;
             bribeTimer = 0;
+            timeBetweenMoves = walkingSpeed;
 
             easyGame = false;
         }
@@ -247,15 +247,19 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
+                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false ;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        isAlerted = true;
+                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -270,15 +274,19 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
+                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        isAlerted = true;
+                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -293,15 +301,19 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
+                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red; 
+                        guardTileColor = ConsoleColor.Red;
+                        isAlerted = true;
+                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -316,15 +328,19 @@ namespace MazeGame
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
                                 guardTileColor = ConsoleColor.DarkRed;
+                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
                         guardTileColor = ConsoleColor.Red;
+                        isAlerted = true;
+                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
                         guardTileColor = ConsoleColor.DarkRed;
+                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
             }

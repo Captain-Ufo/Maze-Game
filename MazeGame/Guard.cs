@@ -18,7 +18,11 @@ namespace MazeGame
 
         private int bribeTimer;
         private bool hasBeenBribed;
+
+        private int alertTimer;
         private bool isAlerted;
+
+        private bool isReturning;
 
         /// <summary>
         /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
@@ -26,17 +30,20 @@ namespace MazeGame
         public bool HasBeenBribedBefore { get; private set; }
 
         private bool easyGame;
-        
-        private string guardMarker = "V";
+
+        private string[] guardMarkersTable = new string[] {"^", ">", "V", "<" };
+        private string guardMarker;
         private ConsoleColor guardSymbolColor = ConsoleColor.Black;
         private ConsoleColor guardTileColor = ConsoleColor.DarkRed;
 
         private int walkingSpeed = 150;
-        private int runningSpeed = 100;
+        private int runningSpeed = 120;
         private int timeBetweenMoves;
         private int timeSinceLastMove = 0;
 
-        private Coordinates originPoint; 
+        private Coordinates originPoint;
+
+        private Coordinates lastKnownPlayerPosition;
 
         /// <summary>
         /// The X coordinate of the Guard
@@ -58,7 +65,10 @@ namespace MazeGame
             isAlerted = false;
             HasBeenBribedBefore = false;
             bribeTimer = 0;
+            alertTimer = 0;
             timeBetweenMoves = walkingSpeed;
+            direction = Directions.up;
+            guardMarker = guardMarkersTable[(int)direction];
 
             easyGame = false;
         }
@@ -122,24 +132,38 @@ namespace MazeGame
 
             UpdateBribe();
 
-            //SpotPlayer(game, world);
-            //Move(world, Patrol());
-
             if (SpotPlayer(game, world))
             {
+                if (!isAlerted)
+                {
+                    game.TimesSpotted ++ ;
+                }
+
+                guardTileColor = ConsoleColor.Red;
+                lastKnownPlayerPosition = new Coordinates(game.MyPlayer.X, game.MyPlayer.Y);
                 isAlerted = true;
-                ChasePlayer(game, world);
+                isReturning = false;
+                timeBetweenMoves = runningSpeed;
+                MoveTowards(lastKnownPlayerPosition, world);
             }
-            /*else if (isAlerted)
+            else if (isAlerted)
             {
-                //stand in place for a while, until alert timer runs off
-            }*/
+                guardTileColor = ConsoleColor.Red;
+                AlertedBehavior(world);
+            }
+            else if (isReturning)
+            {
+                guardTileColor = ConsoleColor.DarkRed;
+                ReturnToPatrol(world);
+            }
             else
             {
+                guardTileColor = ConsoleColor.DarkRed;
+                timeBetweenMoves = walkingSpeed;
                 Move(world, Patrol());
             }
 
-            //CatchPlayer(game);
+            CatchPlayer(game);
 
             timeSinceLastMove -= timeBetweenMoves;
         }
@@ -162,6 +186,8 @@ namespace MazeGame
             nextPatrolPoint = 0;
             bribeTimer = 0;
             hasBeenBribed = false;
+            alertTimer = 0;
+            isAlerted = false;
             X = originPoint.X;
             Y = originPoint.Y;
             timeSinceLastMove = 0;
@@ -221,7 +247,7 @@ namespace MazeGame
                 bribeTimer++;
             }
 
-            if (bribeTimer > 4)
+            if (bribeTimer > 10)
             {
                 hasBeenBribed = false;
                 if (!easyGame)
@@ -246,20 +272,13 @@ namespace MazeGame
                         {
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
-                                guardTileColor = ConsoleColor.DarkRed;
-                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false ;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red;
-                        isAlerted = true;
-                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
-                        guardTileColor = ConsoleColor.DarkRed;
-                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -273,20 +292,13 @@ namespace MazeGame
                         {
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
-                                guardTileColor = ConsoleColor.DarkRed;
-                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red;
-                        isAlerted = true;
-                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
-                        guardTileColor = ConsoleColor.DarkRed;
-                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -300,20 +312,13 @@ namespace MazeGame
                         {
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
-                                guardTileColor = ConsoleColor.DarkRed;
-                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red;
-                        isAlerted = true;
-                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
-                        guardTileColor = ConsoleColor.DarkRed;
-                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
 
@@ -327,24 +332,62 @@ namespace MazeGame
                         {
                             if (!world.IsPositionWalkable(tile.X, tile.Y))
                             {
-                                guardTileColor = ConsoleColor.DarkRed;
-                                timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                                 return false;
                             }
                         }
-                        guardTileColor = ConsoleColor.Red;
-                        isAlerted = true;
-                        timeBetweenMoves = runningSpeed;
                         return true;
                     }
                     else
                     {
-                        guardTileColor = ConsoleColor.DarkRed;
-                        timeBetweenMoves = walkingSpeed; //temp for testing. Proper behavior is to reset speed after the alert timer
                         return false;
                     }
             }
             return false;
+        }
+
+        private void AlertedBehavior(World world)
+        {
+            if (X != lastKnownPlayerPosition.X && Y != lastKnownPlayerPosition.Y)
+            {
+                MoveTowards(lastKnownPlayerPosition, world);
+                return;
+            }
+
+            alertTimer++;
+
+            if (alertTimer % 10 == 0)
+            {
+                if (direction == Directions.left)
+                {
+                    direction = Directions.up;
+                }
+                else
+                {
+                    direction += 1;
+                }
+
+                guardMarker = guardMarkersTable[(int)direction];
+            }
+
+            if (alertTimer > 50) 
+            {
+                alertTimer = 0;
+                isAlerted = false;
+                guardTileColor = ConsoleColor.DarkRed;
+                timeBetweenMoves = walkingSpeed;
+                isReturning = true;
+            }
+        }
+
+        private void ReturnToPatrol(World world)
+        {
+            if (X != patrolPath[nextPatrolPoint].X && Y != patrolPath[nextPatrolPoint].Y)
+            {
+                MoveTowards(new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y), world);
+                return;
+            }
+
+            isReturning = false;
         }
 
         private Tile Pathfind(World world, Tile pathStart, Tile destination)
@@ -396,11 +439,11 @@ namespace MazeGame
             return null;
         }
 
-        private void ChasePlayer(Game game, World world)
+        private void MoveTowards(Coordinates destination, World world)
         {
             Tile guardTile = new Tile(X, Y);
-            Tile playerTile = new Tile(game.MyPlayer.X, game.MyPlayer.Y);
-            Tile tileToMoveTo = Pathfind(world, guardTile, playerTile);
+            Tile destinationTile = new Tile(destination.X, destination.Y);
+            Tile tileToMoveTo = Pathfind(world, guardTile, destinationTile);
 
             if (tileToMoveTo != null)
             {
@@ -509,7 +552,6 @@ namespace MazeGame
                     {
                         X--;
                         direction = Directions.left;
-                        guardMarker = "<";
                     }
                 }
                 else
@@ -518,7 +560,6 @@ namespace MazeGame
                     {
                         X++;
                         direction = Directions.right;
-                        guardMarker = ">";
                     }
                 }
             }
@@ -530,7 +571,6 @@ namespace MazeGame
                     {
                         Y--;
                         direction = Directions.up;
-                        guardMarker = "^";
                     }
                 }
                 else
@@ -539,10 +579,11 @@ namespace MazeGame
                     {
                         Y++;
                         direction = Directions.down;
-                        guardMarker = "v";
                     }
                 }
             }
+
+            guardMarker = guardMarkersTable[(int)direction];
 
             if (world.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
             {

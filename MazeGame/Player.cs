@@ -14,11 +14,11 @@ namespace MazeGame
         /// <summary>
         /// The player's current X position
         /// </summary>
-        public int X { get; set; }
+        public int X { get; private set; }
         /// <summary>
         /// The player's current Y position
         /// </summary>
-        public int Y { get; set; }
+        public int Y { get; private set; }
         /// <summary>
         /// The current amount of collected treasure
         /// </summary>
@@ -26,10 +26,8 @@ namespace MazeGame
         /// <summary>
         /// Whether the player has moved in the current frame or not
         /// </summary>
-        public bool HasPlayerMoved { get; set; }
+        public bool HasMoved { get; set; }
 
-        private int timeSinceLastMove;
-        private int timeBetweenMoves;
         private string playerMarker;
         private ConsoleColor playerColor;
 
@@ -46,9 +44,17 @@ namespace MazeGame
             Y = startingY;
             playerMarker = marker;
             playerColor = color;
+        }
 
-            timeBetweenMoves = 100;
-            timeSinceLastMove = 0;
+        /// <summary>
+        /// Sets the player's starting position at the beginning of a level
+        /// </summary>
+        /// <param name="x">The X coordinate of the position</param>
+        /// <param name="y">The Y coordinate of the position</param>
+        public void SetStartingPosition(int x, int y)
+        {
+            X = x;
+            Y = y;
         }
 
         /// <summary>
@@ -57,15 +63,8 @@ namespace MazeGame
         /// <param name="world">The level the player is moving in</param>
         /// <param name="direction">The direction of the movement</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void Move(World world, Directions direction, int deltaTimeMS)
+        public void Move(World world, Directions direction)
         {
-            timeSinceLastMove += deltaTimeMS;
-
-            /*if (timeSinceLastMove < timeBetweenMoves)
-            {
-                return;
-            }*/
-
             Clear(world);
 
             switch (direction)
@@ -84,8 +83,7 @@ namespace MazeGame
                     break;
             }
 
-            HasPlayerMoved = true;
-            timeSinceLastMove -= timeBetweenMoves;
+            HasMoved = true;
         }
 
         /// <summary>

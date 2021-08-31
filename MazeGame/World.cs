@@ -213,7 +213,7 @@ namespace MazeGame
                 neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y - 1));
             }
 
-            if (currentTile.Y + 1 < columns + yOffset && IsPositionWalkable(currentTile.X, currentTile.Y + 1))
+            if (currentTile.Y + 1 < rows + yOffset && IsPositionWalkable(currentTile.X, currentTile.Y + 1))
             {
                 neighborsList.Add(CreateNewTile(currentTile.X, currentTile.Y + 1));
             }
@@ -223,7 +223,7 @@ namespace MazeGame
                 neighborsList.Add(CreateNewTile(currentTile.X - 1, currentTile.Y));
             }
 
-            if (currentTile.X + 1 < rows + xOffset && IsPositionWalkable(currentTile.X + 1, currentTile.Y))
+            if (currentTile.X + 1 < columns + xOffset && IsPositionWalkable(currentTile.X + 1, currentTile.Y))
             {
                 neighborsList.Add(CreateNewTile(currentTile.X + 1, currentTile.Y));
             }

@@ -18,7 +18,7 @@ namespace MazeGame
         private bool hasDrawnBackground;
 
         private int totalGold;
-        
+
         private string levelFilesPath;
 
         private string gameVersion = "1.5";
@@ -32,6 +32,7 @@ namespace MazeGame
         public Player MyPlayer { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
         public int CurrentRoom { get; private set; }
+        public int TimesSpotted { get; set; }
         public int TimesCaught { get; private set; }
         public Stopwatch MyStopwatch { get; private set; }
 
@@ -150,7 +151,7 @@ namespace MazeGame
 
             while (true)
             {
-                MyPlayer.HasPlayerMoved = false;
+                MyPlayer.HasMoved = false;
 
                 if (playerHasBeenCaught)
                 {
@@ -184,7 +185,7 @@ namespace MazeGame
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
-                    && MyPlayer.HasPlayerMoved)
+                    && MyPlayer.HasMoved)
                 {
                     chiptunePlayer.PlaySFX(100, 100);
                     worlds[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
@@ -194,8 +195,7 @@ namespace MazeGame
                     if (worlds.Count > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        MyPlayer.X = worlds[CurrentRoom].PlayerStartX;
-                        MyPlayer.Y = worlds[CurrentRoom].PlayerStartY;
+                        MyPlayer.SetStartingPosition(worlds[CurrentRoom].PlayerStartX, worlds[CurrentRoom].PlayerStartY);
                         hasDrawnBackground = false;
 
                         saveSystem.SaveGame(this);
@@ -238,10 +238,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad8:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.up, deltaTimeMS);
-                            /*MyPlayer.Clear(worlds[currentLevel]);
-                            MyPlayer.Y--;
-                            MyPlayer.HasPlayerMoved = true;*/
+                            MyPlayer.Move(worlds[currentLevel], Directions.up);
                         }
                         return true;
                     case ConsoleKey.DownArrow:
@@ -249,10 +246,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad2:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.down, deltaTimeMS);
-                            /*MyPlayer.Clear(worlds[currentLevel]);
-                            MyPlayer.Y++;
-                            MyPlayer.HasPlayerMoved = true;*/
+                            MyPlayer.Move(worlds[currentLevel], Directions.down);
                         }
                         return true;
                     case ConsoleKey.LeftArrow:
@@ -260,10 +254,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad4:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.left, deltaTimeMS);
-                            /*MyPlayer.Clear(worlds[currentLevel]);
-                            MyPlayer.X--;
-                            MyPlayer.HasPlayerMoved = true;*/
+                            MyPlayer.Move(worlds[currentLevel], Directions.left);
                         }
                         return true;
                     case ConsoleKey.RightArrow:
@@ -271,10 +262,7 @@ namespace MazeGame
                     case ConsoleKey.NumPad6:
                         if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.right, deltaTimeMS);
-                            /*MyPlayer.Clear(worlds[currentLevel]);
-                            MyPlayer.X++;
-                            MyPlayer.HasPlayerMoved = true;*/
+                            MyPlayer.Move(worlds[currentLevel], Directions.right);
                         }
                         return true;
                     case ConsoleKey.Escape:
@@ -608,7 +596,7 @@ namespace MazeGame
                 "You escaped the Baron's dungeon!",
                 "  ",
                 $"You collected $ {MyPlayer.Booty} in treasures, out of a total of $ {totalGold}.",
-                $"You have been caught {TimesCaught} times.",
+                $"You have been spotted {TimesSpotted} times, and caught {TimesCaught} times.",
                 "  ",
                 "  ",
                 "Thank you for playing!"
@@ -648,8 +636,7 @@ namespace MazeGame
             playerHasBeenCaught = false;
             TimesCaught = 0;
             MyPlayer.Booty = 0;
-            MyPlayer.X = worlds[0].PlayerStartX;
-            MyPlayer.Y = worlds[0].PlayerStartY;
+            MyPlayer.SetStartingPosition(worlds[0].PlayerStartX, worlds[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
             foreach (World world in worlds)
@@ -1099,8 +1086,7 @@ namespace MazeGame
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
             MyPlayer.Booty = saveGame.Booty;
-            MyPlayer.X = worlds[saveGame.CurrentLevel].PlayerStartX;
-            MyPlayer.Y = worlds[saveGame.CurrentLevel].PlayerStartY;
+            MyPlayer.SetStartingPosition(worlds[saveGame.CurrentLevel].PlayerStartX, worlds[saveGame.CurrentLevel].PlayerStartY);
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

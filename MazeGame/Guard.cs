@@ -63,6 +63,7 @@ namespace MazeGame
             nextPatrolPoint = 0;
             hasBeenBribed = false;
             isAlerted = false;
+            isReturning = false;
             HasBeenBribedBefore = false;
             bribeTimer = 0;
             alertTimer = 0;
@@ -175,6 +176,11 @@ namespace MazeGame
         public void BribeGuard(bool IsGameEasy)
         {
             hasBeenBribed = true;
+            if (isAlerted)
+            {
+                isAlerted = false;
+                isReturning = true;
+            }
             easyGame = IsGameEasy;
         }
 
@@ -188,6 +194,7 @@ namespace MazeGame
             hasBeenBribed = false;
             alertTimer = 0;
             isAlerted = false;
+            isReturning = false;
             X = originPoint.X;
             Y = originPoint.Y;
             timeSinceLastMove = 0;
@@ -260,6 +267,11 @@ namespace MazeGame
 
         private bool SpotPlayer(Game game, World world)
         {
+            if (hasBeenBribed)
+            {
+                return false;
+            }
+
             switch (direction)
             {
                 case Directions.up:

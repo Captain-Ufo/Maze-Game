@@ -19,13 +19,13 @@ namespace MazeGame
         /// <summary>
         /// Collects the key piece, by removing it from the map and, if necessary, spawning the next key piece
         /// </summary>
-        /// <param name="world">The current level</param>
+        /// <param name="floor">The current level</param>
         /// <param name="x">The X coordinate of the piece the player is collecting</param>
         /// <param name="y">The X coordinate of the piece the player is collecting</param>
         /// <returns>returns whether the level is still locked or not (so true if there are other pieces to collect, false if there are none)</returns>
-        public bool CollectKeyPiece(World world, int x, int y)
+        public bool CollectKeyPiece(Floor floor, int x, int y)
         {
-            world.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString(), true, false);
+            floor.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString(), true, false);
 
             RevealedKeyPieces--;
 
@@ -34,7 +34,7 @@ namespace MazeGame
                 if (HiddenkeyPieces.Count > 0)
                 {
                     Coordinates nextPiece = HiddenkeyPieces[0];
-                    world.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false, false);
+                    floor.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false, false);
                     RevealedKeyPieces++;
                     HiddenkeyPieces.RemoveAt(0);
                     return true;

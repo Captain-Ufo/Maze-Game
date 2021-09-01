@@ -22,10 +22,10 @@ namespace MazeGame
         /// <summary>
         /// Toggles the lever between on and off, and updates the gates
         /// </summary>
-        /// <param name="world">The world the lever and the connected gates are in</param>
+        /// <param name="floor">The world the lever and the connected gates are in</param>
         /// <param name="xOffset">Horizontal offset to account for the centering of the World map on the screen</param>
         /// <param name="yOffset">Vertical offset to account for the centering of the World map on the screen</param>
-        public void Toggle(World world, int xOffset, int yOffset)
+        public void Toggle(Floor floor, int xOffset, int yOffset)
         {
             IsOn = !IsOn;
 
@@ -38,17 +38,17 @@ namespace MazeGame
 
             foreach (Coordinates coordinates in connectedGates)
             {
-                if (world.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
+                if (floor.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
                 {
-                    world.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
+                    floor.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
                 }
                 else
                 {
-                    world.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.GateChar.ToString(), false, false);
+                    floor.ChangeElementAt(coordinates.X, coordinates.Y, SymbolsConfig.GateChar.ToString(), false, false);
                 }
             }
 
-            world.ChangeElementAt(x + xOffset, y + yOffset, leverSymbol);
+            floor.ChangeElementAt(x + xOffset, y + yOffset, leverSymbol);
         }
 
         /// <summary>

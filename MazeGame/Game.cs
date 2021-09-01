@@ -12,7 +12,7 @@ namespace MazeGame
     /// </summary>
     class Game
     {
-        private List<World> worlds;
+        private List<Floor> floors;
 
         private bool playerHasBeenCaught;
         private bool hasDrawnBackground;
@@ -77,7 +77,7 @@ namespace MazeGame
 
         private void InstantiateEntities(int startBooty, int startLevel)
         {
-            worlds = new List<World>();
+            floors = new List<Floor>();
 
             string[] levelFiles = File.ReadAllLines(levelFilesPath + "\\FloorsConfig.txt");
 
@@ -87,13 +87,13 @@ namespace MazeGame
 
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath);
 
-                worlds.Add(new World(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock,
+                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
             }
 
-            MyPlayer = new Player(worlds[startLevel].PlayerStartX, worlds[startLevel].PlayerStartY);
+            MyPlayer = new Player(floors[startLevel].PlayerStartX, floors[startLevel].PlayerStartY);
             MyPlayer.Booty = startBooty;
         }
 
@@ -166,36 +166,36 @@ namespace MazeGame
                     return;
                 }
 
-                worlds[CurrentRoom].UpdateGuards(deltaTimeMS, this);
+                floors[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
                 hasDrawnBackground = DrawFrame(CurrentRoom, hasDrawnBackground);
 
-                string elementAtPlayerPosition = worlds[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
+                string elementAtPlayerPosition = floors[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
                 {
                     chiptunePlayer.PlaySFX(1000, 100);
-                    worlds[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
+                    floors[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
                     MyPlayer.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
                     chiptunePlayer.PlaySFX(800, 100);
-                    worlds[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
+                    floors[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
                     && MyPlayer.HasMoved)
                 {
                     chiptunePlayer.PlaySFX(100, 100);
-                    worlds[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
+                    floors[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
                 }
-                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !worlds[CurrentRoom].IsLocked)
+                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !floors[CurrentRoom].IsLocked)
                 {
-                    if (worlds.Count > CurrentRoom + 1)
+                    if (floors.Count > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        MyPlayer.SetStartingPosition(worlds[CurrentRoom].PlayerStartX, worlds[CurrentRoom].PlayerStartY);
+                        MyPlayer.SetStartingPosition(floors[CurrentRoom].PlayerStartX, floors[CurrentRoom].PlayerStartY);
                         hasDrawnBackground = false;
 
                         saveSystem.SaveGame(this);
@@ -236,33 +236,33 @@ namespace MazeGame
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.W:
                     case ConsoleKey.NumPad8:
-                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
+                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.up);
+                            MyPlayer.Move(floors[currentLevel], Directions.up);
                         }
                         return true;
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.S:
                     case ConsoleKey.NumPad2:
-                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
+                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.down);
+                            MyPlayer.Move(floors[currentLevel], Directions.down);
                         }
                         return true;
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.A:
                     case ConsoleKey.NumPad4:
-                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
+                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.left);
+                            MyPlayer.Move(floors[currentLevel], Directions.left);
                         }
                         return true;
                     case ConsoleKey.RightArrow:
                     case ConsoleKey.D:
                     case ConsoleKey.NumPad6:
-                        if (worlds[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
+                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
                         {
-                            MyPlayer.Move(worlds[currentLevel], Directions.right);
+                            MyPlayer.Move(floors[currentLevel], Directions.right);
                         }
                         return true;
                     case ConsoleKey.Escape:
@@ -275,7 +275,7 @@ namespace MazeGame
                         {
                             Clear();
                             MyStopwatch.Start();
-                            worlds[currentLevel].Draw();
+                            floors[currentLevel].Draw();
                             return true;
                         }
                     default:
@@ -291,10 +291,10 @@ namespace MazeGame
         {
             if (!hasDrawnBackground)
             {
-                worlds[currentRoom].Draw();
+                floors[currentRoom].Draw();
                 hasDrawnBackground = true;
             }
-            worlds[currentRoom].DrawGuards();
+            floors[currentRoom].DrawGuards();
             MyPlayer.Draw();
             DrawUI(currentRoom);
             CursorVisible = false;
@@ -636,10 +636,10 @@ namespace MazeGame
             playerHasBeenCaught = false;
             TimesCaught = 0;
             MyPlayer.Booty = 0;
-            MyPlayer.SetStartingPosition(worlds[0].PlayerStartX, worlds[0].PlayerStartY);
+            MyPlayer.SetStartingPosition(floors[0].PlayerStartX, floors[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
-            foreach (World world in worlds)
+            foreach (Floor world in floors)
             {
                 world.ResetGuards();
             }
@@ -1086,7 +1086,7 @@ namespace MazeGame
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
             MyPlayer.Booty = saveGame.Booty;
-            MyPlayer.SetStartingPosition(worlds[saveGame.CurrentLevel].PlayerStartX, worlds[saveGame.CurrentLevel].PlayerStartY);
+            MyPlayer.SetStartingPosition(floors[saveGame.CurrentLevel].PlayerStartX, floors[saveGame.CurrentLevel].PlayerStartY);
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

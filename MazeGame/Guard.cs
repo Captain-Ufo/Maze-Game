@@ -119,10 +119,10 @@ namespace MazeGame
         /// <summary>
         /// Updates the guard's AI behavior
         /// </summary>
-        /// <param name="world">The level the guard is in</param>
+        /// <param name="floor">The level the guard is in</param>
         /// <param name="game">The current game</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void Update(World world, Game game, int deltaTimeMS)
+        public void Update(Floor floor, Game game, int deltaTimeMS)
         {
             timeSinceLastMove += deltaTimeMS;
 
@@ -133,7 +133,7 @@ namespace MazeGame
 
             UpdateBribe();
 
-            if (SpotPlayer(game, world))
+            if (SpotPlayer(game, floor))
             {
                 if (!isAlerted)
                 {
@@ -145,23 +145,23 @@ namespace MazeGame
                 isAlerted = true;
                 isReturning = false;
                 timeBetweenMoves = runningSpeed;
-                MoveTowards(lastKnownPlayerPosition, world);
+                MoveTowards(lastKnownPlayerPosition, floor);
             }
             else if (isAlerted)
             {
                 guardTileColor = ConsoleColor.Red;
-                AlertedBehavior(world);
+                AlertedBehavior(floor);
             }
             else if (isReturning)
             {
                 guardTileColor = ConsoleColor.DarkRed;
-                ReturnToPatrol(world);
+                ReturnToPatrol(floor);
             }
             else
             {
                 guardTileColor = ConsoleColor.DarkRed;
                 timeBetweenMoves = walkingSpeed;
-                Move(world, Patrol());
+                Move(floor, Patrol());
             }
 
             CatchPlayer(game);
@@ -220,10 +220,10 @@ namespace MazeGame
         /// <summary>
         /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
         /// </summary>
-        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
-        public void Clear(World world)
+        /// <param name="floor">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(Floor floor)
         {
-            string symbol = world.GetElementAt(X, Y);
+            string symbol = floor.GetElementAt(X, Y);
 
             SetCursorPosition(X, Y);
 
@@ -234,7 +234,7 @@ namespace MazeGame
 
             if (symbol == SymbolsConfig.ExitChar.ToString())
             {
-                if (world.IsLocked)
+                if (floor.IsLocked)
                 {
                     ForegroundColor = ConsoleColor.Red;
                 }
@@ -265,7 +265,7 @@ namespace MazeGame
             }
         }
 
-        private bool SpotPlayer(Game game, World world)
+        private bool SpotPlayer(Game game, Floor floor)
         {
             if (hasBeenBribed)
             {
@@ -282,7 +282,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsTileTransparent(tile.X, tile.Y))
+                            if (!floor.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false ;
                             }
@@ -302,7 +302,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsTileTransparent(tile.X, tile.Y))
+                            if (!floor.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -322,7 +322,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsTileTransparent(tile.X, tile.Y))
+                            if (!floor.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -342,7 +342,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsTileTransparent(tile.X, tile.Y))
+                            if (!floor.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -357,11 +357,11 @@ namespace MazeGame
             return false;
         }
 
-        private void AlertedBehavior(World world)
+        private void AlertedBehavior(Floor floor)
         {
             if (X != lastKnownPlayerPosition.X && Y != lastKnownPlayerPosition.Y)
             {
-                MoveTowards(lastKnownPlayerPosition, world);
+                MoveTowards(lastKnownPlayerPosition, floor);
                 return;
             }
 
@@ -391,18 +391,18 @@ namespace MazeGame
             }
         }
 
-        private void ReturnToPatrol(World world)
+        private void ReturnToPatrol(Floor floor)
         {
             if (X != patrolPath[nextPatrolPoint].X && Y != patrolPath[nextPatrolPoint].Y)
             {
-                MoveTowards(new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y), world);
+                MoveTowards(new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y), floor);
                 return;
             }
 
             isReturning = false;
         }
 
-        private Tile Pathfind(World world, Tile pathStart, Tile destination)
+        private Tile Pathfind(Floor floor, Tile pathStart, Tile destination)
         {
             pathStart.SetDistance(destination.X, destination.Y);
             List<Tile> activeTiles = new List<Tile>();
@@ -421,7 +421,7 @@ namespace MazeGame
                 visitedTiles.Add(tileToCheck);
                 activeTiles.Remove(tileToCheck);
 
-                List<Tile> walkableNeighbors = world.GetWalkableNeighborsOfTile(tileToCheck, destination);
+                List<Tile> walkableNeighbors = floor.GetWalkableNeighborsOfTile(tileToCheck, destination);
 
                 foreach (Tile neighbor in walkableNeighbors)
                 {
@@ -451,17 +451,17 @@ namespace MazeGame
             return null;
         }
 
-        private void MoveTowards(Coordinates destination, World world)
+        private void MoveTowards(Coordinates destination, Floor floor)
         {
             Tile guardTile = new Tile(X, Y);
             Tile destinationTile = new Tile(destination.X, destination.Y);
-            Tile tileToMoveTo = Pathfind(world, guardTile, destinationTile);
+            Tile tileToMoveTo = Pathfind(floor, guardTile, destinationTile);
 
             if (tileToMoveTo != null)
             {
                 Coordinates movementCoordinates = new Coordinates(tileToMoveTo.X, tileToMoveTo.Y);
 
-                Move(world, movementCoordinates);
+                Move(floor, movementCoordinates);
             }
         }
 
@@ -552,15 +552,15 @@ namespace MazeGame
             return new Coordinates(X, Y);
         }
 
-        private void Move(World world, Coordinates tileToMoveTo)
+        private void Move(Floor floor, Coordinates tileToMoveTo)
         {
-            this.Clear(world);
+            this.Clear(floor);
 
             if (X != tileToMoveTo.X)
             {
                 if (X - tileToMoveTo.X > 0)
                 {
-                    if (world.IsPositionWalkable(X - 1, Y))
+                    if (floor.IsPositionWalkable(X - 1, Y))
                     {
                         X--;
                         direction = Directions.left;
@@ -568,7 +568,7 @@ namespace MazeGame
                 }
                 else
                 {
-                    if (world.IsPositionWalkable(X + 1, Y))
+                    if (floor.IsPositionWalkable(X + 1, Y))
                     {
                         X++;
                         direction = Directions.right;
@@ -579,7 +579,7 @@ namespace MazeGame
             {
                 if (Y - tileToMoveTo.Y > 0)
                 {
-                    if (world.IsPositionWalkable(X, Y - 1))
+                    if (floor.IsPositionWalkable(X, Y - 1))
                     {
                         Y--;
                         direction = Directions.up;
@@ -587,7 +587,7 @@ namespace MazeGame
                 }
                 else
                 {
-                    if (world.IsPositionWalkable(X, Y + 1))
+                    if (floor.IsPositionWalkable(X, Y + 1))
                     {
                         Y++;
                         direction = Directions.down;
@@ -597,9 +597,9 @@ namespace MazeGame
 
             guardMarker = guardMarkersTable[(int)direction];
 
-            if (world.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
+            if (floor.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
             {
-                world.ToggleLever(X, Y);
+                floor.ToggleLever(X, Y);
             }
         }
     }

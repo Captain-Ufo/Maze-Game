@@ -8,7 +8,7 @@ namespace MazeGame
     /// <summary>
     /// Holds informations about the current level
     /// </summary>
-    class World
+    class Floor
     {
         private string[,] grid;
 
@@ -50,7 +50,7 @@ namespace MazeGame
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public World(string[,] grid, int startX, int startY, LevelLock levelLock, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
+        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
 

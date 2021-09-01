@@ -60,12 +60,12 @@ namespace MazeGame
         /// <summary>
         /// Updates the player's coordinates, moving them by one tile at a time
         /// </summary>
-        /// <param name="world">The level the player is moving in</param>
+        /// <param name="floor">The level the player is moving in</param>
         /// <param name="direction">The direction of the movement</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void Move(World world, Directions direction)
+        public void Move(Floor floor, Directions direction)
         {
-            Clear(world);
+            Clear(floor);
 
             switch (direction)
             {
@@ -101,16 +101,16 @@ namespace MazeGame
         /// <summary>
         /// Replaces the player's symbol with whatever map symbol should be present in that position
         /// </summary>
-        /// <param name="world">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
-        public void Clear(World world)
+        /// <param name="floor">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(Floor floor)
         {
-            string symbol = world.GetElementAt(X, Y);
+            string symbol = floor.GetElementAt(X, Y);
 
             SetCursorPosition(X, Y);
 
             if (symbol == SymbolsConfig.ExitChar.ToString())
             {
-                if (world.IsLocked)
+                if (floor.IsLocked)
                 {
                     ForegroundColor = ConsoleColor.Red;
                 }

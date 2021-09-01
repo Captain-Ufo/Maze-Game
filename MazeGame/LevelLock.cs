@@ -25,7 +25,7 @@ namespace MazeGame
         /// <returns>returns whether the level is still locked or not (so true if there are other pieces to collect, false if there are none)</returns>
         public bool CollectKeyPiece(World world, int x, int y)
         {
-            world.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString());
+            world.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString(), true, false);
 
             RevealedKeyPieces--;
 
@@ -34,7 +34,7 @@ namespace MazeGame
                 if (HiddenkeyPieces.Count > 0)
                 {
                     Coordinates nextPiece = HiddenkeyPieces[0];
-                    world.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false);
+                    world.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false, false);
                     RevealedKeyPieces++;
                     HiddenkeyPieces.RemoveAt(0);
                     return true;

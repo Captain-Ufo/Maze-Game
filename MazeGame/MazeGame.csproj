@@ -6,19 +6,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Levels\Floor2.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="Levels\Floor2.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Floor2.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="FloorsConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Levels\Floor1b.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Levels\Floor1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Floor1a.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Levels\Floor2.txt">
+    <None Update="Levels\Floor2a.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\Floor3.txt">

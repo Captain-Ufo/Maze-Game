@@ -144,7 +144,26 @@ namespace MazeGame
             }
 
             return grid[y, x] == SymbolsConfig.EmptySpace.ToString() ||
-                   grid[y, x] == "░" ||
+                   grid[y, x] == "-" ||
+                   grid[y, x] == "|" ||
+                   grid[y, x] == SymbolsConfig.ExitChar.ToString() ||
+                   grid[y, x] == SymbolsConfig.KeyChar.ToString() ||
+                   grid[y, x] == SymbolsConfig.TreasureChar.ToString() ||
+                   grid[y, x] == SymbolsConfig.LeverOffChar.ToString() ||
+                   grid[y, x] == SymbolsConfig.LeverOnChar.ToString();
+        }
+
+        public bool IsTileTransparent(int x, int y)
+        {
+            x -= xOffset;
+            y -= yOffset;
+
+            if (x < 0 || y < 0 || x >= columns || y >= rows)
+            {
+                return false;
+            }
+
+            return grid[y, x] == SymbolsConfig.EmptySpace.ToString() ||
                    grid[y, x] == SymbolsConfig.ExitChar.ToString() ||
                    grid[y, x] == SymbolsConfig.KeyChar.ToString() ||
                    grid[y, x] == SymbolsConfig.TreasureChar.ToString() ||

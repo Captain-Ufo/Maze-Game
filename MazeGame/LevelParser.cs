@@ -158,20 +158,14 @@ namespace MazeGame
                             levLock.AddRevealedKeyPiece();
                             break;
                         case '1':
-                        case '2':
-                        case '3':
-                            currentChar = SymbolsConfig.KeyChar;
-                            levLock.AddRevealedKeyPiece();
-                            break;
-                        case '¹':
                             currentChar = SymbolsConfig.EmptySpace;
                             levLock.AddHiddenKeyPiece(x, y, 0);
                             break;
-                        case '²':
+                        case '2':
                             currentChar = SymbolsConfig.EmptySpace;
                             levLock.AddHiddenKeyPiece(x, y, 1);
                             break;
-                        case '³':
+                        case '3':
                             currentChar = SymbolsConfig.EmptySpace;
                             levLock.AddHiddenKeyPiece(x, y, 2);
                             break;

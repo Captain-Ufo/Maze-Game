@@ -254,7 +254,7 @@ namespace MazeGame
                 bribeTimer++;
             }
 
-            if (bribeTimer > 10)
+            if (bribeTimer > 20)
             {
                 hasBeenBribed = false;
                 if (!easyGame)
@@ -282,7 +282,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            if (!world.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false ;
                             }
@@ -302,7 +302,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            if (!world.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -322,7 +322,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            if (!world.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -342,7 +342,7 @@ namespace MazeGame
 
                         foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!world.IsPositionWalkable(tile.X, tile.Y))
+                            if (!world.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }

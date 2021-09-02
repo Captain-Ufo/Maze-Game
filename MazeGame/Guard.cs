@@ -149,7 +149,7 @@ namespace MazeGame
             }
             else if (isAlerted)
             {
-                guardTileColor = ConsoleColor.Red;
+                guardTileColor = ConsoleColor.Magenta;
                 AlertedBehavior(floor);
             }
             else if (isReturning)
@@ -359,10 +359,12 @@ namespace MazeGame
 
         private void AlertedBehavior(Floor floor)
         {
-            if (X != lastKnownPlayerPosition.X && Y != lastKnownPlayerPosition.Y)
+            if (X != lastKnownPlayerPosition.X || Y != lastKnownPlayerPosition.Y)
             {
-                MoveTowards(lastKnownPlayerPosition, floor);
-                return;
+                if (MoveTowards(lastKnownPlayerPosition, floor))
+                {
+                    return;
+                }
             }
 
             alertTimer++;
@@ -451,18 +453,20 @@ namespace MazeGame
             return null;
         }
 
-        private void MoveTowards(Coordinates destination, Floor floor)
+        private bool MoveTowards(Coordinates destination, Floor floor)
         {
             Tile guardTile = new Tile(X, Y);
             Tile destinationTile = new Tile(destination.X, destination.Y);
-            Tile tileToMoveTo = Pathfind(floor, guardTile, destinationTile);
+            Tile tileToMoveTo = Pathfind(floor, destinationTile, guardTile);
 
             if (tileToMoveTo != null)
             {
                 Coordinates movementCoordinates = new Coordinates(tileToMoveTo.X, tileToMoveTo.Y);
 
                 Move(floor, movementCoordinates);
+                return true;
             }
+            return false;
         }
 
         private void CatchPlayer(Game game)

@@ -168,6 +168,7 @@ namespace MazeGame
 
                 floors[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
+                
                 hasDrawnBackground = DrawFrame(CurrentRoom, hasDrawnBackground);
 
                 string elementAtPlayerPosition = floors[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);

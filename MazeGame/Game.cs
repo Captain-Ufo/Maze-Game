@@ -85,7 +85,7 @@ namespace MazeGame
             {
                 string levelFilePath = levelFilesPath + "\\" + levelFile + ".txt";
 
-                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath);
+                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath, DifficultyLevel);
 
                 floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));

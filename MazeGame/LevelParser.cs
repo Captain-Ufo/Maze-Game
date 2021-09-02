@@ -15,7 +15,7 @@ namespace MazeGame
         /// </summary>
         /// <param name="filePath">The path of the file to parse the level from</param>
         /// <returns></returns>
-        public static LevelInfo ParseFileToLevelInfo(string filePath)
+        public static LevelInfo ParseFileToLevelInfo(string filePath, Difficulty difficulty)
         {
             //first, creating a whole bunch of variables that will hold the informations for the creation of the level
 
@@ -170,8 +170,30 @@ namespace MazeGame
                             levLock.AddHiddenKeyPiece(x, y, 2);
                             break;
                         //treasures
-                        case '$':
+                        case SymbolsConfig.TreasureChar:
                             totalGold += 100;
+                            break;
+                        case '£':
+                            if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy || difficulty == Difficulty.Normal || difficulty == Difficulty.Hard)
+                            {
+                                totalGold += 100;
+                                currentChar = SymbolsConfig.TreasureChar;
+                            }
+                            else
+                            {
+                                currentChar = SymbolsConfig.EmptySpace;
+                            }
+                            break;
+                        case '€':
+                            if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy)
+                            {
+                                totalGold += 100;
+                                currentChar = SymbolsConfig.TreasureChar;
+                            }
+                            else
+                            {
+                                currentChar = SymbolsConfig.EmptySpace;
+                            }
                             break;
                         //levers
                         case 'A':

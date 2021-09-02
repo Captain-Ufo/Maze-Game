@@ -395,7 +395,7 @@ namespace MazeGame
 
         private void ReturnToPatrol(Floor floor)
         {
-            if (X != patrolPath[nextPatrolPoint].X && Y != patrolPath[nextPatrolPoint].Y)
+            if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
             {
                 MoveTowards(new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y), floor);
                 return;
@@ -471,13 +471,15 @@ namespace MazeGame
 
         private void CatchPlayer(Game game)
         {
+            if (hasBeenBribed)
+            {
+                return;
+            }
+
             if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
                 && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
             {
-                if (!hasBeenBribed)
-                {
-                    game.CapturePlayer(this);
-                }
+                game.CapturePlayer(this);
             }
         }
 

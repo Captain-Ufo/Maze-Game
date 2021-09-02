@@ -87,7 +87,7 @@ namespace MazeGame
 
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath, DifficultyLevel);
 
-                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock,
+                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Treasures,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
@@ -640,9 +640,9 @@ namespace MazeGame
             MyPlayer.SetStartingPosition(floors[0].PlayerStartX, floors[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
-            foreach (Floor world in floors)
+            foreach (Floor floor in floors)
             {
-                world.ResetGuards();
+                floor.Reset();
             }
 
             if (deleteSave)
@@ -1088,6 +1088,7 @@ namespace MazeGame
             DifficultyLevel = saveGame.DifficultyLevel;
             MyPlayer.Booty = saveGame.Booty;
             MyPlayer.SetStartingPosition(floors[saveGame.CurrentLevel].PlayerStartX, floors[saveGame.CurrentLevel].PlayerStartY);
+            floors[saveGame.CurrentLevel].Reset();
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

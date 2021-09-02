@@ -22,6 +22,8 @@ namespace MazeGame
 
         private Dictionary<Coordinates, Lever> leversDictionary;
 
+        private Coordinates[] treasures;
+
         private Guard[] levelGuards;
 
         private Stopwatch stopwatch;
@@ -50,7 +52,8 @@ namespace MazeGame
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
+        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock,
+                     Coordinates[] treasures, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
 
@@ -61,9 +64,11 @@ namespace MazeGame
             yOffset = ((WindowHeight - 5) / 2) - (rows / 2);
             //yOffset = 0;
 
-            leversDictionary = new Dictionary<Coordinates, Lever>();
-
             this.stopwatch = stopwatch;
+
+            this.treasures = treasures;
+
+            leversDictionary = new Dictionary<Coordinates, Lever>();
 
             foreach(KeyValuePair<Coordinates, Lever> leverInfo in levers)
             {
@@ -218,6 +223,17 @@ namespace MazeGame
         }
 
         /// <summary>
+        /// Resets the floor elements (levers and gates, treasures, keys, guards) to their original state
+        /// </summary>
+        public void Reset()
+        {
+            ResetLevers();
+            ResetGuards();
+            ResetKeys();
+            ResetTreasures();
+        }
+
+        /// <summary>
         /// Pathfinding helper function. Returns the immediately adjecent walkable tiles (north, west, south and east) to the one provided
         /// </summary>
         /// <param name="currentTile">The Tile to find neighbors of</param>
@@ -265,7 +281,7 @@ namespace MazeGame
         /// </summary>
         /// <param name="x">The X coordinate on the grid of the level to toggle</param>
         /// <param name="y">The Y coordinate on the grid of the level to toggle</param>
-        public void ToggleLever(int x, int y)
+        public void ToggleLever(int x, int y, bool redraw = true)
         {
             stopwatch.Stop();
 
@@ -276,10 +292,20 @@ namespace MazeGame
                 Lever lever = leversDictionary[leverCoord];
                 lever.Toggle(this, xOffset, yOffset);
             }
+
             stopwatch.Start();
-            Draw();
+
+            if (redraw)
+            {
+                Draw();
+            }
         }
 
+        /// <summary>
+        /// Collects the key piece and cheks the locked status
+        /// </summary>
+        /// <param name="x">The X coordinate of the collected key</param>
+        /// <param name="y">The Y coordinate of the collected key</param>
         public void CollectKeyPiece(int x, int y)
         {
             IsLocked = levelLock.CollectKeyPiece(this, x, y);
@@ -303,17 +329,6 @@ namespace MazeGame
         }
 
         /// <summary>
-        /// Resets all guards to their state at the beginning of the level
-        /// </summary>
-        public void ResetGuards()
-        {
-            foreach (Guard guard in levelGuards)
-            {
-                guard.Reset();
-            }
-        }
-
-        /// <summary>
         /// Draws all guards
         /// </summary>
         public void DrawGuards()
@@ -324,6 +339,38 @@ namespace MazeGame
                 {
                     guard.Draw();
                 }
+            }
+        }
+
+        private void ResetTreasures()
+        {
+            foreach (Coordinates treasure in treasures)
+            {
+                ChangeElementAt(treasure.X, treasure.Y, SymbolsConfig.TreasureChar.ToString(), false, false);
+            }
+        }
+
+        private void ResetLevers()
+        {
+            foreach (Lever lever in leversDictionary.Values)
+            {
+                if (lever.IsOn)
+                {
+                    lever.Toggle(this, xOffset, yOffset);
+                }
+            }
+        }
+
+        private void ResetKeys()
+        {
+            levelLock.ResetKeys(this);
+        }
+
+        private void ResetGuards()
+        {
+            foreach (Guard guard in levelGuards)
+            {
+                guard.Reset();
             }
         }
     }

@@ -7,13 +7,19 @@ namespace MazeGame
     /// </summary>
     class LevelLock
     {
-        private int RevealedKeyPieces = 0;
+        private int revealedKeyPieces = 0;
 
-        private List<Coordinates> HiddenkeyPieces;
+        private List<Coordinates> hiddenKeyPieces;
+
+        private List<Coordinates> revealedKeyPiecesBackup;
+        private List<Coordinates> hiddenKeyPiecesBackUp;
 
         public LevelLock()
         {
-            HiddenkeyPieces = new List<Coordinates>();
+            hiddenKeyPieces = new List<Coordinates>();
+
+            revealedKeyPiecesBackup = new List<Coordinates>();
+            hiddenKeyPiecesBackUp = new List<Coordinates>();
         }
 
         /// <summary>
@@ -27,16 +33,16 @@ namespace MazeGame
         {
             floor.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString(), true, false);
 
-            RevealedKeyPieces--;
+            revealedKeyPieces--;
 
-            if (RevealedKeyPieces <= 0)
+            if (revealedKeyPieces <= 0)
             {
-                if (HiddenkeyPieces.Count > 0)
+                if (hiddenKeyPieces.Count > 0)
                 {
-                    Coordinates nextPiece = HiddenkeyPieces[0];
+                    Coordinates nextPiece = hiddenKeyPieces[0];
                     floor.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false, false);
-                    RevealedKeyPieces++;
-                    HiddenkeyPieces.RemoveAt(0);
+                    revealedKeyPieces++;
+                    hiddenKeyPieces.RemoveAt(0);
                     return true;
                 }
                 return false;
@@ -47,15 +53,17 @@ namespace MazeGame
 
         public bool IsLocked()
         {
-            return RevealedKeyPieces > 0;
+            return revealedKeyPieces > 0;
         }
 
         /// <summary>
         /// Increases the revelaed key pieces counter
         /// </summary>
-        public void AddRevealedKeyPiece()
+        public void AddRevealedKeyPiece(int x, int y)
         {
-            RevealedKeyPieces++;
+            revealedKeyPieces++;
+
+            revealedKeyPiecesBackup.Add(new Coordinates(x, y));
         }
 
         /// <summary>
@@ -67,8 +75,35 @@ namespace MazeGame
         /// (use 1 for first position, and so on. The method automatically translates it to a correct list index)</param>
         public void AddHiddenKeyPiece(int x, int y, int index)
         {
-            Coordinates pieceCoordinates = new Coordinates(x, y);
-            HiddenkeyPieces.Insert(index, pieceCoordinates);
+            while (hiddenKeyPieces.Count < index + 1)
+            {
+                hiddenKeyPieces.Add(new Coordinates(0, 0));
+            }
+
+            hiddenKeyPieces[index] = new Coordinates(x, y);
+
+            foreach (Coordinates c in hiddenKeyPieces)
+            {
+                hiddenKeyPiecesBackUp.Add(c);
+            }
+        }
+
+        public void ResetKeys(Floor floor)
+        {
+            revealedKeyPieces = revealedKeyPiecesBackup.Count;
+
+            foreach (Coordinates key in revealedKeyPiecesBackup)
+            {
+                floor.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false, false);
+            }
+
+            hiddenKeyPieces = new List<Coordinates>();
+
+            foreach (Coordinates key in hiddenKeyPiecesBackUp)
+            {
+                hiddenKeyPieces.Add(key);
+                floor.ChangeElementAt(key.X, key.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
+            }
         }
     }
 }

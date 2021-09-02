@@ -32,6 +32,8 @@ namespace MazeGame
             int playerStartY = 0;
             int totalGold = 0;
 
+            List<Coordinates> treasures = new List<Coordinates>();
+
             LevelLock levLock = new LevelLock();
 
             Dictionary<Coordinates, Lever> leversDictionary = new Dictionary<Coordinates, Lever>();
@@ -155,7 +157,7 @@ namespace MazeGame
                             break;
                         //keys
                         case SymbolsConfig.KeyChar:
-                            levLock.AddRevealedKeyPiece();
+                            levLock.AddRevealedKeyPiece(x, y);
                             break;
                         case '1':
                             currentChar = SymbolsConfig.EmptySpace;
@@ -172,11 +174,13 @@ namespace MazeGame
                         //treasures
                         case SymbolsConfig.TreasureChar:
                             totalGold += 100;
+                            treasures.Add(new Coordinates(x, y));
                             break;
                         case '£':
                             if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy || difficulty == Difficulty.Normal || difficulty == Difficulty.Hard)
                             {
                                 totalGold += 100;
+                                treasures.Add(new Coordinates(x, y));
                                 currentChar = SymbolsConfig.TreasureChar;
                             }
                             else
@@ -188,6 +192,7 @@ namespace MazeGame
                             if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy)
                             {
                                 totalGold += 100;
+                                treasures.Add(new Coordinates(x, y));
                                 currentChar = SymbolsConfig.TreasureChar;
                             }
                             else
@@ -282,7 +287,7 @@ namespace MazeGame
             guard9.AssignPatrol(ArrangePatrolPoints(guard9, guard9Patrol).ToArray());
             guard10.AssignPatrol(ArrangePatrolPoints(guard10, guard10Patrol).ToArray());
 
-            LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, levLock, leversDictionary, levelGuards.ToArray());
+            LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, treasures.ToArray(), levLock, leversDictionary, levelGuards.ToArray());
 
             return levelInfo;
         }
@@ -375,16 +380,19 @@ namespace MazeGame
         public int PlayerStartX { get; }
         public int PlayerStartY { get; }
         public int TotalGold { get; }
+        public Coordinates[] Treasures { get; }
         public Dictionary<Coordinates, Lever> LeversDictionary { get; }
         public Guard[] Guards { get; }
 
-        public LevelInfo(string[,] grid, int playerStartX, int playerStartY, int totalGold, LevelLock levelLock, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
+        public LevelInfo( string[,] grid, int playerStartX, int playerStartY, int totalGold,
+            Coordinates[] treasures, LevelLock levelLock, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
         {
             Grid = grid;
             LevLock = levelLock;
             PlayerStartX = playerStartX;
             PlayerStartY = playerStartY;
             TotalGold = totalGold;
+            Treasures = treasures;
             LeversDictionary = leversDictionary;
             Guards = guards;
         }

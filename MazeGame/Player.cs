@@ -42,6 +42,7 @@ namespace MazeGame
         {
             X = startingX;
             Y = startingY;
+
             playerMarker = marker;
             playerColor = color;
         }
@@ -64,7 +65,7 @@ namespace MazeGame
         /// <param name="direction">The direction of the movement</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
         public void Move(Floor floor, Directions direction)
-        {
+        { 
             Clear(floor);
 
             switch (direction)
@@ -82,7 +83,6 @@ namespace MazeGame
                     X++;
                     break;
             }
-
             HasMoved = true;
         }
 

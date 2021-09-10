@@ -225,12 +225,10 @@ namespace MazeGame
 
         private bool HandlePlayerInputs(int currentLevel, int deltaTimeMS)
         {
-            ConsoleKey key;
-
             if (KeyAvailable)
             {
                 ConsoleKeyInfo keyInfo = ReadKey(true);
-                key = keyInfo.Key;
+                ConsoleKey key = keyInfo.Key;
 
                 switch (key)
                 {

@@ -363,6 +363,7 @@ namespace MazeGame
             {
                 if (MoveTowards(lastKnownPlayerPosition, floor))
                 {
+                    alertTimer = 0;
                     return;
                 }
             }

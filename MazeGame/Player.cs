@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 using static System.Console;
 
@@ -28,6 +26,9 @@ namespace MazeGame
         /// </summary>
         public bool HasMoved { get; set; }
 
+        private int timeBetweenMoves;
+        private int timeSinceLastMove;
+
         private string playerMarker;
         private ConsoleColor playerColor;
 
@@ -45,6 +46,9 @@ namespace MazeGame
 
             playerMarker = marker;
             playerColor = color;
+
+            timeBetweenMoves = 115;
+            timeSinceLastMove = 0;
         }
 
         /// <summary>
@@ -64,26 +68,67 @@ namespace MazeGame
         /// <param name="floor">The level the player is moving in</param>
         /// <param name="direction">The direction of the movement</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void Move(Floor floor, Directions direction)
+        public bool HandlePlayerControls(Floor floor, int deltaTimeMS)
         { 
             Clear(floor);
+            timeSinceLastMove += deltaTimeMS;
 
-            switch (direction)
+            if (KeyAvailable)
             {
-                case Directions.up:
-                    Y--;
-                    break;
-                case Directions.down:
-                    Y++;
-                    break;
-                case Directions.left:
-                    X--;
-                    break;
-                case Directions.right:
-                    X++;
-                    break;
+                ConsoleKeyInfo keyInfo = ReadKey(true);
+                ConsoleKey key = keyInfo.Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.W:
+                    case ConsoleKey.NumPad8:
+                        if (floor.IsPositionWalkable(X, Y - 1) && timeSinceLastMove >= timeBetweenMoves)
+                        {
+                            Y--;
+                            HasMoved = true;
+                            timeSinceLastMove -= timeBetweenMoves;
+                        }
+                        return true;
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.S:
+                    case ConsoleKey.NumPad2:
+                        if (floor.IsPositionWalkable(X, Y + 1) && timeSinceLastMove >= timeBetweenMoves)
+                        {
+                            Y++;
+                            HasMoved = true;
+                            timeSinceLastMove -= timeBetweenMoves;
+                        }
+                        return true;
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.A:
+                    case ConsoleKey.NumPad4:
+                        if (floor.IsPositionWalkable(X - 1, Y) && timeSinceLastMove >= timeBetweenMoves)
+                        {
+                            X--;
+                            HasMoved = true;
+                            timeSinceLastMove -= timeBetweenMoves;
+                        }
+                        return true;
+                    case ConsoleKey.RightArrow:
+                    case ConsoleKey.D:
+                    case ConsoleKey.NumPad6:
+                        if (floor.IsPositionWalkable(X + 1, Y) && timeSinceLastMove >= timeBetweenMoves)
+                        {
+                            X++;
+                            HasMoved = true;
+                            timeSinceLastMove -= timeBetweenMoves;
+                        }
+                        return true;
+                    case ConsoleKey.Escape:
+                        return false;
+                    default:
+                        return true;
+                } 
+
+
             }
-            HasMoved = true;
+            return true;
         }
 
         /// <summary>

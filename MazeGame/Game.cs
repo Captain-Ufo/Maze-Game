@@ -161,7 +161,7 @@ namespace MazeGame
                 int deltaTimeMS = (int)(MyStopwatch.ElapsedMilliseconds - timeAtPreviousFrame);
                 timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
 
-                if (!HandlePlayerInputs(CurrentRoom, deltaTimeMS))
+                if (!HandleInputs(CurrentRoom, deltaTimeMS))
                 {
                     return;
                 }
@@ -223,62 +223,21 @@ namespace MazeGame
 
 
 
-        private bool HandlePlayerInputs(int currentLevel, int deltaTimeMS)
+        private bool HandleInputs(int currentLevel, int deltaTimeMS)
         {
-            if (KeyAvailable)
-            {
-                ConsoleKeyInfo keyInfo = ReadKey(true);
-                ConsoleKey key = keyInfo.Key;
-
-                switch (key)
+            if (!MyPlayer.HandlePlayerControls(floors[currentLevel], deltaTimeMS))
+            { 
+                MyStopwatch.Stop();
+                if (QuitGame())
                 {
-                    case ConsoleKey.UpArrow:
-                    case ConsoleKey.W:
-                    case ConsoleKey.NumPad8:
-                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y - 1))
-                        {
-                            MyPlayer.Move(floors[currentLevel], Directions.up);
-                        }
-                        return true;
-                    case ConsoleKey.DownArrow:
-                    case ConsoleKey.S:
-                    case ConsoleKey.NumPad2:
-                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X, MyPlayer.Y + 1))
-                        {
-                            MyPlayer.Move(floors[currentLevel], Directions.down);
-                        }
-                        return true;
-                    case ConsoleKey.LeftArrow:
-                    case ConsoleKey.A:
-                    case ConsoleKey.NumPad4:
-                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X - 1, MyPlayer.Y))
-                        {
-                            MyPlayer.Move(floors[currentLevel], Directions.left);
-                        }
-                        return true;
-                    case ConsoleKey.RightArrow:
-                    case ConsoleKey.D:
-                    case ConsoleKey.NumPad6:
-                        if (floors[currentLevel].IsPositionWalkable(MyPlayer.X + 1, MyPlayer.Y))
-                        {
-                            MyPlayer.Move(floors[currentLevel], Directions.right);
-                        }
-                        return true;
-                    case ConsoleKey.Escape:
-                        MyStopwatch.Stop();
-                        if (QuitGame())
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            Clear();
-                            MyStopwatch.Start();
-                            floors[currentLevel].Draw();
-                            return true;
-                        }
-                    default:
-                        return true;
+                    return false;
+                }
+                else
+                {
+                    Clear();
+                    MyStopwatch.Start();
+                    floors[currentLevel].Draw();
+                    return true;
                 }
             }
             return true;

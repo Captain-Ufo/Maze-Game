@@ -32,6 +32,8 @@ namespace MazeGame
             int playerStartY = 0;
             int totalGold = 0;
 
+            Coordinates exit = new Coordinates(0, 0);
+
             List<Coordinates> treasures = new List<Coordinates>();
 
             LevelLock levLock = new LevelLock();
@@ -154,6 +156,10 @@ namespace MazeGame
                             playerStartX = x;
                             playerStartY = y;
                             currentChar = SymbolsConfig.EmptySpace;
+                            break;
+                        //Exit
+                        case SymbolsConfig.ExitChar:
+                            exit = new Coordinates(x, y);
                             break;
                         //keys
                         case SymbolsConfig.KeyChar:
@@ -287,7 +293,7 @@ namespace MazeGame
             guard9.AssignPatrol(ArrangePatrolPoints(guard9, guard9Patrol).ToArray());
             guard10.AssignPatrol(ArrangePatrolPoints(guard10, guard10Patrol).ToArray());
 
-            LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, treasures.ToArray(), levLock, leversDictionary, levelGuards.ToArray());
+            LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, exit, treasures.ToArray(), levLock, leversDictionary, levelGuards.ToArray());
 
             return levelInfo;
         }
@@ -380,11 +386,12 @@ namespace MazeGame
         public int PlayerStartX { get; }
         public int PlayerStartY { get; }
         public int TotalGold { get; }
+        public Coordinates Exit { get; }
         public Coordinates[] Treasures { get; }
         public Dictionary<Coordinates, Lever> LeversDictionary { get; }
         public Guard[] Guards { get; }
 
-        public LevelInfo( string[,] grid, int playerStartX, int playerStartY, int totalGold,
+        public LevelInfo(string[,] grid, int playerStartX, int playerStartY, int totalGold, Coordinates exit,
             Coordinates[] treasures, LevelLock levelLock, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
         {
             Grid = grid;
@@ -392,6 +399,7 @@ namespace MazeGame
             PlayerStartX = playerStartX;
             PlayerStartY = playerStartY;
             TotalGold = totalGold;
+            Exit = exit;
             Treasures = treasures;
             LeversDictionary = leversDictionary;
             Guards = guards;

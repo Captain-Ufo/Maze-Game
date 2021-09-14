@@ -87,7 +87,7 @@ namespace MazeGame
 
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath, DifficultyLevel);
 
-                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Treasures,
+                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, levelInfo.Treasures,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;

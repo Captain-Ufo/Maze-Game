@@ -18,6 +18,8 @@ namespace MazeGame
         private int xOffset;
         private int yOffset;
 
+        private Coordinates exit;
+
         private LevelLock levelLock;
 
         private Dictionary<Coordinates, Lever> leversDictionary;
@@ -52,7 +54,7 @@ namespace MazeGame
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock,
+        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock, Coordinates exit,
                      Coordinates[] treasures, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             this.grid = grid;
@@ -67,6 +69,8 @@ namespace MazeGame
             this.stopwatch = stopwatch;
 
             this.treasures = treasures;
+
+            this.exit = exit;
 
             leversDictionary = new Dictionary<Coordinates, Lever>();
 
@@ -131,6 +135,38 @@ namespace MazeGame
                 }
             }
         }
+
+
+        private void DrawTile(int x, int y, string element)
+        {
+            SetCursorPosition(x, y);
+            if (element == SymbolsConfig.ExitChar.ToString())
+            {
+                if (IsLocked)
+                {
+                    ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    ForegroundColor = ConsoleColor.Green;
+                }
+            }
+            else if (element == SymbolsConfig.KeyChar.ToString())
+            {
+                ForegroundColor = ConsoleColor.DarkYellow;
+            }
+            else if (element == SymbolsConfig.TreasureChar.ToString())
+            {
+                ForegroundColor = ConsoleColor.Yellow;
+            }
+            else
+            {
+                ForegroundColor = ConsoleColor.White;
+            }
+            Write(element);
+        }
+
+
 
         /// <summary>
         /// Checks if a certain position on the grid contains a symbol that can be traversed by the player or the guards
@@ -206,19 +242,28 @@ namespace MazeGame
         /// <param name="y">The X coordinate of the symbol to replace</param>
         /// <param name="newElement">The new symbol</param>
         /// <param name="withOffset">(optional) default true, set to false if the indicated coordinates are without the offset applied</param>
-        public void ChangeElementAt(int x, int y, string newElement, bool withOffset = true, bool redrawScene = true)
+        public void ChangeElementAt(int x, int y, string newElement, bool withOffset = true, bool redraw = true)
         {
+            int destX = x;
+            int destY = y;
+
             if (withOffset)
             {
-                x -= xOffset;
-                y -= yOffset;
+                destX -= xOffset;
+                destY -= yOffset;
             }
 
-            grid[y, x] = newElement;
+            grid[destY, destX] = newElement;
 
-            if (redrawScene)
+            if (redraw)
             {
-                Draw();
+                if (!withOffset)
+                {
+                    x += xOffset;
+                    y += yOffset;
+                }
+
+                DrawTile(x, y, newElement);
             }
         }
 
@@ -281,7 +326,7 @@ namespace MazeGame
         /// </summary>
         /// <param name="x">The X coordinate on the grid of the level to toggle</param>
         /// <param name="y">The Y coordinate on the grid of the level to toggle</param>
-        public void ToggleLever(int x, int y, bool redraw = true)
+        public void ToggleLever(int x, int y)
         {
             stopwatch.Stop();
 
@@ -294,11 +339,6 @@ namespace MazeGame
             }
 
             stopwatch.Start();
-
-            if (redraw)
-            {
-                Draw();
-            }
         }
 
         /// <summary>
@@ -309,7 +349,11 @@ namespace MazeGame
         public void CollectKeyPiece(int x, int y)
         {
             IsLocked = levelLock.CollectKeyPiece(this, x, y);
-            Draw();
+
+            if (!IsLocked)
+            {
+                DrawTile(exit.X + xOffset, exit.Y + yOffset, SymbolsConfig.ExitChar.ToString());
+            }
         }
 
         /// <summary>

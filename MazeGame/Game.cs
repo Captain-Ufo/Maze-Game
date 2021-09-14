@@ -87,7 +87,7 @@ namespace MazeGame
 
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath, DifficultyLevel);
 
-                floors.Add(new Floor(levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, levelInfo.Treasures,
+                floors.Add(new Floor(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, levelInfo.Treasures,
                                      levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
@@ -169,7 +169,7 @@ namespace MazeGame
                 floors[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
                 
-                hasDrawnBackground = DrawFrame(CurrentRoom, hasDrawnBackground);
+                DrawFrame(CurrentRoom);
 
                 string elementAtPlayerPosition = floors[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
 
@@ -177,12 +177,14 @@ namespace MazeGame
                 {
                     chiptunePlayer.PlaySFX(1000, 100);
                     floors[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
+                    MyPlayer.Draw();
                     MyPlayer.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
                     chiptunePlayer.PlaySFX(800, 100);
                     floors[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
+                    MyPlayer.Draw();
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
@@ -190,6 +192,7 @@ namespace MazeGame
                 {
                     chiptunePlayer.PlaySFX(100, 100);
                     floors[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
+                    MyPlayer.Draw();
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !floors[CurrentRoom].IsLocked)
                 {
@@ -245,18 +248,17 @@ namespace MazeGame
 
 
 
-        private bool DrawFrame(int currentRoom, bool hasDrawnBackground)
+        private void DrawFrame(int currentRoom)
         {
             if (!hasDrawnBackground)
             {
                 floors[currentRoom].Draw();
+                MyPlayer.Draw();
                 hasDrawnBackground = true;
             }
             floors[currentRoom].DrawGuards();
-            MyPlayer.Draw();
             DrawUI(currentRoom);
             CursorVisible = false;
-            return hasDrawnBackground;
         }
 
 
@@ -269,11 +271,11 @@ namespace MazeGame
 
             WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
             WriteLine("");
-            Write($"  Tresure collected: $ {MyPlayer.Booty}");
-            SetCursorPosition(32, CursorTop);
-            Write($"Floor {currentLevel + 1}");
-            SetCursorPosition(45, CursorTop);
+            Write($"   {floors[currentLevel].Name}");
+            SetCursorPosition(35, CursorTop);
             Write($"Difficulty Level: {DifficultyLevel}");
+            SetCursorPosition(70, CursorTop);
+            Write($"Tresure collected: $ {MyPlayer.Booty}");
             string quitInfo = "Press Escape to quit.";
             SetCursorPosition(WindowWidth - quitInfo.Length - 3, WindowHeight - 2);
             Write(quitInfo);

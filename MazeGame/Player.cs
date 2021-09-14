@@ -70,7 +70,6 @@ namespace MazeGame
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
         public bool HandlePlayerControls(Floor floor, int deltaTimeMS)
         { 
-            Clear(floor);
             timeSinceLastMove += deltaTimeMS;
 
             if (KeyAvailable)
@@ -85,7 +84,9 @@ namespace MazeGame
                     case ConsoleKey.NumPad8:
                         if (floor.IsPositionWalkable(X, Y - 1) && timeSinceLastMove >= timeBetweenMoves)
                         {
+                            Clear(floor);
                             Y--;
+                            Draw();
                             HasMoved = true;
                             timeSinceLastMove -= timeBetweenMoves;
                         }
@@ -95,7 +96,9 @@ namespace MazeGame
                     case ConsoleKey.NumPad2:
                         if (floor.IsPositionWalkable(X, Y + 1) && timeSinceLastMove >= timeBetweenMoves)
                         {
+                            Clear(floor);
                             Y++;
+                            Draw();
                             HasMoved = true;
                             timeSinceLastMove -= timeBetweenMoves;
                         }
@@ -105,7 +108,9 @@ namespace MazeGame
                     case ConsoleKey.NumPad4:
                         if (floor.IsPositionWalkable(X - 1, Y) && timeSinceLastMove >= timeBetweenMoves)
                         {
+                            Clear(floor);
                             X--;
+                            Draw();
                             HasMoved = true;
                             timeSinceLastMove -= timeBetweenMoves;
                         }
@@ -115,7 +120,9 @@ namespace MazeGame
                     case ConsoleKey.NumPad6:
                         if (floor.IsPositionWalkable(X + 1, Y) && timeSinceLastMove >= timeBetweenMoves)
                         {
+                            Clear(floor);
                             X++;
+                            Draw();
                             HasMoved = true;
                             timeSinceLastMove -= timeBetweenMoves;
                         }

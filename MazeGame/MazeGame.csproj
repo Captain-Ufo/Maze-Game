@@ -15,16 +15,16 @@
     <None Update="Levels\Floor1b.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Floor1.txt">
+    <None Update="Levels\The Deep Cells.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Floor2.txt">
+    <None Update="Levels\The Vault.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\Floor2a.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Floor3.txt">
+    <None Update="Levels\The Barracks.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\Floor4.txt">

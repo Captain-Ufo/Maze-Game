@@ -31,6 +31,11 @@ namespace MazeGame
         private Stopwatch stopwatch;
 
         /// <summary>
+        /// The name of the floor, extracted from the level file name.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Whether the exit is open (either because there's no key in the level or because the player has collected the key) or not
         /// </summary>
         public bool IsLocked { get; private set; }
@@ -54,9 +59,11 @@ namespace MazeGame
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public Floor(string[,] grid, int startX, int startY, LevelLock levelLock, Coordinates exit,
+        public Floor(string name, string[,] grid, int startX, int startY, LevelLock levelLock, Coordinates exit,
                      Coordinates[] treasures, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
+            Name = name;
+
             this.grid = grid;
 
             rows = this.grid.GetLength(0);

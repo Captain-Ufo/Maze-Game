@@ -789,6 +789,7 @@ namespace MazeGame
                     break;
                 default:
                     GameData saveGame = saveSystem.LoadGame(availableSaves[selectedIndex - 1]);
+                    TimesSpotted = saveGame.TimesSpotted;
                     TimesCaught = saveGame.TimesCaught;
                     DifficultyLevel = saveGame.DifficultyLevel;
                     PlayGame(saveGame.CurrentLevel, saveGame.Booty);
@@ -1043,6 +1044,7 @@ namespace MazeGame
             playerHasBeenCaught = false;
 
             GameData saveGame = saveSystem.LoadGame(this);
+            TimesSpotted = saveGame.TimesSpotted;
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
             MyPlayer.Booty = saveGame.Booty;

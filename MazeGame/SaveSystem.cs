@@ -32,7 +32,7 @@ namespace MazeGame
         /// <param name="game">the current game, required to get the data to save</param>
         public void SaveGame(Game game)
         {
-            GameData data = new GameData(game.MyPlayer.Booty, game.CurrentRoom, game.TimesCaught, game.DifficultyLevel);
+            GameData data = new GameData(game.MyPlayer.Booty, game.CurrentRoom, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
 
             string saveGame = JsonSerializer.Serialize(data);
             string saveGameName = "\\" + game.DifficultyLevel + "_Game.sav";
@@ -90,7 +90,7 @@ namespace MazeGame
         /// <param name="game">the current game, from which the method access the difficulty level in order to chose which file to delete</param>
         public void DeleteSaveGame(Game game)
         {
-            string saveGameName = "\\" + game.DifficultyLevel + "Game.sav";
+            string saveGameName = "\\" + game.DifficultyLevel + "_Game.sav";
             string saveFilePath = saveGamesPath + saveGameName;
             if (File.Exists(saveFilePath))
             {
@@ -133,19 +133,22 @@ namespace MazeGame
     {
         public int Booty { get; set; }
         public int CurrentLevel { get; set; }
+        public int TimesSpotted { get; set; }
         public int TimesCaught { get; set; }
         public Difficulty DifficultyLevel { get; set; }
 
-        public GameData(int booty, int currentLevel, int timesCaught, Difficulty difficultyLevel)
+        public GameData(int booty, int currentLevel, int timesSpotted, int timesCaught, Difficulty difficultyLevel)
         {
             Booty = booty;
             CurrentLevel = currentLevel;
+            TimesSpotted = timesSpotted;
             TimesCaught = timesCaught;
             DifficultyLevel = difficultyLevel;
         }
 
         public GameData()
         {
+            //The serialization requires a default, parameterless constructor
         }
     }
 }

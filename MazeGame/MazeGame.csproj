@@ -15,19 +15,19 @@
     <None Update="Levels\Floor1b.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\The Deep Cells.txt">
+    <None Update="Levels\Deep Cells.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\The Vault.txt">
+    <None Update="Levels\Stolen Goods Vault.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\Floor2a.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\The Barracks.txt">
+    <None Update="Levels\Guards Barracks.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Floor4.txt">
+    <None Update="Levels\Interrogation Chambers.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Levels\FloorsConfig.txt">

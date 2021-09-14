@@ -13,9 +13,9 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.genruntimeconfig.cache
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\FloorsConfig.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\TestFloor.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor4.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor1b.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor2a.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Deep Cells.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Vault.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Barracks.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Interrogation Chambers.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Deep Cells.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Guards Barracks.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Stolen Goods Vault.txt

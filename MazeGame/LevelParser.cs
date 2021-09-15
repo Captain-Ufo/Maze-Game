@@ -94,6 +94,11 @@ namespace MazeGame
             Guard guard8 = new Guard();
             Guard guard9 = new Guard();
             Guard guard10 = new Guard();
+            Guard guard11 = new Guard();
+            Guard guard12 = new Guard();
+            Guard guard13 = new Guard();
+            Guard guard14 = new Guard();
+            Guard guard15 = new Guard();
 
             Dictionary<char, Guard> guardsLUT = new Dictionary<char, Guard>
             {
@@ -106,7 +111,12 @@ namespace MazeGame
                 ['K'] = guard7,
                 ['L'] = guard8,
                 ['M'] = guard9,
-                ['N'] = guard10
+                ['N'] = guard10,
+                ['P'] = guard11,
+                ['Q'] = guard12,
+                ['R'] = guard13,
+                ['S'] = guard14,
+                ['T'] = guard15
             };
 
             List<Coordinates> guard1Patrol = new List<Coordinates>();
@@ -119,6 +129,11 @@ namespace MazeGame
             List<Coordinates> guard8Patrol = new List<Coordinates>();
             List<Coordinates> guard9Patrol = new List<Coordinates>();
             List<Coordinates> guard10Patrol = new List<Coordinates>();
+            List<Coordinates> guard11Patrol = new List<Coordinates>();
+            List<Coordinates> guard12Patrol = new List<Coordinates>();
+            List<Coordinates> guard13Patrol = new List<Coordinates>();
+            List<Coordinates> guard14Patrol = new List<Coordinates>();
+            List<Coordinates> guard15Patrol = new List<Coordinates>();
 
             Dictionary<char, List<Coordinates>> guardPatrolsLUT = new Dictionary<char, List<Coordinates>>
             {
@@ -131,7 +146,12 @@ namespace MazeGame
                 ['k'] = guard7Patrol,
                 ['l'] = guard8Patrol,
                 ['m'] = guard9Patrol,
-                ['n'] = guard10Patrol
+                ['n'] = guard10Patrol,
+                ['p'] = guard11Patrol,
+                ['q'] = guard12Patrol,
+                ['r'] = guard13Patrol,
+                ['s'] = guard14Patrol,
+                ['t'] = guard15Patrol,
             };
 
             //Looping through every single character in the grid to find special characters for special gameplay elements 
@@ -251,6 +271,11 @@ namespace MazeGame
                         case 'L':
                         case 'M':
                         case 'N':
+                        case 'P':
+                        case 'Q':
+                        case 'R':
+                        case 'S':
+                        case 'T':
                             guardsLUT[currentChar].AssignOriginPoint(x, y);
                             levelGuards.Add(guardsLUT[currentChar]);
                             currentChar = SymbolsConfig.EmptySpace;
@@ -266,6 +291,11 @@ namespace MazeGame
                         case 'l':
                         case 'm':
                         case 'n':
+                        case 'p':
+                        case 'q':
+                        case 'r':
+                        case 's':
+                        case 't':
                             patrolPoint = new Coordinates(x, y);
                             guardPatrolsLUT[currentChar].Add(patrolPoint);
                             currentChar = SymbolsConfig.EmptySpace;
@@ -292,6 +322,11 @@ namespace MazeGame
             guard8.AssignPatrol(ArrangePatrolPoints(guard8, guard8Patrol).ToArray());
             guard9.AssignPatrol(ArrangePatrolPoints(guard9, guard9Patrol).ToArray());
             guard10.AssignPatrol(ArrangePatrolPoints(guard10, guard10Patrol).ToArray());
+            guard11.AssignPatrol(ArrangePatrolPoints(guard11, guard11Patrol).ToArray());
+            guard12.AssignPatrol(ArrangePatrolPoints(guard12, guard12Patrol).ToArray());
+            guard13.AssignPatrol(ArrangePatrolPoints(guard13, guard13Patrol).ToArray());
+            guard14.AssignPatrol(ArrangePatrolPoints(guard14, guard14Patrol).ToArray());
+            guard15.AssignPatrol(ArrangePatrolPoints(guard15, guard15Patrol).ToArray());
 
             LevelInfo levelInfo = new LevelInfo(grid, playerStartX, playerStartY, totalGold, exit, treasures.ToArray(), levLock, leversDictionary, levelGuards.ToArray());
 

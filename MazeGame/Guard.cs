@@ -15,36 +15,30 @@ namespace MazeGame
         private int nextPatrolPoint;
         private int verticalAggroDistance = 5;
         private int horizontalAggroDistance = 10;
-
         private int bribeTimer;
         private bool hasBeenBribed;
-
         private int alertTimer;
         private bool isAlerted;
-
         private bool isReturning;
+        private int pivotTimer;
+        private bool easyGame;
+        private string[] guardMarkersTable = new string[] {"^", ">", "V", "<" };
+        private string guardMarker;
+        private ConsoleColor guardSymbolColor = ConsoleColor.Black;
+        private ConsoleColor guardTileColor = ConsoleColor.DarkRed;
+        private int walkingSpeed = 150;
+        private int runningSpeed = 120;
+        private int timeBetweenMoves;
+        private int timeSinceLastMove = 0;
+        private Coordinates originPoint;
+        private Coordinates lastPatrolPoint;
+        private Coordinates lastKnownPlayerPosition;
+        private Random rng;
 
         /// <summary>
         /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
         /// </summary>
         public bool HasBeenBribedBefore { get; private set; }
-
-        private bool easyGame;
-
-        private string[] guardMarkersTable = new string[] {"^", ">", "V", "<" };
-        private string guardMarker;
-        private ConsoleColor guardSymbolColor = ConsoleColor.Black;
-        private ConsoleColor guardTileColor = ConsoleColor.DarkRed;
-
-        private int walkingSpeed = 150;
-        private int runningSpeed = 120;
-        private int timeBetweenMoves;
-        private int timeSinceLastMove = 0;
-
-        private Coordinates originPoint;
-
-        private Coordinates lastKnownPlayerPosition;
-
         /// <summary>
         /// The X coordinate of the Guard
         /// </summary>
@@ -60,6 +54,7 @@ namespace MazeGame
         /// </summary>
         public Guard()
         {
+            rng = new Random();
             nextPatrolPoint = 0;
             hasBeenBribed = false;
             isAlerted = false;
@@ -67,6 +62,7 @@ namespace MazeGame
             HasBeenBribedBefore = false;
             bribeTimer = 0;
             alertTimer = 0;
+            pivotTimer = rng.Next(201);
             timeBetweenMoves = walkingSpeed;
             direction = Directions.up;
             guardMarker = guardMarkersTable[(int)direction];
@@ -85,6 +81,7 @@ namespace MazeGame
             Y = y;
 
             originPoint = new Coordinates(X, Y);
+            lastPatrolPoint = originPoint;
         }
 
         /// <summary>
@@ -122,7 +119,7 @@ namespace MazeGame
         /// <param name="floor">The level the guard is in</param>
         /// <param name="game">The current game</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void Update(Floor floor, Game game, int deltaTimeMS)
+        public void UpdateBehavior(Floor floor, Game game, int deltaTimeMS)
         {
             timeSinceLastMove += deltaTimeMS;
 
@@ -161,7 +158,19 @@ namespace MazeGame
             {
                 guardTileColor = ConsoleColor.DarkRed;
                 timeBetweenMoves = walkingSpeed;
-                Move(floor, Patrol());
+                if (patrolPath.Length > 0)
+                {
+                    Move(floor, Patrol());
+                }
+                else
+                {
+                    Pivot(pivotTimer, 20);
+
+                    if (pivotTimer == int.MaxValue) { pivotTimer = 0; }
+                    else { pivotTimer += rng.Next(1, 11); }
+                }
+                lastPatrolPoint.X = X;
+                lastPatrolPoint.Y = Y;
             }
 
             CatchPlayer(game);
@@ -185,7 +194,7 @@ namespace MazeGame
         }
 
         /// <summary>
-        /// Restores the guard to its conditions at the beginning of the level. To be used only when retrying levels
+        /// Restores the guard to their conditions at the beginning of the level. To be used only when retrying levels
         /// </summary>
         public void Reset()
         {
@@ -195,6 +204,7 @@ namespace MazeGame
             alertTimer = 0;
             isAlerted = false;
             isReturning = false;
+            pivotTimer = rng.Next(201);
             X = originPoint.X;
             Y = originPoint.Y;
             timeSinceLastMove = 0;
@@ -370,19 +380,7 @@ namespace MazeGame
 
             alertTimer++;
 
-            if (alertTimer % 10 == 0)
-            {
-                if (direction == Directions.left)
-                {
-                    direction = Directions.up;
-                }
-                else
-                {
-                    direction += 1;
-                }
-
-                guardMarker = guardMarkersTable[(int)direction];
-            }
+            Pivot(alertTimer, 10);
 
             if (alertTimer > 50) 
             {
@@ -396,9 +394,9 @@ namespace MazeGame
 
         private void ReturnToPatrol(Floor floor)
         {
-            if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
+            if (X != lastPatrolPoint.X || Y != lastPatrolPoint.Y)
             {
-                MoveTowards(new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y), floor);
+                MoveTowards(new Coordinates(lastPatrolPoint.X, lastPatrolPoint.Y), floor);
                 return;
             }
 
@@ -532,31 +530,40 @@ namespace MazeGame
 
         private Coordinates Patrol()
         {
-            if (patrolPath.Length > 0)
+            if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
             {
-                if (patrolPath[nextPatrolPoint].X == 0 && patrolPath[nextPatrolPoint].Y == 0)
+                return new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y);
+            }
+            else
+            {
+                if (nextPatrolPoint < patrolPath.Length - 1)
                 {
-                    return new Coordinates(X, Y);
-                }
-
-                if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
-                {
-                    return new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y);
+                    nextPatrolPoint++;
                 }
                 else
                 {
-                    if (nextPatrolPoint < patrolPath.Length-1)
-                    {
-                        nextPatrolPoint++;
-                    }
-                    else
-                    {
-                        nextPatrolPoint = 0;
-                    }
+                    nextPatrolPoint = 0;
                 }
             }
 
             return new Coordinates(X, Y);
+        }
+
+        private void Pivot(int timer, int frequency)
+        {
+            if (timer % frequency == 0)
+            {
+                if (direction == Directions.left)
+                {
+                    direction = Directions.up;
+                }
+                else
+                {
+                    direction += 1;
+                }
+
+                guardMarker = guardMarkersTable[(int)direction];
+            }
         }
 
         private void Move(Floor floor, Coordinates tileToMoveTo)

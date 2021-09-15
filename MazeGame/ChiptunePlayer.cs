@@ -27,7 +27,7 @@ namespace MazeGame
         }
 
         /// <summary>
-        /// Plays (asyncronously, so it won't block player inputs and otehr gameplay) the game over tune
+        /// Plays (asyncronously, so it won't block player inputs and other gameplay) the game over tune
         /// </summary>
         public void PlayGameOverTune()
         {
@@ -43,6 +43,11 @@ namespace MazeGame
             Task.Run(() => GameWonTune(cts.Token));
         }
 
+        /// <summary>
+        /// Plays (asyncronously) a single beep
+        /// </summary>
+        /// <param name="frequency">Frequency of the beep</param>
+        /// <param name="duration">Duration of the beep</param>
         public void PlaySFX(int frequency, int duration)
         {
             Task.Run(() => Beep(frequency, duration));

@@ -134,13 +134,19 @@ namespace MazeGame
                     {
                         ForegroundColor = ConsoleColor.Yellow;
                     }
+                    else if (element == "☺")
+                    {
+                        ForegroundColor = ConsoleColor.DarkMagenta;
+                    }
                     else
                     {
-                        ForegroundColor = ConsoleColor.White;
+                        ForegroundColor = ConsoleColor.Gray;
                     }
                     Write(element);
                 }
             }
+
+            ResetColor();
         }
 
 
@@ -166,11 +172,16 @@ namespace MazeGame
             {
                 ForegroundColor = ConsoleColor.Yellow;
             }
+            else if (element == "☺")
+            {
+                ForegroundColor = ConsoleColor.DarkMagenta;
+            }
             else
             {
-                ForegroundColor = ConsoleColor.White;
+                ForegroundColor = ConsoleColor.Gray;
             }
             Write(element);
+            ResetColor();
         }
 
 
@@ -194,6 +205,7 @@ namespace MazeGame
             return grid[y, x] == SymbolsConfig.EmptySpace.ToString() ||
                    grid[y, x] == "-" ||
                    grid[y, x] == "|" ||
+                   grid[y, x] == "≡" ||
                    grid[y, x] == SymbolsConfig.ExitChar.ToString() ||
                    grid[y, x] == SymbolsConfig.KeyChar.ToString() ||
                    grid[y, x] == SymbolsConfig.TreasureChar.ToString() ||
@@ -374,7 +386,7 @@ namespace MazeGame
             {
                 foreach (Guard guard in levelGuards)
                 {
-                    guard.Update(this, game, deltaDimeMS);
+                    guard.UpdateBehavior(this, game, deltaDimeMS);
                 }
             }
         }

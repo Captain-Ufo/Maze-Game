@@ -27,7 +27,7 @@
     <None Update="Levels\Guards Barracks.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\Interrogation Chambers.txt">
+    <None Update="Levels\High Security Confinement.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Levels\FloorsConfig.txt">

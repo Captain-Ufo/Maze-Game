@@ -10,19 +10,19 @@ namespace MazeGame
     class LevelParser
     {
         /// <summary>
-        /// Reads a text file and interprets all the informations required to create a level. It's a static method, so there's no need to instantiate
+        /// Reads a text file and interprets all the informations required to create a level. It's a static method so there's no need to instantiate
         /// a LevelParser to use it.
         /// </summary>
         /// <param name="filePath">The path of the file to parse the level from</param>
+        /// <param name="difficulty">The difficulty level of the run</param>
         /// <returns></returns>
-        public static LevelInfo ParseFileToLevelInfo(string filePath, Difficulty difficulty)
+        public static LevelInfo ParseFileToLevelInfo(string[] levelMap, Difficulty difficulty)
         {
             //first, creating a whole bunch of variables that will hold the informations for the creation of the level
 
-            string[] lines = File.ReadAllLines(filePath);
-            string firstLine = lines[0];
+            string firstLine = levelMap[0];
 
-            int rows = lines.Length;
+            int rows = levelMap.Length;
             int columns = firstLine.Length;
 
             string[,] grid = new string[rows, columns];
@@ -32,13 +32,13 @@ namespace MazeGame
             int playerStartY = 0;
             int totalGold = 0;
 
-            Coordinates exit = new Coordinates(0, 0);
+            Vector2 exit = new Vector2(0, 0);
 
-            List<Coordinates> treasures = new List<Coordinates>();
+            List<Vector2> treasures = new List<Vector2>();
 
             LevelLock levLock = new LevelLock();
 
-            Dictionary<Coordinates, Lever> leversDictionary = new Dictionary<Coordinates, Lever>();
+            Dictionary<Vector2, Lever> leversDictionary = new Dictionary<Vector2, Lever>();
             
             Lever leverA = new Lever();
             Lever leverE = new Lever();
@@ -59,14 +59,14 @@ namespace MazeGame
                 ['Y'] = leverY
             };
 
-            List<Coordinates> leverAGates = new List<Coordinates>();
-            List<Coordinates> leverEGates = new List<Coordinates>();
-            List<Coordinates> leverIGates = new List<Coordinates>();
-            List<Coordinates> leverOGates = new List<Coordinates>();
-            List<Coordinates> leverUGates = new List<Coordinates>();
-            List<Coordinates> leverYGates = new List<Coordinates>();
+            List<Vector2> leverAGates = new List<Vector2>();
+            List<Vector2> leverEGates = new List<Vector2>();
+            List<Vector2> leverIGates = new List<Vector2>();
+            List<Vector2> leverOGates = new List<Vector2>();
+            List<Vector2> leverUGates = new List<Vector2>();
+            List<Vector2> leverYGates = new List<Vector2>();
 
-            Dictionary<char, List<Coordinates>> leverGatesLUT = new Dictionary<char, List<Coordinates>>
+            Dictionary<char, List<Vector2>> leverGatesLUT = new Dictionary<char, List<Vector2>>
             {
                 ['a'] = leverAGates,
                 ['à'] = leverAGates,
@@ -119,23 +119,23 @@ namespace MazeGame
                 ['T'] = guard15
             };
 
-            List<Coordinates> guard1Patrol = new List<Coordinates>();
-            List<Coordinates> guard2Patrol = new List<Coordinates>();
-            List<Coordinates> guard3Patrol = new List<Coordinates>();
-            List<Coordinates> guard4Patrol = new List<Coordinates>();
-            List<Coordinates> guard5Patrol = new List<Coordinates>();
-            List<Coordinates> guard6Patrol = new List<Coordinates>();
-            List<Coordinates> guard7Patrol = new List<Coordinates>();
-            List<Coordinates> guard8Patrol = new List<Coordinates>();
-            List<Coordinates> guard9Patrol = new List<Coordinates>();
-            List<Coordinates> guard10Patrol = new List<Coordinates>();
-            List<Coordinates> guard11Patrol = new List<Coordinates>();
-            List<Coordinates> guard12Patrol = new List<Coordinates>();
-            List<Coordinates> guard13Patrol = new List<Coordinates>();
-            List<Coordinates> guard14Patrol = new List<Coordinates>();
-            List<Coordinates> guard15Patrol = new List<Coordinates>();
+            List<Vector2> guard1Patrol = new List<Vector2>();
+            List<Vector2> guard2Patrol = new List<Vector2>();
+            List<Vector2> guard3Patrol = new List<Vector2>();
+            List<Vector2> guard4Patrol = new List<Vector2>();
+            List<Vector2> guard5Patrol = new List<Vector2>();
+            List<Vector2> guard6Patrol = new List<Vector2>();
+            List<Vector2> guard7Patrol = new List<Vector2>();
+            List<Vector2> guard8Patrol = new List<Vector2>();
+            List<Vector2> guard9Patrol = new List<Vector2>();
+            List<Vector2> guard10Patrol = new List<Vector2>();
+            List<Vector2> guard11Patrol = new List<Vector2>();
+            List<Vector2> guard12Patrol = new List<Vector2>();
+            List<Vector2> guard13Patrol = new List<Vector2>();
+            List<Vector2> guard14Patrol = new List<Vector2>();
+            List<Vector2> guard15Patrol = new List<Vector2>();
 
-            Dictionary<char, List<Coordinates>> guardPatrolsLUT = new Dictionary<char, List<Coordinates>>
+            Dictionary<char, List<Vector2>> guardPatrolsLUT = new Dictionary<char, List<Vector2>>
             {
                 ['b'] = guard1Patrol,
                 ['c'] = guard2Patrol,
@@ -161,13 +161,13 @@ namespace MazeGame
 
             for (int y = 0; y < rows; y++)
             {
-                string line = lines[y];
+                string line = levelMap[y];
                 for (int x = 0; x < columns; x++)
                 {
                     char currentChar = line[x];
 
-                    Coordinates leverGate;
-                    Coordinates patrolPoint;
+                    Vector2 leverGate;
+                    Vector2 patrolPoint;
 
                     switch (currentChar)
                     {
@@ -179,7 +179,7 @@ namespace MazeGame
                             break;
                         //Exit
                         case SymbolsConfig.ExitChar:
-                            exit = new Coordinates(x, y);
+                            exit = new Vector2(x, y);
                             break;
                         //keys
                         case SymbolsConfig.KeyChar:
@@ -200,13 +200,13 @@ namespace MazeGame
                         //treasures
                         case SymbolsConfig.TreasureChar:
                             totalGold += 100;
-                            treasures.Add(new Coordinates(x, y));
+                            treasures.Add(new Vector2(x, y));
                             break;
                         case '£':
                             if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy || difficulty == Difficulty.Normal || difficulty == Difficulty.Hard)
                             {
                                 totalGold += 100;
-                                treasures.Add(new Coordinates(x, y));
+                                treasures.Add(new Vector2(x, y));
                                 currentChar = SymbolsConfig.TreasureChar;
                             }
                             else
@@ -218,7 +218,7 @@ namespace MazeGame
                             if (difficulty == Difficulty.VeryEasy || difficulty == Difficulty.Easy)
                             {
                                 totalGold += 100;
-                                treasures.Add(new Coordinates(x, y));
+                                treasures.Add(new Vector2(x, y));
                                 currentChar = SymbolsConfig.TreasureChar;
                             }
                             else
@@ -234,7 +234,7 @@ namespace MazeGame
                         case 'U':
                         case 'Y':
                             leversLUT[currentChar].SetLeverCoordinates(x, y);
-                            Coordinates leverCoord = new Coordinates(x, y);
+                            Vector2 leverCoord = new Vector2(x, y);
                             leversDictionary[leverCoord] = leversLUT[currentChar];
                             currentChar = SymbolsConfig.LeverOffChar;
                             break;
@@ -245,7 +245,7 @@ namespace MazeGame
                         case 'o':
                         case 'u':
                         case 'y':
-                            leverGate = new Coordinates(x, y);
+                            leverGate = new Vector2(x, y);
                             leverGatesLUT[currentChar].Add(leverGate);
                             currentChar = SymbolsConfig.GateChar;
                             break;
@@ -256,7 +256,7 @@ namespace MazeGame
                         case 'ò':
                         case 'ù':
                         case 'ÿ':
-                            leverGate = new Coordinates(x, y);
+                            leverGate = new Vector2(x, y);
                             leverGatesLUT[currentChar].Add(leverGate);
                             currentChar = SymbolsConfig.EmptySpace;
                             break;
@@ -280,7 +280,7 @@ namespace MazeGame
                             levelGuards.Add(guardsLUT[currentChar]);
                             currentChar = SymbolsConfig.EmptySpace;
                             break;
-                        //guard patrols
+                        //guards patrols
                         case 'b':
                         case 'c':
                         case 'd':
@@ -296,7 +296,7 @@ namespace MazeGame
                         case 'r':
                         case 's':
                         case 't':
-                            patrolPoint = new Coordinates(x, y);
+                            patrolPoint = new Vector2(x, y);
                             guardPatrolsLUT[currentChar].Add(patrolPoint);
                             currentChar = SymbolsConfig.EmptySpace;
                             break;
@@ -339,18 +339,20 @@ namespace MazeGame
         /// <param name="guard">The guard that follows the patrol</param>
         /// <param name="guardPatrol">The list of patrol points</param>
         /// <returns></returns>
-        public static List<Coordinates> ArrangePatrolPoints(Guard guard, List<Coordinates> guardPatrol)
+        public static List<Vector2> ArrangePatrolPoints(Guard guard, List<Vector2> guardPatrol)
         {
-            //I'm pretty sure the rearrange happens in the least effcient way possible (but that's what I could come up with)
+            //I'm pretty sure the rearrange happens in the least efficient way possible (but this is what I could come up with)
             //by finding the closest one in an orthogonal direction compared to a starting point (which, at the beginning is the starting
             //position of the guard  - not included in the patrol points, so if the designer wants, the guard can start in a different position
             //than the path it will follow for the rest of the level, as long as it's orthogonal to at least one of the patrol points - and in
             //each iteration becomes the previously found patrol point.
             //the loop continues until the newly created lis includes as much entries as the original one.
+            //Considering that this is done only at the beginning, as the game loads the levels (and that it doesn't seem to slow down loading in any
+            //significant way), I reckon it's an acceptable solution.
 
-            Coordinates startPoint = new Coordinates(guard.X, guard.Y);
+            Vector2 startPoint = new Vector2(guard.X, guard.Y);
 
-            List<Coordinates> arrangedPatrolPoints = new List<Coordinates>();
+            List<Vector2> arrangedPatrolPoints = new List<Vector2>();
 
             while (arrangedPatrolPoints.Count < guardPatrol.Count)
             {
@@ -362,7 +364,7 @@ namespace MazeGame
                 {
                     bool alreadyAdded = false;
 
-                    foreach (Coordinates c in arrangedPatrolPoints)
+                    foreach (Vector2 c in arrangedPatrolPoints)
                     {
                         if (c.X == guardPatrol[i].X && c.Y == guardPatrol[i].Y)
                         {
@@ -402,7 +404,7 @@ namespace MazeGame
                     }
                 }
 
-                Coordinates closestPatrolPoint = new Coordinates(closestPatrolX, closestPatrolY);
+                Vector2 closestPatrolPoint = new Vector2(closestPatrolX, closestPatrolY);
                 arrangedPatrolPoints.Add(closestPatrolPoint);
                 startPoint = closestPatrolPoint;
             }
@@ -421,13 +423,13 @@ namespace MazeGame
         public int PlayerStartX { get; }
         public int PlayerStartY { get; }
         public int TotalGold { get; }
-        public Coordinates Exit { get; }
-        public Coordinates[] Treasures { get; }
-        public Dictionary<Coordinates, Lever> LeversDictionary { get; }
+        public Vector2 Exit { get; }
+        public Vector2[] Treasures { get; }
+        public Dictionary<Vector2, Lever> LeversDictionary { get; }
         public Guard[] Guards { get; }
 
-        public LevelInfo(string[,] grid, int playerStartX, int playerStartY, int totalGold, Coordinates exit,
-            Coordinates[] treasures, LevelLock levelLock, Dictionary<Coordinates, Lever> leversDictionary, Guard[] guards)
+        public LevelInfo(string[,] grid, int playerStartX, int playerStartY, int totalGold, Vector2 exit,
+            Vector2[] treasures, LevelLock levelLock, Dictionary<Vector2, Lever> leversDictionary, Guard[] guards)
         {
             Grid = grid;
             LevLock = levelLock;

@@ -11,14 +11,13 @@ namespace MazeGame
         private int selectedIndex;
         private string[] options;
         private string[] prompt;
-
         private ChiptunePlayer ctp;
 
         /// <summary>
         /// Instantiates a Menu object
         /// </summary>
         /// <param name="prompt">The single string that prompts the player to chose</param>
-        /// <param name="options">The list of options the menu displays</param>
+        /// <param name="options">The array of options the menu displays</param>
         public Menu(string prompt, string[] options)
         {
             this.prompt = new string[] { prompt };
@@ -30,7 +29,7 @@ namespace MazeGame
         /// <summary>
         /// Instantiates a Menu object
         /// </summary>
-        /// <param name="prompt">The prompt in string form, to be used for multiple lines prompts, or ascii/text based art</param>
+        /// <param name="prompt">The prompt in string array form, to be used for multiple lines prompts, or ascii/text based art</param>
         /// <param name="options">The list of options the menu displays</param>
         public Menu (string[] prompt, string[] options)
         {
@@ -73,8 +72,7 @@ namespace MazeGame
                         {
                             selectedIndex = options.Length - 1;
                         }
-                        ctp.PlaySFX(1000, 100);
-                        //Beep(1000, 100);
+                        ctp.PlaySFX(1000, 100);;
                         break;
 
                     case ConsoleKey.DownArrow:
@@ -87,7 +85,6 @@ namespace MazeGame
                             selectedIndex = 0;
                         }
                         ctp.PlaySFX(1000, 100);
-                        //Beep(1000, 100);
                         break;
                 }
             }
@@ -108,6 +105,17 @@ namespace MazeGame
         }
 
         /// <summary>
+        /// Updates prompt and options in an already instantiated Menu object
+        /// </summary>
+        /// <param name="prompt">The new prompt, as a single string</param>
+        /// <param name="options">The new array of options</param>
+        public void UpdateMenuItems(string prompt, string[] options)
+        {
+            this.prompt = new string[] { prompt };
+            this.options = options;
+        }
+
+        /// <summary>
         /// Updates the prompt alone in an already instantiated Menu object
         /// </summary>
         /// <param name="prompt">The new prompt, as a string array</param>
@@ -119,7 +127,7 @@ namespace MazeGame
         /// <summary>
         /// Updates the options alone in an already instantiated Menu object
         /// </summary>
-        /// <param name="prompt">The new array of options</param>
+        /// <param name="prompt">The new prompt, as a single string</param>
         public void UpdateMenuPrompt(string prompt)
         {
             this.prompt = new string[] { prompt };

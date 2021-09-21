@@ -8,30 +8,28 @@ namespace MazeGame
     class LevelLock
     {
         private int revealedKeyPieces = 0;
-
-        private List<Coordinates> hiddenKeyPieces;
-
-        private List<Coordinates> revealedKeyPiecesBackup;
-        private List<Coordinates> hiddenKeyPiecesBackUp;
+        private List<Vector2> hiddenKeyPieces;
+        private List<Vector2> revealedKeyPiecesBackup;
+        private List<Vector2> hiddenKeyPiecesBackUp;
 
         public LevelLock()
         {
-            hiddenKeyPieces = new List<Coordinates>();
+            hiddenKeyPieces = new List<Vector2>();
 
-            revealedKeyPiecesBackup = new List<Coordinates>();
-            hiddenKeyPiecesBackUp = new List<Coordinates>();
+            revealedKeyPiecesBackup = new List<Vector2>();
+            hiddenKeyPiecesBackUp = new List<Vector2>();
         }
 
         /// <summary>
         /// Collects the key piece, by removing it from the map and, if necessary, spawning the next key piece
         /// </summary>
-        /// <param name="floor">The current level</param>
+        /// <param name="level">The current level</param>
         /// <param name="x">The X coordinate of the piece the player is collecting</param>
         /// <param name="y">The X coordinate of the piece the player is collecting</param>
         /// <returns>returns whether the level is still locked or not (so true if there are other pieces to collect, false if there are none)</returns>
-        public bool CollectKeyPiece(Floor floor, int x, int y)
+        public bool CollectKeyPiece(Level level, int x, int y)
         {
-            floor.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString());
+            level.ChangeElementAt(x, y, SymbolsConfig.EmptySpace.ToString());
 
             revealedKeyPieces--;
 
@@ -39,8 +37,8 @@ namespace MazeGame
             {
                 if (hiddenKeyPieces.Count > 0)
                 {
-                    Coordinates nextPiece = hiddenKeyPieces[0];
-                    floor.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false);
+                    Vector2 nextPiece = hiddenKeyPieces[0];
+                    level.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false);
                     revealedKeyPieces++;
                     hiddenKeyPieces.RemoveAt(0);
                     return true;
@@ -63,7 +61,7 @@ namespace MazeGame
         {
             revealedKeyPieces++;
 
-            revealedKeyPiecesBackup.Add(new Coordinates(x, y));
+            revealedKeyPiecesBackup.Add(new Vector2(x, y));
         }
 
         /// <summary>
@@ -77,32 +75,36 @@ namespace MazeGame
         {
             while (hiddenKeyPieces.Count < index + 1)
             {
-                hiddenKeyPieces.Add(new Coordinates(0, 0));
+                hiddenKeyPieces.Add(new Vector2(0, 0));
             }
 
-            hiddenKeyPieces[index] = new Coordinates(x, y);
+            hiddenKeyPieces[index] = new Vector2(x, y);
 
-            foreach (Coordinates c in hiddenKeyPieces)
+            foreach (Vector2 c in hiddenKeyPieces)
             {
                 hiddenKeyPiecesBackUp.Add(c);
             }
         }
 
-        public void ResetKeys(Floor floor)
+        /// <summary>
+        /// Resets the lock and all the keys to the state they are at the beginning of the level (uncollects keys, hides hidden keys, re-locks the exit, etc)
+        /// </summary>
+        /// <param name="level">The level the lock is in</param>
+        public void ResetKeys(Level level)
         {
             revealedKeyPieces = revealedKeyPiecesBackup.Count;
 
-            foreach (Coordinates key in revealedKeyPiecesBackup)
+            foreach (Vector2 key in revealedKeyPiecesBackup)
             {
-                floor.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false, false);
+                level.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false, false);
             }
 
-            hiddenKeyPieces = new List<Coordinates>();
+            hiddenKeyPieces = new List<Vector2>();
 
-            foreach (Coordinates key in hiddenKeyPiecesBackUp)
+            foreach (Vector2 key in hiddenKeyPiecesBackUp)
             {
                 hiddenKeyPieces.Add(key);
-                floor.ChangeElementAt(key.X, key.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
+                level.ChangeElementAt(key.X, key.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
             }
         }
     }

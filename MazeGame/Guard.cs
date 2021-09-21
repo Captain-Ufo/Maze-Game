@@ -6,12 +6,12 @@ using static System.Console;
 namespace MazeGame
 {
     /// <summary>
-    /// A gameplay element that (optionally) patrols the level and catches the player if moved within range.
+    /// A gameplay element that patrols the level or pivots in place, and spots, chases and catches the player if within range.
     /// </summary>
     class Guard
     {
         private Directions direction = Directions.down;
-        private Coordinates[] patrolPath;
+        private Vector2[] patrolPath;
         private int nextPatrolPoint;
         private int verticalAggroDistance = 5;
         private int horizontalAggroDistance = 10;
@@ -30,9 +30,9 @@ namespace MazeGame
         private int runningSpeed = 120;
         private int timeBetweenMoves;
         private int timeSinceLastMove = 0;
-        private Coordinates originPoint;
-        private Coordinates lastPatrolPoint;
-        private Coordinates lastKnownPlayerPosition;
+        private Vector2 originPoint;
+        private Vector2 lastPatrolPoint;
+        private Vector2 lastKnownPlayerPosition;
         private Random rng;
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace MazeGame
             X = x;
             Y = y;
 
-            originPoint = new Coordinates(X, Y);
+            originPoint = new Vector2(X, Y);
             lastPatrolPoint = originPoint;
         }
 
@@ -108,7 +108,7 @@ namespace MazeGame
         /// Assigns the patrol path
         /// </summary>
         /// <param name="path">An array of patrol path points in the form of a Coordinates objects</param>
-        public void AssignPatrol(Coordinates[] path)
+        public void AssignPatrol(Vector2[] path)
         {
             patrolPath = path;
         }
@@ -116,10 +116,10 @@ namespace MazeGame
         /// <summary>
         /// Updates the guard's AI behavior
         /// </summary>
-        /// <param name="floor">The level the guard is in</param>
+        /// <param name="level">The level the guard is in</param>
         /// <param name="game">The current game</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public void UpdateBehavior(Floor floor, Game game, int deltaTimeMS)
+        public void UpdateBehavior(Level level, Game game, int deltaTimeMS)
         {
             timeSinceLastMove += deltaTimeMS;
 
@@ -130,29 +130,30 @@ namespace MazeGame
 
             UpdateBribe();
 
-            if (SpotPlayer(game, floor))
+            if (SpotPlayer(game, level))
             {
                 if (!isAlerted)
                 {
+                    game.TunePlayer.PlaySFX(1200, 600);
                     game.TimesSpotted ++ ;
                 }
 
                 guardTileColor = ConsoleColor.Red;
-                lastKnownPlayerPosition = new Coordinates(game.MyPlayer.X, game.MyPlayer.Y);
+                lastKnownPlayerPosition = new Vector2(game.MyPlayer.X, game.MyPlayer.Y);
                 isAlerted = true;
                 isReturning = false;
                 timeBetweenMoves = runningSpeed;
-                MoveTowards(lastKnownPlayerPosition, floor);
+                MoveTowards(lastKnownPlayerPosition, level);
             }
             else if (isAlerted)
             {
                 guardTileColor = ConsoleColor.Magenta;
-                AlertedBehavior(floor);
+                AlertedBehavior(level);
             }
             else if (isReturning)
             {
                 guardTileColor = ConsoleColor.DarkRed;
-                ReturnToPatrol(floor);
+                ReturnToPatrol(level);
             }
             else
             {
@@ -160,14 +161,14 @@ namespace MazeGame
                 timeBetweenMoves = walkingSpeed;
                 if (patrolPath.Length > 0)
                 {
-                    Move(floor, Patrol());
+                    Move(level, Patrol());
                 }
                 else
                 {
                     Pivot(pivotTimer, 20);
 
                     if (pivotTimer == int.MaxValue) { pivotTimer = 0; }
-                    else { pivotTimer += rng.Next(1, 11); }
+                    else { pivotTimer += rng.Next(1, 5); }
                 }
                 lastPatrolPoint.X = X;
                 lastPatrolPoint.Y = Y;
@@ -230,10 +231,10 @@ namespace MazeGame
         /// <summary>
         /// Replaces the guard symbol with whatever static tile is in the map grid in the previous position of the guard
         /// </summary>
-        /// <param name="floor">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
-        public void Clear(Floor floor)
+        /// <param name="level">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(Level level)
         {
-            string symbol = floor.GetElementAt(X, Y);
+            string symbol = level.GetElementAt(X, Y);
 
             SetCursorPosition(X, Y);
 
@@ -244,7 +245,7 @@ namespace MazeGame
 
             if (symbol == SymbolsConfig.ExitChar.ToString())
             {
-                if (floor.IsLocked)
+                if (level.IsLocked)
                 {
                     ForegroundColor = ConsoleColor.Red;
                 }
@@ -275,7 +276,7 @@ namespace MazeGame
             }
         }
 
-        private bool SpotPlayer(Game game, Floor floor)
+        private bool SpotPlayer(Game game, Level level)
         {
             if (hasBeenBribed)
             {
@@ -288,11 +289,11 @@ namespace MazeGame
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
                         && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + 1)
                     {
-                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
-                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!floor.IsTileTransparent(tile.X, tile.Y))
+                            if (!level.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false ;
                             }
@@ -308,11 +309,11 @@ namespace MazeGame
                     if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + horizontalAggroDistance
                         && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
-                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
-                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!floor.IsTileTransparent(tile.X, tile.Y))
+                            if (!level.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -328,11 +329,11 @@ namespace MazeGame
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
                         && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
-                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
-                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!floor.IsTileTransparent(tile.X, tile.Y))
+                            if (!level.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -348,11 +349,11 @@ namespace MazeGame
                     if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + 1
                         && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
                     {
-                        Coordinates[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
 
-                        foreach (Coordinates tile in tilesBetweenGuardAndPlayer)
+                        foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
-                            if (!floor.IsTileTransparent(tile.X, tile.Y))
+                            if (!level.IsTileTransparent(tile.X, tile.Y))
                             {
                                 return false;
                             }
@@ -367,11 +368,11 @@ namespace MazeGame
             return false;
         }
 
-        private void AlertedBehavior(Floor floor)
+        private void AlertedBehavior(Level level)
         {
             if (X != lastKnownPlayerPosition.X || Y != lastKnownPlayerPosition.Y)
             {
-                if (MoveTowards(lastKnownPlayerPosition, floor))
+                if (MoveTowards(lastKnownPlayerPosition, level))
                 {
                     alertTimer = 0;
                     return;
@@ -392,18 +393,18 @@ namespace MazeGame
             }
         }
 
-        private void ReturnToPatrol(Floor floor)
+        private void ReturnToPatrol(Level level)
         {
             if (X != lastPatrolPoint.X || Y != lastPatrolPoint.Y)
             {
-                MoveTowards(new Coordinates(lastPatrolPoint.X, lastPatrolPoint.Y), floor);
+                MoveTowards(new Vector2(lastPatrolPoint.X, lastPatrolPoint.Y), level);
                 return;
             }
 
             isReturning = false;
         }
 
-        private Tile Pathfind(Floor floor, Tile pathStart, Tile destination)
+        private Tile Pathfind(Level level, Tile pathStart, Tile destination)
         {
             pathStart.SetDistance(destination.X, destination.Y);
             List<Tile> activeTiles = new List<Tile>();
@@ -422,7 +423,7 @@ namespace MazeGame
                 visitedTiles.Add(tileToCheck);
                 activeTiles.Remove(tileToCheck);
 
-                List<Tile> walkableNeighbors = floor.GetWalkableNeighborsOfTile(tileToCheck, destination);
+                List<Tile> walkableNeighbors = level.GetWalkableNeighborsOfTile(tileToCheck, destination);
 
                 foreach (Tile neighbor in walkableNeighbors)
                 {
@@ -452,17 +453,17 @@ namespace MazeGame
             return null;
         }
 
-        private bool MoveTowards(Coordinates destination, Floor floor)
+        private bool MoveTowards(Vector2 destination, Level level)
         {
             Tile guardTile = new Tile(X, Y);
             Tile destinationTile = new Tile(destination.X, destination.Y);
-            Tile tileToMoveTo = Pathfind(floor, destinationTile, guardTile);
+            Tile tileToMoveTo = Pathfind(level, destinationTile, guardTile);
 
             if (tileToMoveTo != null)
             {
-                Coordinates movementCoordinates = new Coordinates(tileToMoveTo.X, tileToMoveTo.Y);
+                Vector2 movementCoordinates = new Vector2(tileToMoveTo.X, tileToMoveTo.Y);
 
-                Move(floor, movementCoordinates);
+                Move(level, movementCoordinates);
                 return true;
             }
             return false;
@@ -482,7 +483,7 @@ namespace MazeGame
             }
         }
 
-        private Coordinates[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)
+        private Vector2[] GetTilesBetweenGuardAndPlayer(int guardX, int guardY, int playerX, int playerY)
         {
             bool isLineSteep = Math.Abs(playerY - guardY) > Math.Abs(playerX - guardX);
 
@@ -512,11 +513,11 @@ namespace MazeGame
             int yStep = (guardY < playerY) ? 1 : -1;
             int y = guardY;
 
-            List<Coordinates> tilesBetweenGuardAndPlayer = new List<Coordinates>();
+            List<Vector2> tilesBetweenGuardAndPlayer = new List<Vector2>();
 
             for (int x = guardX; x <= playerX; x++)
             {
-                tilesBetweenGuardAndPlayer.Add(new Coordinates((isLineSteep ? y : x), (isLineSteep ? x : y)));
+                tilesBetweenGuardAndPlayer.Add(new Vector2((isLineSteep ? y : x), (isLineSteep ? x : y)));
                 error = error - deltaY;
                 if (error < 0)
                 {
@@ -528,11 +529,11 @@ namespace MazeGame
             return tilesBetweenGuardAndPlayer.ToArray();
         }
 
-        private Coordinates Patrol()
+        private Vector2 Patrol()
         {
             if (X != patrolPath[nextPatrolPoint].X || Y != patrolPath[nextPatrolPoint].Y)
             {
-                return new Coordinates(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y);
+                return new Vector2(patrolPath[nextPatrolPoint].X, patrolPath[nextPatrolPoint].Y);
             }
             else
             {
@@ -546,7 +547,7 @@ namespace MazeGame
                 }
             }
 
-            return new Coordinates(X, Y);
+            return new Vector2(X, Y);
         }
 
         private void Pivot(int timer, int frequency)
@@ -566,15 +567,15 @@ namespace MazeGame
             }
         }
 
-        private void Move(Floor floor, Coordinates tileToMoveTo)
+        private void Move(Level level, Vector2 tileToMoveTo)
         {
-            this.Clear(floor);
+            this.Clear(level);
 
             if (X != tileToMoveTo.X)
             {
                 if (X - tileToMoveTo.X > 0)
                 {
-                    if (floor.IsPositionWalkable(X - 1, Y))
+                    if (level.IsPositionWalkable(X - 1, Y))
                     {
                         X--;
                         direction = Directions.left;
@@ -582,7 +583,7 @@ namespace MazeGame
                 }
                 else
                 {
-                    if (floor.IsPositionWalkable(X + 1, Y))
+                    if (level.IsPositionWalkable(X + 1, Y))
                     {
                         X++;
                         direction = Directions.right;
@@ -593,7 +594,7 @@ namespace MazeGame
             {
                 if (Y - tileToMoveTo.Y > 0)
                 {
-                    if (floor.IsPositionWalkable(X, Y - 1))
+                    if (level.IsPositionWalkable(X, Y - 1))
                     {
                         Y--;
                         direction = Directions.up;
@@ -601,7 +602,7 @@ namespace MazeGame
                 }
                 else
                 {
-                    if (floor.IsPositionWalkable(X, Y + 1))
+                    if (level.IsPositionWalkable(X, Y + 1))
                     {
                         Y++;
                         direction = Directions.down;
@@ -611,9 +612,9 @@ namespace MazeGame
 
             guardMarker = guardMarkersTable[(int)direction];
 
-            if (floor.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
+            if (level.GetElementAt(X, Y) == SymbolsConfig.LeverOnChar.ToString())
             {
-                floor.ToggleLever(X, Y);
+                level.ToggleLever(X, Y);
             }
         }
     }

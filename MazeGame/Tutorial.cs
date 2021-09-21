@@ -1,0 +1,224 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using static System.Console;
+
+namespace MazeGame
+{
+    class Tutorial
+    {
+        public string[][] TutorialLevels { get; private set; } = new string[4][];
+            
+        string[] tutorialLevel1 =
+        {
+            "╔═════════╦═════════╦═════════╦═════════╦═════════╦═════════╗",
+            "║                   ║         ║         ║         |         ║",
+            "║         ║         ║                             ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╠═════════╩════ ════╬════ ════╩════ ════╬════ ════╬═════════╣",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "║ X                 ║                   ║                 Ð ║",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "╠════-════╦════ ════╬════ ════╦════ ════╬════ ════╬═════════╣",
+            "║         ║         ║         ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "║         ║                             ║                   ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╚═════════╩═════════╩═════════╩═════════╩═════════╩═════════╝"
+        };
+
+        string[] tutorialLevel2 =
+        {
+            "╔═════════╦═════════╦═════════╦═════════╦═════════╦═════════╗",
+            "║                   ║         ║    $    ║         |         ║",
+            "║    1    ║       $ ║                        $    ║         ║",
+            "║         ║         ║  $      ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╠═════════╩════ ════╬════ ════╩════ ════╬════ ════╬═════════╣",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "║ X                 ║                   ║                 Ð ║",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "╠════-════╦════ ════╬════ ════╦════ ════╬════ ════╬═════════╣",
+            "║         ║         ║         ║      $  ║         ║         ║",
+            "║         ║         ║         ║         ║         ║    ¶    ║",
+            "║         ║    $                        ║                   ║",
+            "║         ║         ║    $    ║         ║   $     ║         ║",
+            "╚═════════╩═════════╩═════════╩═════════╩═════════╩═════════╝"
+        };
+
+        string[] tutorialLevel3 =
+        {
+            "╔═════════╦═════════╦═════════╦═════════╦═════════╦═════════╗",
+            "║                   ║         ║         ║         o         ║",
+            "║         ║         e         è         à         ║    $    ║",
+            "║    A    ║         ║         ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╠═════════╩════ ════╬════ ════╩════ ════╬════ì════╬═════════╣",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "║ X                 ║         E         ║         i       Ð ║",
+            "║                   ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "╠════a════╦════a════╬════è════╦════ì════╬════ ════╬═════════╣",
+            "║         ║         ║         ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║    I    ║",
+            "║    O    ║         ì         ì         ║                   ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╚═════════╩═════════╩═════════╩═════════╩═════════╩═════════╝"
+        };
+
+        string[] tutorialLevel4 =
+        {
+            "╔═════════╦═════════╦═════════╦═════════╦═════════╦═════════╗",
+            "║    $              ║         ║         ║         |         ║",
+            "║         ║    $    |    b         b              ║         ║",
+            "║    G    ║         ║         ║         ║         ║         ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╠═════════╩════ ════╬════ ════╩════ ════╬════ ════╬═════════╣",
+            "║ $       $       $ ║                   ║         ║         ║",
+            "║                   ║                   ║         ║         ║",
+            "║ X                 ║                   ║                 Ð ║",
+            "║                   ║                   ║         ║         ║",
+            "║ $       $       $ ║                   ║         ║         ║",
+            "╠═════════╦════ ════╬════ ════╦════ ════╬════ ════╬═════════╣",
+            "║         ║         ║         ║         ║         ║    $    ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "║ c    C                 b  B      b  c ║    D              ║",
+            "║         ║         ║         ║         ║         ║         ║",
+            "╚═════════╩═════════╩═════════╩═════════╩═════════╩═════════╝"
+        };
+
+        public Tutorial()
+        {
+            TutorialLevels[0] = tutorialLevel1;
+            TutorialLevels[1] = tutorialLevel2;
+            TutorialLevels[2] = tutorialLevel3;
+            TutorialLevels[3] = tutorialLevel4;
+        }
+
+        public void DisplayTutorialInstructions(int index)
+        {
+            string[] instructions;
+
+            switch (index)
+            {
+                case 0:
+                    instructions = new string[]
+                    {
+                        "You are Gareth, the non-copyright infringing Master Thief. This is the training course you built in your hideout.",
+                        $"Use arrow keys, WASD or numpad keys to move around the map; reach the exit ({SymbolsConfig.ExitChar}) to complete the level."
+                    };
+                    DisplayInstructions(instructions);
+                    break;
+
+                case 1:
+                    instructions = new string[]
+                    {
+                        $"Treasures ({SymbolsConfig.TreasureChar}) are optional collectibles in each floor.",
+                        " ",
+                        "If the exit is green, it means it's open and you are free to exit (assuming no other obstacles prevent you to reach it).",
+                        $"If the exit is red, it means instead that you will need to find one or more Keys ({SymbolsConfig.KeyChar}) to unlock it.",
+                        " ",
+                        "When you are on a mission, you may have limited knowledge of the locations layouts: you will know where to look for some of the keys,",
+                        "but as you collect the known ones, you might find that there are others hidden about the floor.",
+                        " ",
+                        "If the exit doesn't turn green when you collect the last key, check the map to see if you did not discovered the location of another one."
+                    };
+                    DisplayInstructions(instructions);
+                    break;
+
+                case 2:
+                    instructions = new string[]
+                    {
+                         $"Levers (\\) open and close gates ({SymbolsConfig.GateChar}) throughout the level.",
+                         "They may open optional rooms and passages, or clear the way to your destination.",
+                         "Levers can open multiple gates. They may also close gates that start open when you first enter a location",
+                    };
+                    DisplayInstructions(instructions);
+                    break;
+
+                case 3:
+                    instructions = new string[]
+                    {
+                         "Beware of Guards! They patrol the grounds, or stand in place and look around.",
+                         "If they see you, they'll get alerted and chase you until they loose sight of you. You may be able to safely hide in some closets.",
+                         "They can't see right behind them, of course, but be careful; they are still aware of what happens in their immediate viciniy.",
+                         "Study their activity well before trying to make your move, and don't get too close no matter where they are looking.",
+                         "Depending on the difficulty level you chose at the beginning of your adventure, you might be able to bribe them to look the other way.",
+                         "It will get more expansive the more you do it, so don't be too cocky!",
+                         "Feel free to experiment here. This is just training: you will be able to retry as many times as you need."
+                    };
+                    DisplayInstructions(instructions);
+                    break;
+            }
+        }
+
+        private void DisplayInstructions(string[] instructions)
+        {
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                int cursorXoffset = instructions[i].Length / 2;
+                SetCursorPosition((WindowWidth / 2) - cursorXoffset, WindowTop + i + 1);
+                WriteLine(instructions[i]);
+            }
+        }
+
+        public void DisplayTutorialFail()
+        {
+            Clear();
+            string[] instructions = new string[]
+            {
+                "The guards caught you!",
+                " ",
+                "Don't worry, this is just for training. You can retry as many times as you need.",
+                " ",
+                " ",
+                " ",
+                "Press any key when you are ready to retry."
+            };
+            DisplayInstructions(instructions);
+            ReadKey(true);
+            return;
+        }
+
+        public void DisplayEndTutorial()
+        {
+            Clear();
+            string[] instructions = new string[]
+            {
+                "Congratulations, you completed the training course!",
+                "With your master thief skills refreshed, you are ready to start new adventures.",
+                " ",
+                " ",
+                "A few more words about your upcoming adventures:",
+                "The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.",
+                "You will be able to choose your difficulty level before starting a new game:",
+                " ",
+                "> VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.                     ",
+                "  Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.                   ",
+                " ",
+                "> EASY: same conditions as very easy, but if you game over, you'll have to start from the first level.                        ",
+                " ",
+                "> NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.                 ",
+                "  Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.                       ",
+                " ",
+                "> HARD: same conditions as normal, but if you game over, you'll have to start from the first level.                           ",
+                " ",
+                "> VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.",
+                "  You will still be able to load the last save and retry the same level.                                                      ",
+                " ",
+                "> IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.                "
+            };
+            DisplayInstructions(instructions);
+
+            SetCursorPosition(0, WindowHeight - 3);
+            WriteLine("Press any key to return to the main menu...");
+            ReadKey(true);
+        }
+    }
+}

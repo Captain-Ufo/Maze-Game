@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using static System.Console;
+using System.Text;
 
 namespace MazeGame
 {
@@ -12,23 +13,17 @@ namespace MazeGame
     /// </summary>
     class Game
     {
-        private List<Floor> floors;
-
+        private List<Level> levels;
         private bool playerHasBeenCaught;
         private bool hasDrawnBackground;
-
         private int totalGold;
-
         private string levelFilesPath;
-
         private string gameVersion = "1.5";
-
         private Menu mainMenu;
         private Menu bribeMenu;
-
         private SaveSystem saveSystem;
-        private ChiptunePlayer chiptunePlayer;
-
+        
+        public ChiptunePlayer TunePlayer { get; private set; }
         public Player MyPlayer { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
         public int CurrentRoom { get; private set; }
@@ -43,14 +38,14 @@ namespace MazeGame
         public void Start()
         {
             saveSystem = new SaveSystem();
-            chiptunePlayer = new ChiptunePlayer();
+            TunePlayer = new ChiptunePlayer();
             MyStopwatch = new Stopwatch();
 
             playerHasBeenCaught = false;
             TimesCaught = 0;
             totalGold = 0;
 
-            levelFilesPath = Directory.GetCurrentDirectory() + "\\Levels";
+            levelFilesPath = Directory.GetCurrentDirectory() + "/Levels";
 
             SetupConsole();
             CreateMainMenu();
@@ -75,26 +70,46 @@ namespace MazeGame
 
 
 
-        private void InstantiateEntities(int startBooty, int startLevel)
+        private void InstantiateGameEntities(string configFilePath, int startBooty, int startLevel)
         {
-            floors = new List<Floor>();
+            levels = new List<Level>();
 
-            string[] levelFiles = File.ReadAllLines(levelFilesPath + "\\FloorsConfig.txt");
+            string[] levelFiles = File.ReadAllLines(levelFilesPath + configFilePath);
 
             foreach (string levelFile in levelFiles)
             {
-                string levelFilePath = levelFilesPath + "\\" + levelFile + ".txt";
+                string levelFilePath = levelFilesPath + "/" + levelFile + ".txt";
 
-                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelFilePath, DifficultyLevel);
+                string[] levelMap = File.ReadAllLines(levelFilePath);
 
-                floors.Add(new Floor(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, levelInfo.Treasures,
-                                     levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelMap, DifficultyLevel);
+
+                levels.Add(new Level(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, 
+                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
             }
 
-            MyPlayer = new Player(floors[startLevel].PlayerStartX, floors[startLevel].PlayerStartY);
+            MyPlayer = new Player(levels[startLevel].PlayerStartX, levels[startLevel].PlayerStartY);
             MyPlayer.Booty = startBooty;
+        }
+
+
+
+        private void InstantiateTutorialEntities(Tutorial tutorial)
+        {
+            levels = new List<Level>();
+
+            for (int i = 0; i < tutorial.TutorialLevels.Length; i++)
+            {
+                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(tutorial.TutorialLevels[i], DifficultyLevel);
+
+                levels.Add(new Level("Tutorial " + (i + 1), levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit,
+                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+            }
+
+            MyPlayer = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            MyPlayer.Booty = 0;
         }
 
 
@@ -105,7 +120,7 @@ namespace MazeGame
 
             try
             {
-                SetWindowSize(180, 56);
+                SetWindowSize(180, 60);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -129,17 +144,33 @@ namespace MazeGame
 
 
         #region Game
-        private void PlayGame(int startRoom, int startBooty = 0)
+        private void PlayGame(int startRoom = 0, int startBooty = 0)
         {
             Clear();
             DisplayLoading();
-            InstantiateEntities(startBooty, startRoom);
+            InstantiateGameEntities("/FloorsConfig.txt", startBooty, startRoom);
             RunGameLoop(startRoom);
+            WinGame();
         }
 
 
 
-        private void RunGameLoop(int startRoom)
+        private void PlayTutorial()
+        {            
+            Tutorial tutorial = new Tutorial();
+
+            Clear();
+            DisplayLoading();
+            DifficultyLevel = Difficulty.VeryEasy;
+            InstantiateTutorialEntities(tutorial);
+            RunGameLoop(0, tutorial);
+            tutorial.DisplayEndTutorial();
+            RunMainMenu();
+        }
+
+
+
+        private void RunGameLoop(int startRoom, Tutorial tutorial = null)
         {
             MyStopwatch.Start();
             long timeAtPreviousFrame = MyStopwatch.ElapsedMilliseconds;
@@ -166,48 +197,59 @@ namespace MazeGame
                     return;
                 }
 
-                floors[CurrentRoom].UpdateGuards(deltaTimeMS, this);
+                levels[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
                 
                 DrawFrame(CurrentRoom);
 
-                string elementAtPlayerPosition = floors[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
+                if (tutorial != null)
+                {
+                    tutorial.DisplayTutorialInstructions(CurrentRoom);
+                }
+
+                string elementAtPlayerPosition = levels[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
                 {
-                    chiptunePlayer.PlaySFX(1000, 100);
-                    floors[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
+                    TunePlayer.PlaySFX(1000, 100);
+                    levels[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
                     MyPlayer.Draw();
                     MyPlayer.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
-                    chiptunePlayer.PlaySFX(800, 100);
-                    floors[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
+                    TunePlayer.PlaySFX(800, 100);
+                    levels[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
                     MyPlayer.Draw();
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
                     && MyPlayer.HasMoved)
                 {
-                    chiptunePlayer.PlaySFX(100, 100);
-                    floors[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
+                    TunePlayer.PlaySFX(100, 100);
+                    levels[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
                     MyPlayer.Draw();
                 }
-                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !floors[CurrentRoom].IsLocked)
+                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !levels[CurrentRoom].IsLocked)
                 {
-                    if (floors.Count > CurrentRoom + 1)
+                    if (levels.Count > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        MyPlayer.SetStartingPosition(floors[CurrentRoom].PlayerStartX, floors[CurrentRoom].PlayerStartY);
+                        MyPlayer.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
                         hasDrawnBackground = false;
 
-                        saveSystem.SaveGame(this);
+                        if (tutorial == null)
+                        {
+                            saveSystem.SaveGame(this);
+                        }
                         Clear();
                     }
                     else
                     {
-                        saveSystem.DeleteSaveGame(this);
+                        if (tutorial == null)
+                        {
+                            saveSystem.DeleteSaveGame(this);
+                        }
                         break;
                     }
                 }
@@ -215,20 +257,33 @@ namespace MazeGame
                 Thread.Sleep(20);
             }
 
+            MyStopwatch.Stop();
+
             if (playerHasBeenCaught)
             {
-                GameOver();
+                if (tutorial != null)
+                {
+                    tutorial.DisplayTutorialFail();
+                    hasDrawnBackground = false;
+                    playerHasBeenCaught = false;
+                    TimesCaught = 0;
+                    MyPlayer.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
+                    levels[CurrentRoom].Reset();
+                    RunGameLoop(CurrentRoom, tutorial);
+                }
+                else
+                {
+                    GameOver();
+                }
                 return;
             }
-
-            WinGame();
         }
 
 
 
         private bool HandleInputs(int currentLevel, int deltaTimeMS)
         {
-            if (!MyPlayer.HandlePlayerControls(floors[currentLevel], deltaTimeMS))
+            if (!MyPlayer.HandlePlayerControls(levels[currentLevel], deltaTimeMS))
             { 
                 MyStopwatch.Stop();
                 if (QuitGame())
@@ -239,7 +294,7 @@ namespace MazeGame
                 {
                     Clear();
                     MyStopwatch.Start();
-                    floors[currentLevel].Draw();
+                    levels[currentLevel].Draw();
                     return true;
                 }
             }
@@ -252,11 +307,11 @@ namespace MazeGame
         {
             if (!hasDrawnBackground)
             {
-                floors[currentRoom].Draw();
+                levels[currentRoom].Draw();
                 MyPlayer.Draw();
                 hasDrawnBackground = true;
             }
-            floors[currentRoom].DrawGuards();
+            levels[currentRoom].DrawGuards();
             DrawUI(currentRoom);
             CursorVisible = false;
         }
@@ -271,7 +326,7 @@ namespace MazeGame
 
             WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
             WriteLine("");
-            Write($"   {floors[currentLevel].Name}");
+            Write($"   {levels[currentLevel].Name}");
             SetCursorPosition(35, CursorTop);
             Write($"Difficulty Level: {DifficultyLevel}");
             SetCursorPosition(70, CursorTop);
@@ -316,8 +371,8 @@ namespace MazeGame
                 bribeCostIncrease = 100;
             }
 
-            //No setting for Very Hard or Ironman because in the current iteration of the design, at those difficulty levels 
-            //being caught means instant game over
+            // No setting for Very Hard or Ironman because in the current iteration of the design, at those difficulty levels 
+            // being caught means instant game over
 
             int bribeCost = 100 + (bribeCostIncrease * TimesCaught);
 
@@ -331,21 +386,21 @@ namespace MazeGame
                 @"                   ___ | ______     ;_____ |___....__      ,;;;;/;;;;;'       ",
                 @"             ___.-~ \\(| \  \.\ \__/ /./ /:|)~   ~   \   ,;;;;/;;;;;'         ",
                 @"         /~~~    ~\    |  ~-.     |   .-~: |//  _.-~~--,;;;;/;;;;;'           ",
-                @"        (.-~___     \.'|    | /-.__.-\|::::| //~     ,;;;;/;;;;;'             ",
-                @"        /      ~~--._ \|   /   ______ `\:: |/      ,;;;;/;;;;;'               ",
-                @"     .-|             ~~|   |  /''''''\ |:  |     ,;;;;/;;;;;' \               ",
+                @"        (.-~___     \.'|    | /-.__.-\|::::| //~      ,;;;;/;;;;;'            ",
+                @"        /      ~~--._ \|   /   ______ `\:: |/       ,;;;;/;;;;;'              ",
+                @"     .-|             ~~|   |  /''''''\ |:  |      ,;;;;/;;;;;' \              ",
+                @"    /                   \  |  ~`'~~''~ |  /     ,;;;;/;;;;;'--__;             ",
                 @"    /                   \  |  ~`'~~''~ |  /    ,;;;;/;;;;;'--__;              ",
-                @"    /                   \  |  ~`'~~''~ |  /    ,;;;;/;;;;;'--__;              ",
-                @"   (        \             \|`\._____./'|/    ,;;;;/;;;;;'      '\             ",
-                @"  / \        \              \888888888/    ,;;;;/;;;;;'     /    |            ",
+                @"   (        \             \| `\.____./'|/    ,;;;;/;;;;;'      '\             ",
+                @"  / \        \!             \888888888/    ,;;;;/;;;;;'     /    |            ",
                 @" |      ___--'|              \8888888/   ,;;;;/;;;;;'      |     |            ",
                 @"|`-._---       |               \888/   ,;;;;/;;;;;'              \            ",
                 @"|             /                  °   ,;;;;/;;;;;'  \              \__________ ",
                 @"(             )                 |  ,;;;;/;;;;;'      |        _.--~           ",
                 @" \          \/ \              ,  ;;;;;/;;;;;'       /(     .-~_..--~~~~~~~~~~ ",
                 @"  \__         '  `       ,     ,;;;;;/;;;;;'    .   /  \   / /~               ",
-                @" /          \'  |`._______ ,;;;;;;/;;;;;;'    /   :    \/'/'       /|_/|   ``|",
-                @"| _.-~~~~-._ |   \ __   .,;;;;;;/;;;;;;' ~~~~'   .'    | |       /~ (/\/    ||",
+                @" /          \'  |`._______ ,;;;;;;/;;;;;;'     /   :   \/'/'       /|_/|   ``|",
+                @"| _.-~~~~-._ |   \ __   .,;;;;;;/;;;;;;' ~~~~~'  .'    | |       /~ (/\/    ||",
                 @"/~ _.-~~~-._\    /~/   ;;;;;;;/;;;;;;;'          |    | |       / ~/_-'|-   /|",
                 @"(/~         \| /' |   ;;;;;;/;;;;;;;;            ;   | |       (.-~;  /-   / |",
                 @"|            /___ `-,;;;;;/;;;;;;;;'            |   | |      ,/)  /  /-   /  |",
@@ -361,15 +416,15 @@ namespace MazeGame
                 @"|  `-.     ,'              `#########       \       | |          ((.-~~~-~_--~",
                 @"`\    `-.;'                  `#####' | | '    ((.-~~                          ",
                 @"  `-._   )               \     |   |        .       |  \                 '    ",
-                @"      `~~_ /                  |    \               |   `--------------------- ",
+                @"      `~~_ /                  |    \                |  `--------------------- ",
                 @"                                                                              ",
-                @"       |/ ~                `.  |     \        .     | O    __.-------------- -",
+                @"       |/ ~                `.  |    \         .     | O    __.-------------- -",
                 @"                                                                              ",
-                @"        |                   \ ;      \             | _.- ~                    ",
+                @"        |                   \ ;      \              | _.- ~                   ",
                 @"                                                                              ",
-                @"        |                    |        |            |  /  |                    ",
+                @"        |                    |        |             |  /  |                   ",
                 @"                                                                              ",
-                @"         |                   |         |           |/ '  |  RN TX             ",
+                @"         |                   |         |            |/ '  |  RN TX            ",
             };
 
             foreach(string s in guardArt)
@@ -382,6 +437,8 @@ namespace MazeGame
 
             string[] prompt =
             {
+                "'HALT!'",
+                " ",
                 "A guard caught you! Quick, maybe you can bribe them.",
                 $"You have collected ${MyPlayer.Booty} so far.",
             };
@@ -418,7 +475,15 @@ namespace MazeGame
                         return true;
                     }
 
-                    message = "The guard's request are too high for your pockets.";
+                    if (MyPlayer.Booty > 0)
+                    {
+                        message = "The guard won't be swayed by the paltry sum you can offer.";
+                    }
+                    else
+                    {
+                        message = "You pockets are empty. The guard won't be swayed by words alone.";
+                    }
+
                     SetCursorPosition(xPos - message.Length / 2, CursorTop + 4);
                     WriteLine(message);
                     ReadKey(true);
@@ -440,54 +505,54 @@ namespace MazeGame
 
             string[] gameOverArt =
             {
-                "                                                                            ",
-                "                                                                            ",
-                "       ____ __|__   ____    _ ________|__ _________ ______ _____            ",
-                "       |           |o  o|      |           |  \\__      |                    ",
-                "                   | c)%,      |                 \\     |                    ",
-                "                   |o__o'%                 |                       |        ",
-                "    ___|______________ _  %  ,mM  _________|__ ________|__ ____ ___|__      ",
-                "             |            %  |  n    |           |           |              ",
-                "             |      -__/   %  Y /    |           |   ____    |              ",
-                "             |      /       %J_]     |           |  |o  o|   |              ",
-                "   _ _____ __|__ ________|  / /  ____|__ _______    ,%(C | __|__  __ __     ",
-                "       |           |       / /             |        %o__o|         |        ",
-                "                          / /     ,-~~,      Mm,   %               |        ",
-                "       |          ____   / /    ,r/^V\\,\\    n  |  %    |           |        ",
-                "   ____|_______  |o  o|  \\ \\    ('_ ~ ( )   \\ Y  %  ___|_______ ___|__ _    ",
-                "             |   | c)%|   \\/\\   ()--()-))    [_t%            |              ",
-                "             |   |o__%|   /  \\   \\ _(x)88     \\ \\            |              ",
-                "             |        %   \\  !`-. \\ _/|8       \\ \\           |   _/         ",
-                "   _ _____ __|__ ____  %   \\    ,%J___]>---.____\\ \\  ________|___\\_____     ",
-                "       |  \\_       |    %,  \\ `,%         '    (__/    |           |        ",
-                "       |    \\      |     `%-%-%/           / =\\|88                 |        ",
-                "                   |          |           /888         |                    ",
-                "    ___|________ __|_______   |           |8  _________|_______ ___|__      ",
-                "             |           |     \\          /8     |           |              ",
-                "             |           |     |         |8      |           |              ",
-                "             |           |     |         |8                  |              ",
-                "   _ _____ __|___ _______|____ /          \\_ _    ________ __|__  ___ _     ",
-                "       |           |           J\\:______/ \\            |\\__        |        ",
-                "                   |           |           |           | | \\       |        ",
-                "       |           |          /            \\           |           |        ",
-                "    ___|__ ________|_______  /     \\_       \\ _____ ___|__ ____ ___|__ _    ",
-                "             |           |  /      /88\\      \\   |           |              ",
-                "                         | /      /8   \\      \\  |           |              ",
-                "             |            /      /8  |  \\      \\                            ",
-                "   _ _____ __|__ ______  /      /8___|__ \\      \\  _ ________|__ _____ _    ",
-                "       |           |    /     .'8         '.     \\     |           |        ",
-                "       | _         |   /     /8|            \\     \\    |                    ",
-                "       |  \\_       |  /__ __/8 |           | \\_____\\   |           |        ",
-                "   ____|__/________  /   |888__|__ ____  __|__ 8|   \\ _|_______ ___|__ _    ",
-                "             |      /   /8           |           \\   \\       |              ",
-                "                   /  .'8            |            '.  \\      |              ",
-                "             |    /__/8  |           |             8\\__\\     |              ",
-                "     ____ __ |_  |  /8___|__ _____ __|__ ________|_ 8\\  l __|__ _____ _     ",
-                "      |         /> /8          |           |         8\\ <\\         |        ",
-                "  ____          />_/8           |   y       |          8\\_<\\         ____    ",
-                " |o  o|       ,%J__]            |   \\       |           [__t %,     | o  o | ",
-                " | c)%,      ,%> )(8__ ___ ___  |___/___ ___| ______ ___8)(  <%,    _,% (c | ",
-                "| o__o`%-%-%' __ ]8                                     [ __  '%-%-%`o__o | ",
+                @"                                                                            ",
+                @"                                                                            ",
+                @"       ____ __|__   ____    _ ________|__ _________ ______ _____            ",
+                @"       |           |o  o|      |           |  \__      |                    ",
+                @"                   | c)%,      |                 \     |                    ",
+                @"                   |o__o'%                 |                       |        ",
+                @"    ___|______________ _  %  ,mM  _________|__ ________|__ ____ ___|__      ",
+                @"             |            %  |  n    |           |           |              ",
+                @"             |      -__/   %  Y /    |           |   ____    |              ",
+                @"             |      /       %J_]     |           |  |o  o|   |              ",
+                @"   _ _____ __|__ ________|  / /  ____|__ _______    ,%(C | __|__  __ __     ",
+                @"       |           |       / /             |        %o__o|         |        ",
+                @"                          / /     ,-~~,      Mm,   %               |        ",
+                @"       |          ____   / /    ,r/^V\,\    n  |  %    |           |        ",
+                @"   ____|_______  |o  o|  \ \    ('_ ~ ( )   \ Y  %  ___|_______ ___|__ _    ",
+                @"             |   | c)%|   \/\   ()--()-))    [_t%            |              ",
+                @"             |   |o__%|   /  \   \ _(x)88     \ \            |              ",
+                @"             |        %   \  |`-. \ _/|8       \ \           |   _/         ",
+                @"   _ _____ __|__ ____  %   \ !  ,%J___]>---.____\ \  ________|___\_____     ",
+                @"       |  \_       |    %,  \ `,% \  /   /'    (__/    |           |        ",
+                @"       |    \      |     `%-%-%/|  \/   /  / =\|88                 |        ",
+                @"                   |          | \      /   /888         |                    ",
+                @"    ___|________ __|_______   |  '----'   |8  _________|_______ ___|__      ",
+                @"             |           |     \          /8     |           |              ",
+                @"             |           |     |         |8      |           |              ",
+                @"             |           |     |         |8                  |              ",
+                @"   _ _____ __|___ _______|____ /          \_ _    ________ __|__  ___ _     ",
+                @"       |           |           J\:______/ \            |\__        |        ",
+                @"                   |           |           |           | | \       |        ",
+                @"       |           |          /            \           |           |        ",
+                @"    ___|__ ________|_______  /     \_       \ _____ ___|__ ____ ___|__ _    ",
+                @"             |           |  /      /88\      \   |           |              ",
+                @"                         | /      /8   \      \  |           |              ",
+                @"             |            /      /8  |  \      \                            ",
+                @"   _ _____ __|__ ______  /      /8___|__ \      \  _ ________|__ _____ _    ",
+                @"       |           |    /     .'8         '.     \     |           |        ",
+                @"       | _         |   /     /8|            \     \    |                    ",
+                @"       |  \_       |  /__ __/8 |           | \_____\   |           |        ",
+                @"   ____|__/________  /   |888__|__ ____  __|__ 8|   \ _|_______ ___|__ _    ",
+                @"             |      /   /8           |           \   \       |              ",
+                @"                   /  .'8            |            '.  \      |              ",
+                @"             |    /__/8  |           |             8\__\     |              ",
+                @"     ____ __ |_  |  /8___|__ _____ __|__ ________|_ 8\  l __|__ _____ _     ",
+                @"      |         /> /8          |           |         8\ <\         |        ",
+                @" ____          />_/8           |   y       |          8\_<\         ____    ",
+                @"|o  o|       ,%J__]            |   \       |           [__t %,     | o  o | ",
+                @"| c)%,      ,%> )(8__ ___ ___  |___/___ ___| ______ ___8)(  <%,    _,% (c | ",
+                @"| o__o`%-%-%' __ ]8                                     [ __  '%-%-%`o__o | ",
             };
 
             SetCursorPosition(0, 2);
@@ -522,7 +587,7 @@ namespace MazeGame
                 ResetColor();
             }
 
-            chiptunePlayer.PlayGameOverTune();
+            TunePlayer.PlayGameOverTune();
 
             if (CurrentRoom == 0 || DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.Hard || DifficultyLevel == Difficulty.Ironman)
             {
@@ -538,7 +603,7 @@ namespace MazeGame
             SetCursorPosition(0, WindowHeight - 2);
             Write("Press any key to continue...");
             ReadKey(true);
-            chiptunePlayer.StopTune();
+            TunePlayer.StopTune();
             DisplayAboutInfo();
         }
 
@@ -546,7 +611,7 @@ namespace MazeGame
 
         private void WinGame()
         {
-            chiptunePlayer.PlayGameWinTune();
+            TunePlayer.PlayGameWinTune();
 
             string[] outro =
             {
@@ -585,7 +650,7 @@ namespace MazeGame
             WriteLine("Press any key to continue...");
             ReadKey(true);
             ResetGame(true);
-            chiptunePlayer.StopTune();
+            TunePlayer.StopTune();
             DisplayAboutInfo();
         }
 
@@ -596,12 +661,12 @@ namespace MazeGame
             playerHasBeenCaught = false;
             TimesCaught = 0;
             MyPlayer.Booty = 0;
-            MyPlayer.SetStartingPosition(floors[0].PlayerStartX, floors[0].PlayerStartY);
+            MyPlayer.SetStartingPosition(levels[0].PlayerStartX, levels[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
-            foreach (Floor floor in floors)
+            foreach (Level level in levels)
             {
-                floor.Reset();
+                level.Reset();
             }
 
             if (deleteSave)
@@ -651,7 +716,7 @@ namespace MazeGame
                 "                                                                  ",
             };
 
-            string[] options = { "New Game", "Instructions", "Credits", "Quit" };
+            string[] options = { "New Game", "Tutorial", "Credits", "Quit" };
 
             mainMenu = new Menu(prompt, options);
         }
@@ -702,7 +767,7 @@ namespace MazeGame
 
         private void MainMenuWithContinue(string[] saveFiles)
         {
-            string[] options = { "Continue", "New Game", "Instructions", "Credits", "Quit" };
+            string[] options = { "Continue", "New Game", "Tutorial", "Credits", "Quit" };
 
             mainMenu.UpdateMenuOptions(options);
 
@@ -717,7 +782,7 @@ namespace MazeGame
                     SelectDifficulty(true);
                     break;
                 case 2:
-                    DisplayInstructions();
+                    PlayTutorial();
                     break;
                 case 3:
                     DisplayAboutInfo();
@@ -735,7 +800,7 @@ namespace MazeGame
 
         private void DefaultMainMenu()
         {
-            string[] options = { "New Game", "Instructions", "Credits", "Quit" };
+            string[] options = { "New Game", "Tutorial", "Credits", "Quit" };
 
             mainMenu.UpdateMenuOptions(options);
 
@@ -747,7 +812,7 @@ namespace MazeGame
                     SelectDifficulty(false);
                     break;
                 case 1:
-                    DisplayInstructions();
+                    PlayTutorial();
                     break;
                 case 2:
                     DisplayAboutInfo();
@@ -848,7 +913,7 @@ namespace MazeGame
                     return;
             }
 
-            PlayGame(0);
+            PlayGame();
         }
 
 
@@ -867,54 +932,7 @@ namespace MazeGame
                 "Had they searched you more throughly, they would've found the emergency lockpick sown inside the hem of your shirt.",
                 "The meager lock of the cell's door is not going to resist it for too long.",
                 "Escape the dungeon and, to spite the Watch, try to collect as much treasure as you can!"
-        };
-
-            foreach(string s in backStory)
-            {
-                SetCursorPosition((WindowWidth / 2) - (s.Length / 2), CursorTop);
-                WriteLine(s);
-            }
-
-            WriteLine("\n\n\n ~·~ INSTRUCTIONS: ~·~");
-            WriteLine("\n > Use the arrow keys to move.");
-            Write("\n > Try to reach the TRAPDOOR to the next level, which looks like this: ");
-            ForegroundColor = ConsoleColor.Green;
-            WriteLine(SymbolsConfig.ExitChar);
-            ResetColor();
-            Write("\n > Sometimes before you reach the door you need to find a KEY, which looks like this: ");
-            ForegroundColor = ConsoleColor.DarkYellow;
-            WriteLine(SymbolsConfig.KeyChar);
-            ResetColor();
-            Write("\n > Avoid at all costs GUARDS, which looks like this: ");
-            BackgroundColor = ConsoleColor.DarkRed;
-            ForegroundColor = ConsoleColor.Black;
-            WriteLine("<");
-            ResetColor();
-            WriteLine("   Beware, Guards can catch you even if they just walk by your position. They don't need to actually bump against you.");
-            WriteLine("   Depending on the difficulty level you chose, you might be able to bribe them to look the other way. It will get more expansive the more you do it!");
-            WriteLine("\n > LEVERS, which looks like this: " + SymbolsConfig.LeverOffChar + " or this " + SymbolsConfig.LeverOnChar + 
-                      ", open GATES ( " +SymbolsConfig.GateChar + " )  in the current floor.");
-            Write("\n > (Optional) Try to collect as much treasure as you can: ");
-            ForegroundColor = ConsoleColor.Yellow;
-            WriteLine(SymbolsConfig.TreasureChar);
-            ResetColor();
-            WriteLine("\n The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.");
-            WriteLine("\n\n Difficulty levels:");
-            WriteLine("\n > VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.");
-            WriteLine("   Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.");
-            WriteLine("\n > EASY: same conditions as very easy, but if you game over, you'll have to start from the first level.");
-            WriteLine("\n > NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.");
-            WriteLine("   Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.");
-            WriteLine("\n > HARD: same conditions as normal, but if you game over, you'll have to start from the first level.");
-            WriteLine("\n > VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.");
-            WriteLine("   You will still be able to load the last save and retry the same level.");
-            WriteLine("\n > IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.");
-
-            SetCursorPosition(0, WindowHeight - 3);
-            WriteLine("Press any key to return to the main menu...");
-            ReadKey(true);
-            Clear();
-            RunMainMenu();
+            };
         }
 
 
@@ -931,7 +949,7 @@ namespace MazeGame
             WriteLine("  (Yes, I know it's bad. I'm not a level designer :P)");
             WriteLine("\n Ascii title from Text To Ascii Art Generator (https://www.patorjk.com/software/taag)");
             WriteLine(" Ascii art from Ascii Art Archive (https://www.asciiart.eu/):");
-            WriteLine("\n Guard art by Randall Nortman and Tua Xiong");
+            WriteLine("\n Guard art based on 'Orc' by Randall Nortman and Tua Xiong");
             WriteLine("\n Win screen art by Henry Segerman");
             WriteLine("\n Game over screen art based on art by Jgs");
             SetCursorPosition(0, WindowHeight - 3);
@@ -951,11 +969,16 @@ namespace MazeGame
                 "Are you sure you want to quit?",
                 "The game automatically saved the last level you played, but all your progress in the current level will be lost.",
              };
-            string[] options = { "Yes", "No" };
+            string[] options = { "Quit to Main Menu", "Quit to desktop", "Return to game" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
             int selection = quitMenu.Run(WindowWidth/2, 10, 2);
             if (selection == 0)
+            {
+                RunMainMenu();
+                return true;
+            }
+            if (selection == 1)
             {
                 Environment.Exit(0);
                 return true;
@@ -1008,7 +1031,7 @@ namespace MazeGame
 
             if (selectedIndex == 0)
             {
-                chiptunePlayer.StopTune();
+                TunePlayer.StopTune();
                 ResetGame(true);
                 RunGameLoop(0);
             }
@@ -1032,7 +1055,7 @@ namespace MazeGame
 
             if (selectedIndex == 0)
             {
-                chiptunePlayer.StopTune();
+                TunePlayer.StopTune();
                 Retry();
             }
         }
@@ -1048,8 +1071,8 @@ namespace MazeGame
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
             MyPlayer.Booty = saveGame.Booty;
-            MyPlayer.SetStartingPosition(floors[saveGame.CurrentLevel].PlayerStartX, floors[saveGame.CurrentLevel].PlayerStartY);
-            floors[saveGame.CurrentLevel].Reset();
+            MyPlayer.SetStartingPosition(levels[saveGame.CurrentLevel].PlayerStartX, levels[saveGame.CurrentLevel].PlayerStartY);
+            levels[saveGame.CurrentLevel].Reset();
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

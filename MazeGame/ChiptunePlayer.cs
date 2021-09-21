@@ -55,28 +55,28 @@ namespace MazeGame
 
         private void GameWonTune(CancellationToken token)
         {
-            Coordinates[] tune =
+            Vector2[] tune =
             {
-                new Coordinates(540, 100),
-                new Coordinates(590, 120),
-                new Coordinates(640, 140),
-                new Coordinates(690, 500),
-                new Coordinates(640, 500),
-                new Coordinates(590, 200),
-                new Coordinates(640, 100),
-                new Coordinates(690, 130),
-                new Coordinates(740, 500),
-                new Coordinates(690, 500),
-                new Coordinates(640, 200),
-                new Coordinates(690, 100),
-                new Coordinates(740, 130),
-                new Coordinates(790, 500),
-                new Coordinates(740, 500),
-                new Coordinates(790, 200),
-                new Coordinates(840, 100),
-                new Coordinates(890, 120),
-                new Coordinates(940, 140),
-                new Coordinates(990, 2000),
+                new Vector2(540, 100),
+                new Vector2(590, 120),
+                new Vector2(640, 140),
+                new Vector2(690, 500),
+                new Vector2(640, 500),
+                new Vector2(590, 200),
+                new Vector2(640, 100),
+                new Vector2(690, 130),
+                new Vector2(740, 500),
+                new Vector2(690, 500),
+                new Vector2(640, 200),
+                new Vector2(690, 100),
+                new Vector2(740, 130),
+                new Vector2(790, 500),
+                new Vector2(740, 500),
+                new Vector2(790, 200),
+                new Vector2(840, 100),
+                new Vector2(890, 120),
+                new Vector2(940, 140),
+                new Vector2(990, 2000),
             };
 
             for (int i = 0; i < tune.Length; i++)
@@ -92,24 +92,24 @@ namespace MazeGame
 
         private void GameOverTune(CancellationToken token)
         {
-            Coordinates[] tune =
+            Vector2[] tune =
             {
-                new Coordinates(660, 1000),
-                new Coordinates(528, 1000),
-                new Coordinates(594, 1000),
-                new Coordinates(495, 1000),
-                new Coordinates(528, 1000),
-                new Coordinates(440, 1000),
-                new Coordinates(419, 1000),
-                new Coordinates(495, 1000),
-                new Coordinates(660, 1000),
-                new Coordinates(528, 1000),
-                new Coordinates(594, 1000),
-                new Coordinates(495, 1000),
-                new Coordinates(660, 500),
-                new Coordinates(528, 500),
-                new Coordinates(670, 1000),
-                new Coordinates(638, 2000),
+                new Vector2(660, 1000),
+                new Vector2(528, 1000),
+                new Vector2(594, 1000),
+                new Vector2(495, 1000),
+                new Vector2(528, 1000),
+                new Vector2(440, 1000),
+                new Vector2(419, 1000),
+                new Vector2(495, 1000),
+                new Vector2(660, 1000),
+                new Vector2(528, 1000),
+                new Vector2(594, 1000),
+                new Vector2(495, 1000),
+                new Vector2(660, 500),
+                new Vector2(528, 500),
+                new Vector2(670, 1000),
+                new Vector2(638, 2000),
             };
 
             for (int i = 0; i < tune.Length; i++)

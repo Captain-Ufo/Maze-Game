@@ -10,6 +10,7 @@ namespace MazeGame
     public static class SymbolsConfig
     {
         public const char ExitChar = 'Ð';
+        public const char EntranceChar = '≡';
         public const char KeyChar = '¶';
         public const char SpawnChar = 'X';
         public const char EmptySpace = ' ';

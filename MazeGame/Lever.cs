@@ -9,23 +9,23 @@ namespace MazeGame
     /// </summary>
     class Lever
     {
+        private int x;
+        private int y;
+        private Vector2[] connectedGates;
+
         /// <summary>
         /// Whether the lever is on or off
         /// </summary>
         public bool IsOn { get; set; } = false;
 
-        int x;
-        int y;
-
-        private Coordinates[] connectedGates;
 
         /// <summary>
         /// Toggles the lever between on and off, and updates the gates
         /// </summary>
-        /// <param name="floor">The world the lever and the connected gates are in</param>
+        /// <param name="level">The level the lever and the connected gates are in</param>
         /// <param name="xOffset">Horizontal offset to account for the centering of the World map on the screen</param>
         /// <param name="yOffset">Vertical offset to account for the centering of the World map on the screen</param>
-        public void Toggle(Floor floor, int xOffset, int yOffset)
+        public void Toggle(Level level, int xOffset, int yOffset)
         {
             IsOn = !IsOn;
 
@@ -36,19 +36,19 @@ namespace MazeGame
                 leverSymbol = SymbolsConfig.LeverOffChar.ToString();
             }
 
-            foreach (Coordinates coordinates in connectedGates)
+            foreach (Vector2 coordinates in connectedGates)
             {
-                if (floor.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
+                if (level.GetElementAt(coordinates.X + xOffset, coordinates.Y + yOffset) == SymbolsConfig.GateChar.ToString())
                 {
-                    floor.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.EmptySpace.ToString());
+                    level.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.EmptySpace.ToString());
                 }
                 else
                 {
-                    floor.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.GateChar.ToString());
+                    level.ChangeElementAt(coordinates.X + xOffset, coordinates.Y + yOffset, SymbolsConfig.GateChar.ToString());
                 }
             }
 
-            floor.ChangeElementAt(x + xOffset, y + yOffset, leverSymbol);
+            level.ChangeElementAt(x + xOffset, y + yOffset, leverSymbol);
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace MazeGame
         /// <summary>
         /// Assigns the gates that are swtiched by this lever. To be used only when parsing the level file
         /// </summary>
-        /// <param name="gates">The array of gates (in the form of Coordinates objects)</param>
-        public void AssignGates(Coordinates[] gates)
+        /// <param name="gates">The array of gates (in the form of Vector2 objects)</param>
+        public void AssignGates(Vector2[] gates)
         {
             connectedGates = gates;
         }

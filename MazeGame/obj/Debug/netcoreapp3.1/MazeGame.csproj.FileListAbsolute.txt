@@ -4,7 +4,6 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\MazeGame.runtimeconfig.dev.json
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\MazeGame.dll
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\MazeGame.pdb
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.csprojAssemblyReference.cache
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.AssemblyInfoInputs.cache
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.AssemblyInfo.cs
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.csproj.CoreCompileInputs.cache
@@ -19,3 +18,5 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Guards Barracks.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Stolen Goods Vault.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\High Security Confinement.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.csproj.AssemblyReference.cache
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.GeneratedMSBuildEditorConfig.editorconfig

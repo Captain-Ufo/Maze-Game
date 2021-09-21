@@ -9,6 +9,11 @@ namespace MazeGame
     /// </summary>
     class Player
     {
+        private int timeBetweenMoves;
+        private int timeSinceLastMove;
+        private string playerMarker;
+        private ConsoleColor playerColor;
+
         /// <summary>
         /// The player's current X position
         /// </summary>
@@ -25,12 +30,6 @@ namespace MazeGame
         /// Whether the player has moved in the current frame or not
         /// </summary>
         public bool HasMoved { get; set; }
-
-        private int timeBetweenMoves;
-        private int timeSinceLastMove;
-
-        private string playerMarker;
-        private ConsoleColor playerColor;
 
         /// <summary>
         /// Instantiates a Player object
@@ -65,10 +64,10 @@ namespace MazeGame
         /// <summary>
         /// Updates the player's coordinates, moving them by one tile at a time
         /// </summary>
-        /// <param name="floor">The level the player is moving in</param>
+        /// <param name="level">The level the player is moving in</param>
         /// <param name="direction">The direction of the movement</param>
         /// <param name="deltaTimeMS">frame timing, to handle movement speed</param>
-        public bool HandlePlayerControls(Floor floor, int deltaTimeMS)
+        public bool HandlePlayerControls(Level level, int deltaTimeMS)
         { 
             timeSinceLastMove += deltaTimeMS;
 
@@ -82,9 +81,9 @@ namespace MazeGame
                     case ConsoleKey.UpArrow:
                     case ConsoleKey.W:
                     case ConsoleKey.NumPad8:
-                        if (floor.IsPositionWalkable(X, Y - 1) && timeSinceLastMove >= timeBetweenMoves)
+                        if (level.IsPositionWalkable(X, Y - 1) && timeSinceLastMove >= timeBetweenMoves)
                         {
-                            Clear(floor);
+                            Clear(level);
                             Y--;
                             Draw();
                             HasMoved = true;
@@ -94,9 +93,9 @@ namespace MazeGame
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.S:
                     case ConsoleKey.NumPad2:
-                        if (floor.IsPositionWalkable(X, Y + 1) && timeSinceLastMove >= timeBetweenMoves)
+                        if (level.IsPositionWalkable(X, Y + 1) && timeSinceLastMove >= timeBetweenMoves)
                         {
-                            Clear(floor);
+                            Clear(level);
                             Y++;
                             Draw();
                             HasMoved = true;
@@ -106,9 +105,9 @@ namespace MazeGame
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.A:
                     case ConsoleKey.NumPad4:
-                        if (floor.IsPositionWalkable(X - 1, Y) && timeSinceLastMove >= timeBetweenMoves)
+                        if (level.IsPositionWalkable(X - 1, Y) && timeSinceLastMove >= timeBetweenMoves)
                         {
-                            Clear(floor);
+                            Clear(level);
                             X--;
                             Draw();
                             HasMoved = true;
@@ -118,9 +117,9 @@ namespace MazeGame
                     case ConsoleKey.RightArrow:
                     case ConsoleKey.D:
                     case ConsoleKey.NumPad6:
-                        if (floor.IsPositionWalkable(X + 1, Y) && timeSinceLastMove >= timeBetweenMoves)
+                        if (level.IsPositionWalkable(X + 1, Y) && timeSinceLastMove >= timeBetweenMoves)
                         {
-                            Clear(floor);
+                            Clear(level);
                             X++;
                             Draw();
                             HasMoved = true;
@@ -153,16 +152,16 @@ namespace MazeGame
         /// <summary>
         /// Replaces the player's symbol with whatever map symbol should be present in that position
         /// </summary>
-        /// <param name="floor">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
-        public void Clear(Floor floor)
+        /// <param name="level">The level from which to gather the information required (which symbol to use, the state of the exit, etc)</param>
+        public void Clear(Level level)
         {
-            string symbol = floor.GetElementAt(X, Y);
+            string symbol = level.GetElementAt(X, Y);
 
             SetCursorPosition(X, Y);
 
             if (symbol == SymbolsConfig.ExitChar.ToString())
             {
-                if (floor.IsLocked)
+                if (level.IsLocked)
                 {
                     ForegroundColor = ConsoleColor.Red;
                 }

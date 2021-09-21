@@ -18,7 +18,7 @@ namespace MazeGame
         /// </summary>
         public SaveSystem()
         {
-            saveGamesPath = Directory.GetCurrentDirectory() + "\\Saves";
+            saveGamesPath = Directory.GetCurrentDirectory() + "/Saves";
 
             if (!Directory.Exists(saveGamesPath))
             {
@@ -35,7 +35,7 @@ namespace MazeGame
             GameData data = new GameData(game.MyPlayer.Booty, game.CurrentRoom, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
 
             string saveGame = JsonSerializer.Serialize(data);
-            string saveGameName = "\\" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
             if (!Directory.Exists(saveGamesPath))
             {
                 Directory.CreateDirectory(saveGamesPath);
@@ -55,7 +55,7 @@ namespace MazeGame
             {
                 throw new Exception("LoadGame - Save file directory does not exists!");
             }
-            string saveGameName = "\\" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
             string saveFilePath = saveGamesPath + saveGameName;
 
             string loadedData = File.ReadAllText(saveFilePath);
@@ -76,7 +76,7 @@ namespace MazeGame
                 throw new Exception("LoadGame - Save file directory does not exists!");
             }
 
-            string saveFilePath = saveGamesPath + "\\" + saveGameName;
+            string saveFilePath = saveGamesPath + "/" + saveGameName;
 
             string loadedData = File.ReadAllText(saveFilePath);
             GameData data = JsonSerializer.Deserialize<GameData>(loadedData);
@@ -90,7 +90,7 @@ namespace MazeGame
         /// <param name="game">the current game, from which the method access the difficulty level in order to chose which file to delete</param>
         public void DeleteSaveGame(Game game)
         {
-            string saveGameName = "\\" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
             string saveFilePath = saveGamesPath + saveGameName;
             if (File.Exists(saveFilePath))
             {

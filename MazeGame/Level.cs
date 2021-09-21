@@ -8,26 +8,18 @@ namespace MazeGame
     /// <summary>
     /// Holds informations about the current level
     /// </summary>
-    class Floor
+    class Level
     {
         private string[,] grid;
-
         private int rows;
         private int columns;
-
         private int xOffset;
         private int yOffset;
-
-        private Coordinates exit;
-
+        private Vector2 exit;
         private LevelLock levelLock;
-
-        private Dictionary<Coordinates, Lever> leversDictionary;
-
-        private Coordinates[] treasures;
-
+        private Dictionary<Vector2, Lever> leversDictionary;
+        private Vector2[] treasures;
         private Guard[] levelGuards;
-
         private Stopwatch stopwatch;
 
         /// <summary>
@@ -52,15 +44,18 @@ namespace MazeGame
         /// <summary>
         /// Instantiates a World object
         /// </summary>
+        /// <param name="name">The level's title</param>
         /// <param name="grid">The grid of sumbols that represents the level, in the form of a bi-dimensional string array</param>
-        /// <param name="hasKey">Whether the level has a key and the exit is initially locked or not</param>
-        /// <param name="startX">The player's starting X coordinate</param>
-        /// <param name="startY">The player's starting Y coordinate</param>
+        /// <param name="startX">The player's starting X coordinate, int format</param>
+        /// <param name="startY">The player's starting Y coordinate, int format</param>
+        /// <param name="levelLock">The System that handles keys in the level, as a LevelLock object</param>
+        /// <param name="exit">The coordinates of the exit point</param>
+        /// <param name="treasures">The array containing the coordinates of all the treasures in the level</param>
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
-        public Floor(string name, string[,] grid, int startX, int startY, LevelLock levelLock, Coordinates exit,
-                     Coordinates[] treasures, Dictionary<Coordinates, Lever> levers, Guard[] guards, Stopwatch stopwatch)
+        public Level(string name, string[,] grid, int startX, int startY, LevelLock levelLock, Vector2 exit,
+                     Vector2[] treasures, Dictionary<Vector2, Lever> levers, Guard[] guards, Stopwatch stopwatch)
         {
             Name = name;
 
@@ -79,11 +74,11 @@ namespace MazeGame
 
             this.exit = exit;
 
-            leversDictionary = new Dictionary<Coordinates, Lever>();
+            leversDictionary = new Dictionary<Vector2, Lever>();
 
-            foreach(KeyValuePair<Coordinates, Lever> leverInfo in levers)
+            foreach(KeyValuePair<Vector2, Lever> leverInfo in levers)
             {
-                Coordinates coordinatesWithOffset = new Coordinates(leverInfo.Key.X + xOffset, leverInfo.Key.Y + yOffset);
+                Vector2 coordinatesWithOffset = new Vector2(leverInfo.Key.X + xOffset, leverInfo.Key.Y + yOffset);
                 Lever lever = leverInfo.Value;
 
                 leversDictionary[coordinatesWithOffset] = lever;
@@ -205,7 +200,7 @@ namespace MazeGame
             return grid[y, x] == SymbolsConfig.EmptySpace.ToString() ||
                    grid[y, x] == "-" ||
                    grid[y, x] == "|" ||
-                   grid[y, x] == "≡" ||
+                   grid[y, x] == SymbolsConfig.EntranceChar.ToString() ||
                    grid[y, x] == SymbolsConfig.ExitChar.ToString() ||
                    grid[y, x] == SymbolsConfig.KeyChar.ToString() ||
                    grid[y, x] == SymbolsConfig.TreasureChar.ToString() ||
@@ -225,6 +220,7 @@ namespace MazeGame
 
             return grid[y, x] == SymbolsConfig.EmptySpace.ToString() ||
                    grid[y, x] == SymbolsConfig.ExitChar.ToString() ||
+                   grid[y, x] == SymbolsConfig.EntranceChar.ToString() ||
                    grid[y, x] == SymbolsConfig.KeyChar.ToString() ||
                    grid[y, x] == SymbolsConfig.TreasureChar.ToString() ||
                    grid[y, x] == SymbolsConfig.LeverOffChar.ToString() ||
@@ -349,7 +345,7 @@ namespace MazeGame
         {
             stopwatch.Stop();
 
-            Coordinates leverCoord = new Coordinates(x, y);
+            Vector2 leverCoord = new Vector2(x, y);
 
             if (leversDictionary.ContainsKey(leverCoord))
             {
@@ -407,7 +403,7 @@ namespace MazeGame
 
         private void ResetTreasures()
         {
-            foreach (Coordinates treasure in treasures)
+            foreach (Vector2 treasure in treasures)
             {
                 ChangeElementAt(treasure.X, treasure.Y, SymbolsConfig.TreasureChar.ToString(), false, false);
             }
@@ -441,7 +437,7 @@ namespace MazeGame
     /// <summary>
     /// Helper struct that holds a int X, int Y pair
     /// </summary>
-    public struct Coordinates
+    public struct Vector2
     {
         public int X;
         public int Y;
@@ -451,7 +447,7 @@ namespace MazeGame
         /// </summary>
         /// <param name="x">The X coordinate</param>
         /// <param name="y">the Y coordinate</param>
-        public Coordinates(int x, int y)
+        public Vector2(int x, int y)
         {
             X = x;
             Y = y;

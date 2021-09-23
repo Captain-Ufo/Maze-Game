@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.IO;
+using System.Threading;
 using static System.Console;
-using System.Text;
 
 namespace MazeGame
 {
@@ -70,15 +69,17 @@ namespace MazeGame
 
 
 
-        private void InstantiateGameEntities(string configFilePath, int startBooty, int startLevel)
+        private void InstantiateGameEntities(string configFileDir, int startBooty, int startLevel)
         {
             levels = new List<Level>();
+
+            string configFilePath = configFileDir +"/FloorsConfig.txt";
 
             string[] levelFiles = File.ReadAllLines(levelFilesPath + configFilePath);
 
             foreach (string levelFile in levelFiles)
             {
-                string levelFilePath = levelFilesPath + "/" + levelFile + ".txt";
+                string levelFilePath = levelFilesPath + "/" + configFileDir + "/" + levelFile + ".txt";
 
                 string[] levelMap = File.ReadAllLines(levelFilePath);
 
@@ -116,11 +117,11 @@ namespace MazeGame
 
         private void SetupConsole()
         {
-            Title = "Escape From The Dungeon";
+            Title = "Heist!";
 
             try
             {
-                SetWindowSize(180, 60);
+                SetWindowSize(180, 56);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -148,7 +149,7 @@ namespace MazeGame
         {
             Clear();
             DisplayLoading();
-            InstantiateGameEntities("/FloorsConfig.txt", startBooty, startRoom);
+            InstantiateGameEntities("/Baron's Jails", startBooty, startRoom);
             RunGameLoop(startRoom);
             WinGame();
         }
@@ -624,12 +625,22 @@ namespace MazeGame
                 $"You have been spotted {TimesSpotted} times, and caught {TimesCaught} times.",
                 "  ",
                 "  ",
+                "  ",
+                "  ",
                 "Thank you for playing!"
             };
 
             if (TimesCaught > 0)
             {
-                outro[7] = "Nevertheless, you always managed to convince the guard to look the other way.";
+                outro[7] = "Nevertheless, you always persuaded the guards to look the other way.";
+            }
+            else
+            {
+                outro[7] = "You fled the prison and the Baron's guards are none the wiser!";
+                if (MyPlayer.Booty == totalGold)
+                {
+                    outro[8] = "You really are the best of all thieves in the city.";
+                }
             }
 
             Clear();
@@ -682,41 +693,28 @@ namespace MazeGame
         private void CreateMainMenu()
         {
             string[] prompt = {
-                "                                                                  ",
-                "       ▓█████   ██████  ▄████▄   ▄▄▄       ██▓███  ▓█████         ",
-                "       ▓█   ▀ ▒██    ▒ ▒██▀ ▀█  ▒████▄    ▓██░  ██▒▓█   ▀         ",
-                "       ▒███   ░ ▓██▄   ▒▓█    ▄ ▒██  ▀█▄  ▓██░ ██▓▒▒███           ",
-                "       ▒▓█  ▄   ▒   ██▒▒▓▓▄ ▄██▒░██▄▄▄▄██ ▒██▄█▓▒ ▒▒▓█  ▄         ",
-                "       ░▒████▒▒██████▒▒▒ ▓███▀ ░ ▓█   ▓██▒▒██▒ ░  ░░▒████▒        ",
-                "       ░░ ▒░ ░▒ ▒▓▒ ▒ ░░ ░▒ ▒  ░ ▒▒   ▓▒█░▒▓▒░ ░  ░░░ ▒░ ░        ",
-                "        ░ ░  ░░ ░▒  ░ ░  ░  ▒     ▒   ▒▒ ░░▒ ░      ░ ░  ░        ",
-                "          ░   ░  ░  ░  ░          ░   ▒   ░░          ░           ",
-                "          ░  ░      ░  ░ ░            ░  ░            ░  ░        ",
-                "                    ░                                             ",
-                "   █████▒██▀███   ▒█████   ███▄ ▄███▓    ▄▄▄█████▓ ██░ ██ ▓█████  ",
-                " ▓██   ▒▓██ ▒ ██▒▒██▒  ██▒▓██▒▀█▀ ██▒    ▓  ██▒ ▓▒▓██░ ██▒▓█   ▀  ",
-                " ▒████ ░▓██ ░▄█ ▒▒██░  ██▒▓██    ▓██░    ▒ ▓██░ ▒░▒██▀▀██░▒███    ",
-                " ░▓█▒  ░▒██▀▀█▄  ▒██   ██░▒██    ▒██     ░ ▓██▓ ░ ░▓█ ░██ ▒▓█  ▄  ",
-                " ░▒█░   ░██▓ ▒██▒░ ████▓▒░▒██▒   ░██▒      ▒██▒ ░ ░▓█▒░██▓░▒████▒ ",
-                "  ▒ ░   ░ ▒▓ ░▒▓░░ ▒░▒░▒░ ░ ▒░   ░  ░      ▒ ░░    ▒ ░░▒░▒░░ ▒░ ░ ",
-                "  ░       ░▒ ░ ▒░  ░ ▒ ▒░ ░  ░      ░        ░     ▒ ░▒░ ░ ░ ░  ░ ",
-                "  ░ ░     ░░   ░ ░ ░ ░ ▒  ░      ░         ░       ░  ░░ ░   ░    ",
-                "           ░         ░ ░         ░                 ░  ░  ░   ░  ░ ",
-                "                     ░                                            ",
-                "  ▓█████▄  █    ██  ███▄    █   ▄████ ▓█████  ▒█████   ███▄    █  ",
-                "  ▒██▀ ██▌ ██  ▓██▒ ██ ▀█   █  ██▒ ▀█▒▓█   ▀ ▒██▒  ██▒ ██ ▀█   █  ",
-                "  ░██   █▌▓██  ▒██░▓██  ▀█ ██▒▒██░▄▄▄░▒███   ▒██░  ██▒▓██  ▀█ ██▒ ",
-                "  ░▓█▄   ▌▓▓█  ░██░▓██▒  ▐▌██▒░▓█  ██▓▒▓█  ▄ ▒██   ██░▓██▒  ▐▌██▒ ",
-                "  ░▒████▓ ▒▒█████▓ ▒██░   ▓██░░▒▓███▀▒░▒████▒░ ████▓▒░▒██░   ▓██░ ",
-                "   ▒▒▓  ▒ ░▒▓▒ ▒ ▒ ░ ▒░   ▒ ▒  ░▒   ▒ ░░ ▒░ ░░ ▒░▒░▒░ ░ ▒░   ▒ ▒  ",
-                "   ░ ▒  ▒ ░░▒░ ░ ░ ░ ░░   ░ ▒░  ░   ░  ░ ░  ░  ░ ▒ ▒░ ░ ░░   ░ ▒░ ",
-                "   ░ ░  ░  ░░░ ░ ░    ░   ░ ░ ░ ░   ░    ░   ░ ░ ░ ▒     ░   ░ ░  ",
-                "     ░       ░              ░       ░    ░  ░    ░ ░           ░  ",
-                "   ░                                                              ",
-                "                                                                  ",
+                "                                                              $$$$$                                  ",
+                "                                                              $:::$                                  ",
+                "HHHHHHHHH     HHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIII   $$$$$:::$$$$$$ TTTTTTTTTTTTTTTTTTTTTTT !!! ",
+                "H:::::::H     H:::::::HE::::::::::::::::::::EI::::::::I $$::::::::::::::$T:::::::::::::::::::::T!!:!!",
+                "H:::::::H     H:::::::HE::::::::::::::::::::EI::::::::I$:::::$$$$$$$::::$T:::::::::::::::::::::T!:::!",
+                "HH::::::H     H::::::HHEE::::::EEEEEEEEE::::EII::::::II$::::$       $$$$$T:::::TT:::::::TT:::::T!:::!",
+                "  H:::::H     H:::::H    E:::::E       EEEEEE  I::::I  $::::$            TTTTTT  T:::::T  TTTTTT!:::!",
+                "  H:::::H     H:::::H    E:::::E               I::::I  $::::$                    T:::::T        !:::!",
+                "  H::::::HHHHH::::::H    E::::::EEEEEEEEEE     I::::I  $:::::$$$$$$$$$           T:::::T        !:::!",
+                "  H:::::::::::::::::H    E:::::::::::::::E     I::::I   $$::::::::::::$$         T:::::T        !:::!",
+                "  H:::::::::::::::::H    E:::::::::::::::E     I::::I     $$$$$$$$$:::::$        T:::::T        !:::!",
+                "  H::::::HHHHH::::::H    E::::::EEEEEEEEEE     I::::I              $::::$        T:::::T        !:::!",
+                "  H:::::H     H:::::H    E:::::E               I::::I              $::::$        T:::::T        !!:!!",
+                "  H:::::H     H:::::H    E:::::E       EEEEEE  I::::I  $$$$$       $::::$        T:::::T         !!! ",
+                "HH::::::H     H::::::HHEE::::::EEEEEEEE:::::EII::::::II$::::$$$$$$$:::::$      TT:::::::TT           ",
+                "H:::::::H     H:::::::HE::::::::::::::::::::EI::::::::I$::::::::::::::$$       T:::::::::T       !!! ",
+                "H:::::::H     H:::::::HE::::::::::::::::::::EI::::::::I $$$$$$:::$$$$$         T:::::::::T      !!:!!",
+                "HHHHHHHHH     HHHHHHHHHEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIII      $:::$             TTTTTTTTTTT       !!! ",
+                "                                                             $$$$$                                   "
             };
 
-            string[] options = { "New Game", "Tutorial", "Credits", "Quit" };
+            string[] options = { "New Game", "Tutorial", "Credits ", "Quit" };
 
             mainMenu = new Menu(prompt, options);
         }
@@ -728,12 +726,12 @@ namespace MazeGame
             string[] prompt =
             {
                 "A guard caught you! Quick, maybe you can bribe them.",
-                $"You have collected $0 so far.",
+                "You have collected $0 so far.",
             };
 
             string[] options =
             {
-                $"Bribe ($ 0)",
+                "Bribe ($ 0)",
                 "Surrender"
             };
 
@@ -767,11 +765,11 @@ namespace MazeGame
 
         private void MainMenuWithContinue(string[] saveFiles)
         {
-            string[] options = { "Continue", "New Game", "Tutorial", "Credits", "Quit" };
+            string[] options = { "Continue", "New Game", "Tutorial", "Credits ", "Quit" };
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2, 1, 2);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5);
 
             switch (selectedIndex)
             {
@@ -800,11 +798,11 @@ namespace MazeGame
 
         private void DefaultMainMenu()
         {
-            string[] options = { "New Game", "Tutorial", "Credits", "Quit" };
+            string[] options = { "New Game", "Tutorial", "Credits ", "Quit" };
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2, 1, 2);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5);
 
             switch (selectedIndex)
             {
@@ -872,6 +870,11 @@ namespace MazeGame
             {
                 "~·~ Choose your difficulty level ~·~",
                 "  ",
+                "The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.",
+                "  ",
+                "  ",
+                "  ",
+                "  ",
                 "  ",
                 "  ",
                 "  "
@@ -879,38 +882,78 @@ namespace MazeGame
 
             if (IsThereASavegame)
             {
-                prompt[2] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
+                prompt[3] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
             }
 
-            string[] options = { "Very Easy", "Easy", "Normal", "Hard", "Very Hard", "Ironman", "Back"};
+            string[] options = { "Back", "Very Easy", "Easy", "Normal", "Hard", "Very Hard", "Ironman"};
+
+            string[] vEasyPrompt = new string[prompt.Length];
+            Array.Copy(prompt, vEasyPrompt, prompt.Length);
+            vEasyPrompt[6] = "VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.";
+            vEasyPrompt[7] = "Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.";
+
+            string[] easyPrompt = new string[prompt.Length];
+            Array.Copy(prompt, easyPrompt, prompt.Length);
+            easyPrompt[6] = "EASY: same conditions as very easy, but if you game over, you'll have to start from the first level.";
+
+            string[] normalPrompt = new string[prompt.Length];
+            Array.Copy(prompt, normalPrompt, prompt.Length);
+            normalPrompt[6] = "NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.";
+            normalPrompt[7] = "Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.";
+
+            string[] hardPrompt = new string[prompt.Length];
+            Array.Copy(prompt, hardPrompt, prompt.Length);
+            hardPrompt[6] = "HARD: same conditions as normal, but if you game over, you'll have to start from the first level.";
+
+            string[] vHardPrompt = new string[prompt.Length];
+            Array.Copy(prompt, vHardPrompt, prompt.Length);
+            vHardPrompt[6] = "VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.";
+            vHardPrompt[7] = "You will still be able to load the last save and retry the same level.";
+
+            string[] ironmanPrompt = new string[prompt.Length];
+            Array.Copy(prompt, ironmanPrompt, prompt.Length);
+            ironmanPrompt[6] = "IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.";
+
+            string[] defaultPrompt = prompt;
+
+            string[][] promptsUpdates = new string[][]
+            {
+                defaultPrompt,
+                vEasyPrompt,
+                easyPrompt,
+                normalPrompt,
+                hardPrompt,
+                vHardPrompt,
+                ironmanPrompt,
+            };
 
             Menu difficultyMenu = new Menu(prompt, options);
 
-            int selectedIndex = difficultyMenu.Run(WindowWidth / 2, 8, 0);
+            int selectedIndex = difficultyMenu.RunWithUpdatingPrompt(WindowWidth / 2, 8, 0, promptsUpdates);
 
             switch (selectedIndex)
             {
                 case 0:
-                    DifficultyLevel = Difficulty.VeryEasy;
-                    break;
-                case 1:
-                    DifficultyLevel = Difficulty.Easy;
-                    break;
-                case 2:
-                    DifficultyLevel = Difficulty.Normal;
-                    break;
-                case 3:
-                    DifficultyLevel = Difficulty.Hard;
-                    break;
-                case 4:
-                    DifficultyLevel = Difficulty.VeryHard;
-                    break;
-                case 5:
-                    DifficultyLevel = Difficulty.Ironman;
-                    break;
-                case 6:
                     RunMainMenu();
                     return;
+                case 1:
+                    DifficultyLevel = Difficulty.VeryEasy;
+                    break;
+                case 2:
+                    DifficultyLevel = Difficulty.Easy;
+                    break;
+                case 3:
+                    DifficultyLevel = Difficulty.Normal;
+                    break;
+                case 4:
+                    DifficultyLevel = Difficulty.Hard;
+                    break;
+                case 5:
+                    DifficultyLevel = Difficulty.VeryHard;
+                    break;
+                case 6:
+                    DifficultyLevel = Difficulty.Ironman;
+                    break;
             }
 
             PlayGame();
@@ -941,17 +984,46 @@ namespace MazeGame
         {
             Clear();
             string authorName = "Cristian Baldi";
-            WriteLine("\n\n ~·~ CREDITS: ~·~");
-            WriteLine($"\n\n Escape from the Dungeon, a game by {authorName} expanding on the lessons in Micheal Hadley's \"Intro To Programming in C#\" course:");
-            WriteLine(" https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ");
-            WriteLine($"\n Programming: {authorName}");
-            WriteLine($"\n Level desing: {authorName}");
-            WriteLine("  (Yes, I know it's bad. I'm not a level designer :P)");
-            WriteLine("\n Ascii title from Text To Ascii Art Generator (https://www.patorjk.com/software/taag)");
-            WriteLine(" Ascii art from Ascii Art Archive (https://www.asciiart.eu/):");
-            WriteLine("\n Guard art based on 'Orc' by Randall Nortman and Tua Xiong");
-            WriteLine("\n Win screen art by Henry Segerman");
-            WriteLine("\n Game over screen art based on art by Jgs");
+            string[] credits = new string[]
+            {
+                " ",
+                " ",
+                "~·~ CREDITS: ~·~",
+                " ",
+                " ",
+                $"Escape from the Dungeon, a game by {authorName}",
+                " ",
+                $"Programming: {authorName}",
+                "Shoutout to Micheal Hadley's \"Intro To Programming in C#\" course:",
+                "https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ",
+                " ",
+                $"Baron's Jail campaign level desing: {authorName}",
+                "(I'm not a level designer :P)",
+                " ",
+                $"Chiptune Music: {authorName}",
+                "(I'm not a musician either)",
+                " ",
+                " ",
+                "~·~ ART: ~·~",
+                " ",
+                "Ascii title from Text To Ascii Art Generator (https://www.patorjk.com/software/taag)",
+                " ",
+                "Ascii art from Ascii Art Archive (https://www.asciiart.eu/):",
+                "Guard art based on 'Orc' by Randall Nortman and Tua Xiong",
+                "Win screen art by Henry Segerman",
+                "Game over screen art based on art by Jgs"
+            };
+
+            foreach (string credit in credits)
+            {
+                for (int i = 0; i < credits.Length; i++)
+                {
+                    int cursorXoffset = credits[i].Length / 2;
+                    SetCursorPosition((WindowWidth / 2) - cursorXoffset, WindowTop + i + 1);
+                    WriteLine(credits[i]);
+                }
+            }
+
             SetCursorPosition(0, WindowHeight - 3);
             WriteLine("\n Press any key to return to main menu...");
             ReadKey(true);

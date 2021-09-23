@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static System.Console;
 
 namespace MazeGame
@@ -93,6 +94,152 @@ namespace MazeGame
             return selectedIndex;
         }
 
+        public int RunWithUpdatingPrompt(int xPos, int yPos, int optionsOffset, string[][] updatedPrompts)
+        {
+            ConsoleKey keyPressed;
+
+            do
+            {
+                SetCursorPosition(0, 0);
+                DisplayPrompt(xPos, yPos);
+                DisplayOptions(xPos, optionsOffset);
+
+                ConsoleKeyInfo info = ReadKey(true);
+                keyPressed = info.Key;
+
+                switch (keyPressed)
+                {
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.NumPad8:
+                    case ConsoleKey.W:
+
+                        selectedIndex--;
+                        if (selectedIndex < 0)
+                        {
+                            selectedIndex = options.Length - 1;
+                        }
+                        prompt = updatedPrompts[selectedIndex];
+                        ctp.PlaySFX(1000, 100); ;
+                        break;
+
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.NumPad2:
+                    case ConsoleKey.S:
+
+                        selectedIndex++;
+                        if (selectedIndex == options.Length)
+                        {
+                            selectedIndex = 0;
+                        }
+                        prompt = updatedPrompts[selectedIndex];
+                        ctp.PlaySFX(1000, 100);
+                        break;
+                }
+            }
+            while (keyPressed != ConsoleKey.Enter);
+
+            return selectedIndex;
+        }
+
+        /// <summary>
+        /// Displays only a subset of all the menu options, scrolling to a new subset (if available) when needed
+        /// </summary>
+        /// <param name="xPos">Horizontal position of the menu (prompt and options) on the screen. Input 0 for the left side of the screen, 
+        /// any other number to center the menu around that position</param>
+        /// <param name="yPos">Vertical position of the prompt on the screen. Input 0 for the very top of the screen</param>
+        /// <param name="optionsOffset">The verticfal distance between the menu prompt and the option list</param>
+        /// <param name="numberOfDisplayedOptions">The number of ptions to be displayed per screen; counting from 1
+        /// (so 3, for example translates to an options range of 0-2)</param>
+        /// <returns>The index of the chosen option, after the user selects one and hits enter</returns>
+        public int RunWithScrollingOptions(int xPos, int yPos, int optionsOffset, int numberOfDisplayedOptions)
+        {
+            ConsoleKey keyPressed;
+
+            int firstShownOption = 0;
+            int lastShownOption;
+
+            if (options.Length < numberOfDisplayedOptions)
+            {
+                lastShownOption = options.Length - 1;
+            }
+            else
+            {
+                lastShownOption = numberOfDisplayedOptions - 1;
+            }
+            
+            do
+            {
+                SetCursorPosition(0, 0);
+                DisplayPrompt(xPos, yPos);
+                DisplaySelectionOfOptions(xPos, optionsOffset, firstShownOption, lastShownOption);
+
+                ConsoleKeyInfo info = ReadKey(true);
+                keyPressed = info.Key;
+
+                switch (keyPressed)
+                {
+                    case ConsoleKey.UpArrow:
+                    case ConsoleKey.NumPad8:
+                    case ConsoleKey.W:
+
+                        selectedIndex--;
+                        if (selectedIndex < 0)
+                        {
+                            if (numberOfDisplayedOptions >= options.Length)
+                            {
+                                selectedIndex = options.Length - 1;
+                            }
+                            else
+                            {
+                                selectedIndex = lastShownOption;
+                            }
+                        }
+                        else  if (selectedIndex < firstShownOption)
+                        {
+                            firstShownOption -= numberOfDisplayedOptions;
+                            lastShownOption = firstShownOption + numberOfDisplayedOptions - 1;
+
+                            if (firstShownOption < 0)
+                            {
+                                firstShownOption = 0;
+                                lastShownOption = numberOfDisplayedOptions - 1;
+                            }
+                        }
+
+                        ctp.PlaySFX(1000, 100); ;
+                        break;
+
+                    case ConsoleKey.DownArrow:
+                    case ConsoleKey.NumPad2:
+                    case ConsoleKey.S:
+
+                        selectedIndex++;
+                        if (selectedIndex > lastShownOption)
+                        {
+                            if (selectedIndex < options.Length)
+                            {
+                                firstShownOption += numberOfDisplayedOptions;
+                                lastShownOption += numberOfDisplayedOptions;
+                                if (lastShownOption >= options.Length)
+                                {
+                                    Clear();
+                                    lastShownOption = options.Length - 1;
+                                }
+                            }
+                            else if (selectedIndex == options.Length)
+                            {
+                                selectedIndex = firstShownOption;
+                            }
+                        }
+                        ctp.PlaySFX(1000, 100);
+                        break;
+                }
+            }
+            while (keyPressed != ConsoleKey.Enter);
+
+            return selectedIndex;
+        }
+
         /// <summary>
         /// Updates prompt and options in an already instantiated Menu object
         /// </summary>
@@ -145,8 +292,20 @@ namespace MazeGame
             foreach (string s in prompt)
             {
                 int posX = xPosition - (s.Length / 2);
+                for (int i = 0; i < posX; i++)
+                {
+                    SetCursorPosition(i, CursorTop);
+                    Write(" ");
+                }
                 SetCursorPosition(posX, CursorTop);
-                WriteLine(s);
+                Write(s);
+                for (int i = CursorLeft; i < WindowWidth - 1; i++)
+                {
+                    SetCursorPosition(i, CursorTop);
+                    Write(" ");
+                }
+                SetCursorPosition(WindowWidth - 1, CursorTop);
+                WriteLine();
             }
         }
 
@@ -178,6 +337,70 @@ namespace MazeGame
             }
             CursorVisible = false;
             ResetColor();
+        }
+
+        private void DisplaySelectionOfOptions(int xPos, int optionsOffset, int firstShownOption, int lastShownOption)
+        {
+            ConsoleColor textBackground;
+            ConsoleColor textColor;
+
+            SetCursorPosition(xPos, CursorTop + optionsOffset);
+            if (firstShownOption > 0)
+            {
+                WriteLine("^");
+            }
+            else
+            {
+                WriteLine(" ");
+            }
+
+            for (int i = firstShownOption; i <= lastShownOption; i++)
+            {
+                string option = options[i];
+                int posX = xPos - (option.Length / 2) - 4;
+                string prefix = " ";
+                string suffix = " ";
+
+                if (i == selectedIndex)
+                {
+                    prefix = ">";
+                    suffix = "<";
+                    textColor = ConsoleColor.Black;
+                    textBackground = ConsoleColor.White;
+                }
+                else
+                {
+                    textColor = ConsoleColor.White;
+                    textBackground = ConsoleColor.Black;
+                }
+
+                for (int j = 0; j < posX; j++)
+                {
+                    SetCursorPosition(j, CursorTop);
+                    Write(" ");
+                }
+                ForegroundColor = textColor;
+                BackgroundColor = textBackground;
+                Write($"{prefix} [ {option} ] {suffix}");
+                ResetColor();
+                for (int j = CursorLeft; j < WindowWidth - 1; j++)
+                {
+                    SetCursorPosition(j, CursorTop);
+                    Write(" ");
+                }
+                SetCursorPosition(WindowWidth - 1, CursorTop);
+                WriteLine();
+            }
+            SetCursorPosition(WindowWidth / 2, CursorTop);
+            if (lastShownOption < options.Length - 1)
+            {
+                WriteLine("V");
+            }
+            else
+            {
+                WriteLine(" ");
+            }
+            CursorVisible = false;
         }
     }
 }

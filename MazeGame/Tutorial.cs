@@ -194,25 +194,6 @@ namespace MazeGame
                 "Congratulations, you completed the training course!",
                 "With your master thief skills refreshed, you are ready to start new adventures.",
                 " ",
-                " ",
-                "A few more words about your upcoming adventures:",
-                "The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.",
-                "You will be able to choose your difficulty level before starting a new game:",
-                " ",
-                "> VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.                     ",
-                "  Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.                   ",
-                " ",
-                "> EASY: same conditions as very easy, but if you game over, you'll have to start from the first level.                        ",
-                " ",
-                "> NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.                 ",
-                "  Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.                       ",
-                " ",
-                "> HARD: same conditions as normal, but if you game over, you'll have to start from the first level.                           ",
-                " ",
-                "> VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.",
-                "  You will still be able to load the last save and retry the same level.                                                      ",
-                " ",
-                "> IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.                "
             };
             DisplayInstructions(instructions);
 

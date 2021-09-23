@@ -22,7 +22,7 @@ namespace MazeGame
         private bool isReturning;
         private int pivotTimer;
         private bool easyGame;
-        private string[] guardMarkersTable = new string[] {"^", ">", "V", "<" };
+        private string[] guardMarkersTable = new string[] { "^", ">", "V", "<" };
         private string guardMarker;
         private ConsoleColor guardSymbolColor = ConsoleColor.Black;
         private ConsoleColor guardTileColor = ConsoleColor.DarkRed;

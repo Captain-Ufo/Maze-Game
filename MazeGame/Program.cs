@@ -6,16 +6,17 @@ namespace MazeGame
     {
         static void Main(string[] args)
         {
-            ConsoleSetter.SetConsole("Heist!", 180, 56, false, false, true, true);
+            ConsoleHelper.SetConsole("Heist!", 180, 56, false, false, true, true);
 
             Game game = new Game();
             game.Start();
+            //MenuTesting.Test();
         }
     }
 
     class MenuTesting
     {
-        public void Test()
+        public static void Test()
         {
             Console.Title = "Heist!";
             Console.SetWindowSize(180, 56);
@@ -60,7 +61,7 @@ namespace MazeGame
 
             Menu testMenu = new Menu(prompt, options);
 
-            int selectedIndex = testMenu.RunWithScrollingOptions(Console.WindowWidth / 2, 2, 2, 7);
+            int selectedIndex = testMenu.RunWithScrollingOptions(Console.WindowWidth / 2, 2, 2, 0, Console.WindowWidth, 7);
 
             Console.SetCursorPosition(0, Console.WindowHeight - 2);
             Console.WriteLine($"You chose {selectedIndex}");

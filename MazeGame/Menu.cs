@@ -48,15 +48,19 @@ namespace MazeGame
         /// any other number to center the menu around that position</param>
         /// <param name="yPos">Vertical position of the prompt on the screen. Input 0 for the very top of the screen</param>
         /// <param name="optionsOffset">The verticfal distance between the menu prompt and the option list</param>
+        /// <param name="lineStart">The X coordinate that indicates where each line in the menu starts (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use 0 for the left edge of the screen</param>
+        /// <param name="lineEnd">The X coordinate that indicates where each line in the menu ends (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use WindowWidth for the right edge of the screen</param>
         /// <returns>The index of the chosen option, after the user selects one and hits enter</returns>
-        public int Run(int xPos, int yPos, int optionsOffset)
+        public int Run(int xPos, int yPos, int optionsOffset, int lineStart, int lineEnd)
         {
             ConsoleKey keyPressed;
 
             do
             {
                 SetCursorPosition(0, 0);
-                DisplayPrompt(xPos, yPos);
+                DisplayPrompt(xPos, yPos, lineStart, lineEnd);
                 DisplayOptions(xPos, optionsOffset);
 
                 ConsoleKeyInfo info = ReadKey(true);
@@ -74,6 +78,7 @@ namespace MazeGame
                             selectedIndex = options.Length - 1;
                         }
                         ctp.PlaySFX(1000, 100);;
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
 
                     case ConsoleKey.DownArrow:
@@ -86,6 +91,7 @@ namespace MazeGame
                             selectedIndex = 0;
                         }
                         ctp.PlaySFX(1000, 100);
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
                 }
             }
@@ -94,14 +100,27 @@ namespace MazeGame
             return selectedIndex;
         }
 
-        public int RunWithUpdatingPrompt(int xPos, int yPos, int optionsOffset, string[][] updatedPrompts)
+        /// <summary>
+        /// Displays the menu, allowing for a dynamic prompt that updates depending on the selected option
+        /// </summary>
+        /// <param name="xPos">Horizontal position of the menu (prompt and options) on the screen. Input 0 for the left side of the screen, 
+        /// any other number to center the menu around that position</param>
+        /// <param name="yPos">Vertical position of the prompt on the screen. Input 0 for the very top of the screen</param>
+        /// <param name="optionsOffset">The verticfal distance between the menu prompt and the option list</param>
+        /// <param name="lineStart">The X coordinate that indicates where each line in the menu starts (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use 0 for the left edge of the screen</param>
+        /// <param name="lineEnd">The X coordinate that indicates where each line in the menu ends (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use WindowWidth for the right edge of the screen</param>
+        /// <param name="updatedPrompts">An array containing the different prompts per each option. This array MUST have as many entries as the number of options.</param>
+        /// <returns>The index of the chosen option, after the user selects one and hits enter</returns>
+        public int RunWithUpdatingPrompt(int xPos, int yPos, int optionsOffset, int lineStart, int lineEnd, string[][] updatedPrompts)
         {
             ConsoleKey keyPressed;
 
             do
             {
                 SetCursorPosition(0, 0);
-                DisplayPrompt(xPos, yPos);
+                DisplayPrompt(xPos, yPos, lineStart, lineEnd);
                 DisplayOptions(xPos, optionsOffset);
 
                 ConsoleKeyInfo info = ReadKey(true);
@@ -119,7 +138,8 @@ namespace MazeGame
                             selectedIndex = options.Length - 1;
                         }
                         prompt = updatedPrompts[selectedIndex];
-                        ctp.PlaySFX(1000, 100); ;
+                        ctp.PlaySFX(1000, 100);
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
 
                     case ConsoleKey.DownArrow:
@@ -133,6 +153,7 @@ namespace MazeGame
                         }
                         prompt = updatedPrompts[selectedIndex];
                         ctp.PlaySFX(1000, 100);
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
                 }
             }
@@ -148,10 +169,14 @@ namespace MazeGame
         /// any other number to center the menu around that position</param>
         /// <param name="yPos">Vertical position of the prompt on the screen. Input 0 for the very top of the screen</param>
         /// <param name="optionsOffset">The verticfal distance between the menu prompt and the option list</param>
+        /// <param name="lineStart">The X coordinate that indicates where each line in the menu starts (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use 0 for the left edge of the screen</param>
+        /// <param name="lineEnd">The X coordinate that indicates where each line in the menu ends (so that part of the screen can remain
+        /// uneffected by the updates of the various parts). Use WindowWidth for the right edge of the screen</param>
         /// <param name="numberOfDisplayedOptions">The number of ptions to be displayed per screen; counting from 1
         /// (so 3, for example translates to an options range of 0-2)</param>
         /// <returns>The index of the chosen option, after the user selects one and hits enter</returns>
-        public int RunWithScrollingOptions(int xPos, int yPos, int optionsOffset, int numberOfDisplayedOptions)
+        public int RunWithScrollingOptions(int xPos, int yPos, int optionsOffset, int lineStart, int lineEnd, int numberOfDisplayedOptions)
         {
             ConsoleKey keyPressed;
 
@@ -170,8 +195,8 @@ namespace MazeGame
             do
             {
                 SetCursorPosition(0, 0);
-                DisplayPrompt(xPos, yPos);
-                DisplaySelectionOfOptions(xPos, optionsOffset, firstShownOption, lastShownOption);
+                DisplayPrompt(xPos, yPos, lineStart, lineEnd);
+                DisplaySelectionOfOptions(xPos, optionsOffset, lineStart, lineEnd, firstShownOption, lastShownOption);
 
                 ConsoleKeyInfo info = ReadKey(true);
                 keyPressed = info.Key;
@@ -206,7 +231,8 @@ namespace MazeGame
                             }
                         }
 
-                        ctp.PlaySFX(1000, 100); ;
+                        ctp.PlaySFX(1000, 100);
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
 
                     case ConsoleKey.DownArrow:
@@ -232,6 +258,7 @@ namespace MazeGame
                             }
                         }
                         ctp.PlaySFX(1000, 100);
+                        while (KeyAvailable) { ReadKey(true); }
                         break;
                 }
             }
@@ -285,26 +312,26 @@ namespace MazeGame
             this.options = options;
         }
 
-        private void DisplayPrompt(int xPosition, int yPosition)
+        private void DisplayPrompt(int xPosition, int yPosition, int lineStart, int lineEnd)
         {
             SetCursorPosition(0, yPosition);
 
             foreach (string s in prompt)
             {
                 int posX = xPosition - (s.Length / 2);
-                for (int i = 0; i < posX; i++)
+                for (int i = lineStart; i < posX; i++)
                 {
                     SetCursorPosition(i, CursorTop);
                     Write(" ");
                 }
                 SetCursorPosition(posX, CursorTop);
                 Write(s);
-                for (int i = CursorLeft; i < WindowWidth - 1; i++)
+                for (int i = CursorLeft; i < lineEnd - 1; i++)
                 {
                     SetCursorPosition(i, CursorTop);
                     Write(" ");
                 }
-                SetCursorPosition(WindowWidth - 1, CursorTop);
+                SetCursorPosition(lineEnd - 1, CursorTop);
                 WriteLine();
             }
         }
@@ -339,7 +366,7 @@ namespace MazeGame
             ResetColor();
         }
 
-        private void DisplaySelectionOfOptions(int xPos, int optionsOffset, int firstShownOption, int lastShownOption)
+        private void DisplaySelectionOfOptions(int xPos, int optionsOffset, int lineStart, int lineEnd, int firstShownOption, int lastShownOption)
         {
             ConsoleColor textBackground;
             ConsoleColor textColor;
@@ -374,7 +401,7 @@ namespace MazeGame
                     textBackground = ConsoleColor.Black;
                 }
 
-                for (int j = 0; j < posX; j++)
+                for (int j = lineStart; j < posX; j++)
                 {
                     SetCursorPosition(j, CursorTop);
                     Write(" ");
@@ -383,12 +410,12 @@ namespace MazeGame
                 BackgroundColor = textBackground;
                 Write($"{prefix} [ {option} ] {suffix}");
                 ResetColor();
-                for (int j = CursorLeft; j < WindowWidth - 1; j++)
+                for (int j = CursorLeft; j < lineEnd - 1; j++)
                 {
                     SetCursorPosition(j, CursorTop);
                     Write(" ");
                 }
-                SetCursorPosition(WindowWidth - 1, CursorTop);
+                SetCursorPosition(lineEnd - 1, CursorTop);
                 WriteLine();
             }
             SetCursorPosition(WindowWidth / 2, CursorTop);

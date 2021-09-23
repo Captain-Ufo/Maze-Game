@@ -33,7 +33,7 @@
     <None Update="Levels\Baron's Jails\FloorsConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Levels\TestFloor.txt">
+    <None Update="Levels\Baron's Jails\TestFloor.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="RoomConfig.txt">

@@ -76,6 +76,8 @@ namespace MazeGame
                 ConsoleKeyInfo keyInfo = ReadKey(true);
                 ConsoleKey key = keyInfo.Key;
 
+                while (KeyAvailable) { ReadKey(true); }
+
                 switch (key)
                 {
                     case ConsoleKey.UpArrow:

@@ -295,8 +295,10 @@ namespace MazeGame
             int uiPosition = WindowHeight - 4;
 
             SetCursorPosition(0, uiPosition);
-
-            WriteLine("___________________________________________________________________________________________________________________________________________________________________________________");
+            for (int i = 0; i < WindowWidth; i++)
+            {
+                Write("_");
+            }
             WriteLine("");
             Write($"   {levels[currentLevel].Name}");
             SetCursorPosition(35, CursorTop);
@@ -423,7 +425,7 @@ namespace MazeGame
 
             bribeMenu.UpdateMenuItems(prompt, options);
 
-            int selectedIndex = bribeMenu.Run(xPos, 5, 2);
+            int selectedIndex = bribeMenu.Run(xPos, 5, 2, (WindowWidth/3)*2, WindowWidth);
 
             switch (selectedIndex)
             {
@@ -714,7 +716,7 @@ namespace MazeGame
         private void RunMainMenu()
         {
             Clear();
-            string[] saveFiles = saveSystem.CheckForOngoingGames();
+            string[] saveFiles = saveSystem.CheckForSavedGames();
 
             string gameVersionText = "Version " + gameVersion;
 
@@ -740,7 +742,7 @@ namespace MazeGame
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5, 0, WindowWidth);
 
             switch (selectedIndex)
             {
@@ -773,7 +775,7 @@ namespace MazeGame
 
             mainMenu.UpdateMenuOptions(options);
 
-            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5);
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5, 0, WindowWidth);
 
             switch (selectedIndex)
             {
@@ -813,7 +815,7 @@ namespace MazeGame
 
             Menu loadSaveMenu = new Menu(prompt, options.ToArray());
 
-            int selectedIndex = loadSaveMenu.Run(WindowWidth/2, 10, 2);
+            int selectedIndex = loadSaveMenu.Run(WindowWidth/2, 10, 2, 0, WindowWidth);
 
             switch (selectedIndex)
             {
@@ -900,7 +902,7 @@ namespace MazeGame
 
             Menu difficultyMenu = new Menu(prompt, options);
 
-            int selectedIndex = difficultyMenu.RunWithUpdatingPrompt(WindowWidth / 2, 8, 0, promptsUpdates);
+            int selectedIndex = difficultyMenu.RunWithUpdatingPrompt(WindowWidth / 2, 8, 0, 0, WindowWidth, promptsUpdates);
 
             switch (selectedIndex)
             {
@@ -1015,7 +1017,7 @@ namespace MazeGame
             string[] options = { "Quit to Main Menu", "Quit to desktop", "Return to game" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2, 10, 2);
+            int selection = quitMenu.Run(WindowWidth/2, 10, 2, 0, WindowWidth);
             if (selection == 0)
             {
                 RunMainMenu();
@@ -1044,7 +1046,7 @@ namespace MazeGame
             string[] options = { "Yes", "No" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2, 10, 2);
+            int selection = quitMenu.Run(WindowWidth/2, 10, 2, 0, WindowWidth);
             if (selection == 0)
             {
                 Environment.Exit(0);
@@ -1070,7 +1072,7 @@ namespace MazeGame
 
             Menu retryMenu = new Menu(prompt, options);
 
-            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1);
+            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1, 0, WindowWidth / 2);
 
             if (selectedIndex == 0)
             {
@@ -1094,7 +1096,7 @@ namespace MazeGame
 
             Menu retryMenu = new Menu(prompt, options);
 
-            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1);
+            int selectedIndex = retryMenu.Run(WindowWidth / 4, CursorTop + 2, 1, 0, WindowWidth / 2);
 
             if (selectedIndex == 0)
             {

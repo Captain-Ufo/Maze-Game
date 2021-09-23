@@ -102,7 +102,7 @@ namespace MazeGame
         /// Checks the save file folder for any existing save file
         /// </summary>
         /// <returns>The list of savefile names the method finds</returns>
-        public string[] CheckForOngoingGames()
+        public string[] CheckForSavedGames()
         {
             string[] files = Directory.GetFiles(saveGamesPath);
 

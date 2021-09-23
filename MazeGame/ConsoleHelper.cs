@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using static System.Console;
 
 namespace MazeGame
 {
-    class ConsoleSetter
+    class ConsoleHelper
     {
         private const int MF_BYCOMMAND = 0x00000000;
         public const int SC_CLOSE = 0xF060;

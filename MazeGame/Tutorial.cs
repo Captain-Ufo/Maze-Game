@@ -113,7 +113,7 @@ namespace MazeGame
                         "You are Gareth, the non-copyright infringing Master Thief. This is the training course you built in your hideout.",
                         $"Use arrow keys, WASD or numpad keys to move around the map; reach the exit ({SymbolsConfig.ExitChar}) to complete the level."
                     };
-                    DisplayInstructions(instructions);
+                    DisplaytextCentered(instructions);
                     break;
 
                 case 1:
@@ -129,7 +129,7 @@ namespace MazeGame
                         " ",
                         "If the exit doesn't turn green when you collect the last key, check the map to see if you did not discovered the location of another one."
                     };
-                    DisplayInstructions(instructions);
+                    DisplaytextCentered(instructions);
                     break;
 
                 case 2:
@@ -139,7 +139,7 @@ namespace MazeGame
                          "They may open optional rooms and passages, or clear the way to your destination.",
                          "Levers can open multiple gates. They may also close gates that start open when you first enter a location",
                     };
-                    DisplayInstructions(instructions);
+                    DisplaytextCentered(instructions);
                     break;
 
                 case 3:
@@ -153,12 +153,12 @@ namespace MazeGame
                          "It will get more expansive the more you do it, so don't be too cocky!",
                          "Feel free to experiment here. This is just training: you will be able to retry as many times as you need."
                     };
-                    DisplayInstructions(instructions);
+                    DisplaytextCentered(instructions);
                     break;
             }
         }
 
-        private void DisplayInstructions(string[] instructions)
+        private void DisplaytextCentered(string[] instructions)
         {
             for (int i = 0; i < instructions.Length; i++)
             {
@@ -171,7 +171,7 @@ namespace MazeGame
         public void DisplayTutorialFail()
         {
             Clear();
-            string[] instructions = new string[]
+            string[] failMessage = new string[]
             {
                 "The guards caught you!",
                 " ",
@@ -181,7 +181,7 @@ namespace MazeGame
                 " ",
                 "Press any key when you are ready to retry."
             };
-            DisplayInstructions(instructions);
+            DisplaytextCentered(failMessage);
             ReadKey(true);
             return;
         }
@@ -189,13 +189,14 @@ namespace MazeGame
         public void DisplayEndTutorial()
         {
             Clear();
-            string[] instructions = new string[]
+            string[] endMessage = new string[]
             {
                 "Congratulations, you completed the training course!",
-                "With your master thief skills refreshed, you are ready to start new adventures.",
-                " ",
+                "With your master thief skills refreshed, you are ready to start new adventures."
+
             };
-            DisplayInstructions(instructions);
+
+            DisplaytextCentered(endMessage);
 
             SetCursorPosition(0, WindowHeight - 3);
             WriteLine("Press any key to return to the main menu...");

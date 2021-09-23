@@ -46,7 +46,6 @@ namespace MazeGame
 
             levelFilesPath = Directory.GetCurrentDirectory() + "/Levels";
 
-            SetupConsole();
             CreateMainMenu();
             CreateBribeMenu();
             RunMainMenu();
@@ -111,34 +110,6 @@ namespace MazeGame
 
             MyPlayer = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
             MyPlayer.Booty = 0;
-        }
-
-
-
-        private void SetupConsole()
-        {
-            Title = "Heist!";
-
-            try
-            {
-                SetWindowSize(180, 56);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                DisplayConsoleSizeWarning();
-            }
-        }
-
-
-
-        private void DisplayConsoleSizeWarning()
-        {
-            WriteLine("Error setting the preferred console size.");
-            WriteLine("You can continue using the program, but glitches may occour, and it will probably not be displayed correctly.");
-            WriteLine("To fix this error, please try changing the character size of the Console.");
-
-            WriteLine("\n\nPress any key to continue...");
-            ReadKey(true);
         }
         #endregion
 

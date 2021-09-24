@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using static System.Console;
 
@@ -13,6 +14,8 @@ namespace MazeGame
     class Game
     {
         private List<Level> levels;
+        private string[] availableMissions;
+        private string[] availableCampaigns;
         private bool playerHasBeenCaught;
         private bool hasDrawnBackground;
         private int totalGold;
@@ -20,6 +23,8 @@ namespace MazeGame
         private string gameVersion = "1.5";
         private Menu mainMenu;
         private Menu bribeMenu;
+        private Menu campaignsMenu;
+        private Menu missionsMenu;
         private SaveSystem saveSystem;
         private Random rng;
 
@@ -40,6 +45,7 @@ namespace MazeGame
             TunePlayer = new ChiptunePlayer();
             MyStopwatch = new Stopwatch();
             rng = new Random();
+            levels = new List<Level>();
 
             playerHasBeenCaught = false;
             TimesCaught = 0;
@@ -47,8 +53,7 @@ namespace MazeGame
 
             levelFilesPath = Directory.GetCurrentDirectory() + "/Levels";
 
-            CreateMainMenu();
-            CreateBribeMenu();
+            CreateMenues();
             RunMainMenu();
         }
 
@@ -69,11 +74,11 @@ namespace MazeGame
 
 
 
-        private void InstantiateGameEntities(string configFileDir, int startBooty, int startLevel)
+        private void InstantiateCampaignEntities(string configFileDir, int startBooty, int startLevel)
         {
-            levels = new List<Level>();
+            levels.Clear();
 
-            string configFilePath = configFileDir +"/FloorsConfig.txt";
+            string configFilePath = "/" + configFileDir +"/FloorsConfig.txt";
 
             string[] levelFiles = File.ReadAllLines(levelFilesPath + configFilePath);
 
@@ -93,6 +98,27 @@ namespace MazeGame
 
             PlayerCharacter = new Player(levels[startLevel].PlayerStartX, levels[startLevel].PlayerStartY);
             PlayerCharacter.Booty = startBooty;
+        }
+
+
+
+        private void InstantiateMissionEntities(string levelFile)
+        {
+            levels.Clear();
+
+            string levelFilePath = levelFilesPath + "/" + levelFile + ".txt";
+
+            string[] levelMap = File.ReadAllLines(levelFilePath);
+
+            LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelMap, DifficultyLevel);
+
+            levels.Add(new Level(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit,
+                                 levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+
+            totalGold += levelInfo.TotalGold;
+
+            PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            PlayerCharacter.Booty = 0;
         }
 
 
@@ -117,12 +143,23 @@ namespace MazeGame
 
 
         #region Game
-        private void PlayGame(int startRoom = 0, int startBooty = 0)
+        private void PlayGampaign(string missionDirectory, int startRoom = 0, int startBooty = 0)
         {
             Clear();
             DisplayLoading();
-            InstantiateGameEntities("/The Baron's Jails", startBooty, startRoom);
+            InstantiateCampaignEntities(missionDirectory, startBooty, startRoom);
             RunGameLoop(startRoom);
+            WinGame();
+        }
+
+
+
+        private void PlayMission(string mission)
+        {
+            Clear();
+            DisplayLoading();
+            InstantiateMissionEntities(mission);
+            RunGameLoop(0);
             WinGame();
         }
 
@@ -646,7 +683,7 @@ namespace MazeGame
                 "~·~ CONGRATULATIONS! ~·~",
                 "  ",
                 "  ",
-                "You escaped the Baron's dungeon!",
+                "You successfully completed the heist!",
                 "  ",
                 $"You collected $ {PlayerCharacter.Booty} in treasures, out of a total of $ {totalGold}.",
                 $"You have been spotted {TimesSpotted} times, and caught {TimesCaught} times.",
@@ -717,6 +754,16 @@ namespace MazeGame
 
 
         #region Menus
+        private void CreateMenues()
+        {
+            CreateMainMenu();
+            CreateBribeMenu();
+            CreateMissionsMenu();
+            CreateCampaignsMenu();
+        }
+
+
+
         private void CreateMainMenu()
         {
             string[] prompt = {
@@ -741,7 +788,7 @@ namespace MazeGame
                 "                                                             $$$$$                                   "
             };
 
-            string[] options = { "New Game", "Tutorial", "Credits ", "Quit" };
+            string[] options = { "New Campaign", "Single Mission", "Tutorial", "Credits ", "Quit" };
 
             mainMenu = new Menu(prompt, options);
         }
@@ -763,6 +810,47 @@ namespace MazeGame
             };
 
             bribeMenu = new Menu(prompt, options);
+        }
+
+
+
+        private void CreateCampaignsMenu()
+        {
+            string[] prompt =
+            {
+                "Choose the campaign you would like to play:",
+                " ",
+                " ",
+                " ",
+            };
+
+            availableCampaigns = Directory.GetDirectories(levelFilesPath);
+            List<string> options = new List<string>();
+            options.Add("Back");
+            for (int i = 0; i < availableCampaigns.Length; i++)
+            {
+                availableCampaigns[i] = availableCampaigns[i].Remove(0, levelFilesPath.Length + 1);
+                options.Add(availableCampaigns[i]);
+            }
+
+            campaignsMenu = new Menu(prompt, options.ToArray());
+        }
+
+
+
+        private void CreateMissionsMenu()
+        {
+            string prompt = "Choose the mission you would like to play:";
+
+            availableMissions = Directory.GetFiles(levelFilesPath).Select(file => Path.GetFileNameWithoutExtension(file)).ToArray();
+            List<string> options = new List<string>();
+            options.Add("Back");
+            foreach(string s in availableMissions)
+            {
+                options.Add(s);
+            }
+
+            missionsMenu = new Menu(prompt, options.ToArray());
         }
 
 
@@ -792,7 +880,7 @@ namespace MazeGame
 
         private void MainMenuWithContinue(string[] saveFiles)
         {
-            string[] options = { "Continue", "New Game", "Tutorial", "Credits ", "Quit" };
+            string[] options = { "Continue Campaign", "New Campaign", "Single Mission", "Tutorial", "Credits ", "Quit" };
 
             mainMenu.UpdateMenuOptions(options);
 
@@ -804,7 +892,43 @@ namespace MazeGame
                     LoadSaveMenu(saveFiles);
                     break;
                 case 1:
-                    SelectDifficulty(true);
+                    SelectCampaign(1);
+                    break;
+                case 2:
+                    SelectMission();
+                    break;
+                case 3:
+                    PlayTutorial();
+                    break;
+                case 4:
+                    DisplayAboutInfo();
+                    break;
+                case 5:
+                    if (!MainMenuQuitGame())
+                    {
+                        RunMainMenu();
+                    }
+                    break;
+            }
+        }
+
+
+
+        private void DefaultMainMenu()
+        {
+            string[] options = { "New Campaign", "Single Mission", "Tutorial", "Credits ", "Quit" };
+
+            mainMenu.UpdateMenuOptions(options);
+
+            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5, 0, WindowWidth);
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    SelectCampaign(2);
+                    break;
+                case 1:
+                    SelectMission();
                     break;
                 case 2:
                     PlayTutorial();
@@ -823,38 +947,10 @@ namespace MazeGame
 
 
 
-        private void DefaultMainMenu()
-        {
-            string[] options = { "New Game", "Tutorial", "Credits ", "Quit" };
-
-            mainMenu.UpdateMenuOptions(options);
-
-            int selectedIndex = mainMenu.Run(WindowWidth / 2, 10, 5, 0, WindowWidth);
-
-            switch (selectedIndex)
-            {
-                case 0:
-                    SelectDifficulty(false);
-                    break;
-                case 1:
-                    PlayTutorial();
-                    break;
-                case 2:
-                    DisplayAboutInfo();
-                    break;
-                case 3:
-                    if (!MainMenuQuitGame())
-                    {
-                        RunMainMenu();
-                    }
-                    break;
-            }
-        }
-
-
-
         private void LoadSaveMenu(string[] availableSaves)
         {
+            //TODO: this doesn't support multiple campaigns. Update the save system for that
+
             Clear();
 
             string prompt = "~·~ Which game do you want to load? ~·~";
@@ -882,14 +978,90 @@ namespace MazeGame
                     TimesSpotted = saveGame.TimesSpotted;
                     TimesCaught = saveGame.TimesCaught;
                     DifficultyLevel = saveGame.DifficultyLevel;
-                    PlayGame(saveGame.CurrentLevel, saveGame.Booty);
+                    PlayGampaign("/The Baron's Jails", saveGame.CurrentLevel, saveGame.Booty);
                     break;
             }
         }
 
 
 
-        private void SelectDifficulty(bool IsThereASavegame)
+        private void SelectCampaign( int saveGameStatus )
+        {
+            Clear();
+
+            if (saveGameStatus == 1)
+            {
+                string[] newPrompt =
+                {
+                    "Choose the campaign you would like to play:",
+                    " ",
+                    "! WARNING: Savegames detected !",
+                    "If you start a a new game with the same campaign and same difficulty level as a previous, uncompleted playthrough, the savegame will be overwritten.",
+                };
+
+                campaignsMenu.UpdateMenuPrompt(newPrompt);
+            }
+            else
+            {
+                string[] newPrompt =
+                {
+                    "Choose the campaign you would like to play:",
+                    " ",
+                    " ",
+                    " ",
+                };
+
+                campaignsMenu.UpdateMenuPrompt(newPrompt);
+            }
+            
+            string selectedCampaign;
+            int selectedIndex = campaignsMenu.RunWithScrollingOptions(WindowWidth / 2, 5, 2, 0, WindowWidth - 1, 40);
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    Clear();
+                    RunMainMenu();
+                    return;
+                default:
+                    selectedCampaign = availableCampaigns[selectedIndex - 1];
+                    SelectDifficulty(saveGameStatus);
+                    break;
+            }
+
+            PlayGampaign(selectedCampaign);
+        }
+
+
+
+        private void SelectMission()
+        {
+            Clear();
+            int selectedIndex = missionsMenu.RunWithScrollingOptions(WindowWidth / 2, 5, 2, 0, WindowWidth-1, 40);
+            string selectedMission = "";
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    Clear();
+                    RunMainMenu();
+                    return;
+                default:
+                    selectedMission = availableMissions[selectedIndex - 1];
+                    SelectDifficulty(0);
+                    break;
+            }
+
+            PlayMission(selectedMission);
+        }
+
+
+
+        /// <summary>
+        /// Menu to select difficulty level.
+        /// </summary>
+        /// <param name="saveGameStatus">= 0 for single missions, 1 for campaigns with existing savegames, anything else for standard game</param>
+        private void SelectDifficulty(int saveGameStatus)
         {
             Clear();
 
@@ -907,9 +1079,18 @@ namespace MazeGame
                 "  "
             };
 
-            if (IsThereASavegame)
+            switch (saveGameStatus)
             {
-                prompt[3] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
+                case 0:
+                    prompt[2] = "Single missions will not be saved";
+                    break;
+                case 1:
+                    prompt[2] = "The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.";
+                    prompt[3] = "! Warning: if you start a new game with the same difficulty level as an existing save, the save will be overwritten. !";
+                    break;
+                default:
+                    prompt[2] = "The game will autosave your progress every time you complete a level. Only one savegame per difficulty level is possible.";
+                    break;
             }
 
             string[] options = { "Back", "Very Easy", "Easy", "Normal", "Hard", "Very Hard", "Ironman"};
@@ -917,7 +1098,8 @@ namespace MazeGame
             string[] vEasyPrompt = new string[prompt.Length];
             Array.Copy(prompt, vEasyPrompt, prompt.Length);
             vEasyPrompt[6] = "VERY EASY: you can bribe guards as many times as you want, if you have collected enough money to do it.";
-            vEasyPrompt[7] = "Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry.";
+            if (saveGameStatus == 0) { vEasyPrompt[7] = "Bribe cost increase by $50 each time."; }
+            else { vEasyPrompt[7] = "Bribe cost increase by $50 each time. If you game over, you'll be able to reload the last save and retry."; }
 
             string[] easyPrompt = new string[prompt.Length];
             Array.Copy(prompt, easyPrompt, prompt.Length);
@@ -926,7 +1108,8 @@ namespace MazeGame
             string[] normalPrompt = new string[prompt.Length];
             Array.Copy(prompt, normalPrompt, prompt.Length);
             normalPrompt[6] = "NORMAL: you can bribe each guard only once, after which they'll arrest you if they catch you a second time.";
-            normalPrompt[7] = "Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry.";
+            if (saveGameStatus == 0) { normalPrompt[7] = "Bribe cost will increase by $100 each time."; }
+            else { normalPrompt[7] = "Bribe cost will increase by $100 each time. If you game over, you can reload the last save and retry."; }
 
             string[] hardPrompt = new string[prompt.Length];
             Array.Copy(prompt, hardPrompt, prompt.Length);
@@ -935,11 +1118,12 @@ namespace MazeGame
             string[] vHardPrompt = new string[prompt.Length];
             Array.Copy(prompt, vHardPrompt, prompt.Length);
             vHardPrompt[6] = "VERY HARD: you cannot bribe guards at all. They'll arrest you on sight straight from the first time you'll cross their path.";
-            vHardPrompt[7] = "You will still be able to load the last save and retry the same level.";
+            if (saveGameStatus != 0) { vHardPrompt[7] = "You will still be able to load the last save and retry the same level."; }
 
             string[] ironmanPrompt = new string[prompt.Length];
             Array.Copy(prompt, ironmanPrompt, prompt.Length);
-            ironmanPrompt[6] = "IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning.";
+            if (saveGameStatus == 0) { ironmanPrompt[6] = "IRONMAN: You cannot bribe guards at all, it's game over whenever you get caught."; }
+            else { ironmanPrompt[6] = "IRONMAN: You cannot bribe guards at all, and if you get caught you'll have to start from the very beginning."; }
 
             string[] defaultPrompt = prompt;
 
@@ -982,8 +1166,6 @@ namespace MazeGame
                     DifficultyLevel = Difficulty.Ironman;
                     break;
             }
-
-            PlayGame();
         }
 
 

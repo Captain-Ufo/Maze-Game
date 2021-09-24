@@ -32,7 +32,7 @@ namespace MazeGame
         /// <param name="game">the current game, required to get the data to save</param>
         public void SaveGame(Game game)
         {
-            GameData data = new GameData(game.MyPlayer.Booty, game.CurrentRoom, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
+            GameData data = new GameData(game.PlayerCharacter.Booty, game.CurrentRoom, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
 
             string saveGame = JsonSerializer.Serialize(data);
             string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";

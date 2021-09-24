@@ -16,12 +16,12 @@ namespace MazeGame
         private int verticalAggroDistance = 5;
         private int horizontalAggroDistance = 10;
         private int bribeTimer;
-        private bool hasBeenBribed;
+        private int bribeTimerDuration;
+        private bool isBribed;
         private int alertTimer;
         private bool isAlerted;
         private bool isReturning;
         private int pivotTimer;
-        private bool easyGame;
         private string[] guardMarkersTable = new string[] { "^", ">", "V", "<" };
         private string guardMarker;
         private ConsoleColor guardSymbolColor = ConsoleColor.Black;
@@ -38,7 +38,7 @@ namespace MazeGame
         /// <summary>
         /// To be set depending on difficulty level. If true, it will prevent being bribed a second time
         /// </summary>
-        public bool HasBeenBribedBefore { get; private set; }
+        public int TimesBribed { get; private set; }
         /// <summary>
         /// The X coordinate of the Guard
         /// </summary>
@@ -56,18 +56,17 @@ namespace MazeGame
         {
             rng = new Random();
             nextPatrolPoint = 0;
-            hasBeenBribed = false;
+            isBribed = false;
             isAlerted = false;
             isReturning = false;
-            HasBeenBribedBefore = false;
+            TimesBribed = 0;
             bribeTimer = 0;
+            bribeTimerDuration = 50;
             alertTimer = 0;
             pivotTimer = rng.Next(201);
             timeBetweenMoves = walkingSpeed;
             direction = Directions.up;
             guardMarker = guardMarkersTable[(int)direction];
-
-            easyGame = false;
         }
 
         /// <summary>
@@ -139,7 +138,7 @@ namespace MazeGame
                 }
 
                 guardTileColor = ConsoleColor.Red;
-                lastKnownPlayerPosition = new Vector2(game.MyPlayer.X, game.MyPlayer.Y);
+                lastKnownPlayerPosition = new Vector2(game.PlayerCharacter.X, game.PlayerCharacter.Y);
                 isAlerted = true;
                 isReturning = false;
                 timeBetweenMoves = runningSpeed;
@@ -183,15 +182,14 @@ namespace MazeGame
         /// Prevents a Game Over
         /// </summary>
         /// <param name="IsGameEasy">Sets the flag that is used to determine how many times a guard can be bribed</param>
-        public void BribeGuard(bool IsGameEasy)
+        public void BribeGuard()
         {
-            hasBeenBribed = true;
+            isBribed = true;
             if (isAlerted)
             {
                 isAlerted = false;
                 isReturning = true;
             }
-            easyGame = IsGameEasy;
         }
 
         /// <summary>
@@ -201,7 +199,7 @@ namespace MazeGame
         {
             nextPatrolPoint = 0;
             bribeTimer = 0;
-            hasBeenBribed = false;
+            isBribed = false;
             alertTimer = 0;
             isAlerted = false;
             isReturning = false;
@@ -209,8 +207,7 @@ namespace MazeGame
             X = originPoint.X;
             Y = originPoint.Y;
             timeSinceLastMove = 0;
-            HasBeenBribedBefore = false;
-            easyGame = false;
+            TimesBribed = 0;
         }
 
         /// <summary>
@@ -260,25 +257,22 @@ namespace MazeGame
 
         private void UpdateBribe()
         {
-            if (hasBeenBribed)
+            if (isBribed)
             {
                 bribeTimer++;
             }
 
-            if (bribeTimer > 20)
+            if (bribeTimer > bribeTimerDuration)
             {
-                hasBeenBribed = false;
-                if (!easyGame)
-                {
-                    HasBeenBribedBefore = true;
-                }
+                isBribed = false;
+                TimesBribed ++;
                 bribeTimer = 0;
             }
         }
 
         private bool SpotPlayer(Game game, Level level)
         {
-            if (hasBeenBribed)
+            if (isBribed)
             {
                 return false;
             }
@@ -286,10 +280,10 @@ namespace MazeGame
             switch (direction)
             {
                 case Directions.up:
-                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
-                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + 1)
+                    if (game.PlayerCharacter.X >= X - horizontalAggroDistance && game.PlayerCharacter.X <= X + horizontalAggroDistance
+                        && game.PlayerCharacter.Y >= Y - verticalAggroDistance && game.PlayerCharacter.Y <= Y + 1)
                     {
-                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.PlayerCharacter.X, game.PlayerCharacter.Y);
 
                         foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
@@ -306,10 +300,10 @@ namespace MazeGame
                     }
 
                 case Directions.right:
-                    if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + horizontalAggroDistance
-                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
+                    if (game.PlayerCharacter.X >= X - 1 && game.PlayerCharacter.X <= X + horizontalAggroDistance
+                        && game.PlayerCharacter.Y >= Y - verticalAggroDistance && game.PlayerCharacter.Y <= Y + verticalAggroDistance)
                     {
-                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.PlayerCharacter.X, game.PlayerCharacter.Y);
 
                         foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
@@ -326,10 +320,10 @@ namespace MazeGame
                     }
 
                  case Directions.down:
-                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + horizontalAggroDistance
-                        && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + verticalAggroDistance)
+                    if (game.PlayerCharacter.X >= X - horizontalAggroDistance && game.PlayerCharacter.X <= X + horizontalAggroDistance
+                        && game.PlayerCharacter.Y >= Y - 1 && game.PlayerCharacter.Y <= Y + verticalAggroDistance)
                     {
-                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.PlayerCharacter.X, game.PlayerCharacter.Y);
 
                         foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
@@ -346,10 +340,10 @@ namespace MazeGame
                     }
 
                  case Directions.left:
-                    if (game.MyPlayer.X >= X - horizontalAggroDistance && game.MyPlayer.X <= X + 1
-                        && game.MyPlayer.Y >= Y - verticalAggroDistance && game.MyPlayer.Y <= Y + verticalAggroDistance)
+                    if (game.PlayerCharacter.X >= X - horizontalAggroDistance && game.PlayerCharacter.X <= X + 1
+                        && game.PlayerCharacter.Y >= Y - verticalAggroDistance && game.PlayerCharacter.Y <= Y + verticalAggroDistance)
                     {
-                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.MyPlayer.X, game.MyPlayer.Y);
+                        Vector2[] tilesBetweenGuardAndPlayer = GetTilesBetweenGuardAndPlayer(this.X, this.Y, game.PlayerCharacter.X, game.PlayerCharacter.Y);
 
                         foreach (Vector2 tile in tilesBetweenGuardAndPlayer)
                         {
@@ -471,13 +465,13 @@ namespace MazeGame
 
         private void CatchPlayer(Game game)
         {
-            if (hasBeenBribed)
+            if (isBribed)
             {
                 return;
             }
 
-            if (game.MyPlayer.X >= X - 1 && game.MyPlayer.X <= X + 1
-                && game.MyPlayer.Y >= Y - 1 && game.MyPlayer.Y <= Y + 1)
+            if (game.PlayerCharacter.X >= X - 1 && game.PlayerCharacter.X <= X + 1
+                && game.PlayerCharacter.Y >= Y - 1 && game.PlayerCharacter.Y <= Y + 1)
             {
                 game.CapturePlayer(this);
             }

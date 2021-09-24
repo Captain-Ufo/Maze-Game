@@ -14,9 +14,9 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor2a.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.csproj.AssemblyReference.cache
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\obj\Debug\netcoreapp3.1\MazeGame.GeneratedMSBuildEditorConfig.editorconfig
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\High Security Confinement.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\Deep Cells.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\FloorsConfig.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\Guards Barracks.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\Stolen Goods Vault.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Baron's Jails\TestFloor.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\High Security Confinement.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\Deep Cells.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\FloorsConfig.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\Guards Barracks.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\Stolen Goods Vault.txt
+D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Baron's Jails\TestFloor.txt

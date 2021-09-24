@@ -39,6 +39,7 @@ namespace MazeGame
             try
             {
                 SetWindowSize(width, height);
+                SetBufferSize(width, height);
             }
             catch (ArgumentOutOfRangeException)
             {

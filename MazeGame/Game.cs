@@ -21,15 +21,15 @@ namespace MazeGame
         private Menu mainMenu;
         private Menu bribeMenu;
         private SaveSystem saveSystem;
-        
+        private Random rng;
+
         public ChiptunePlayer TunePlayer { get; private set; }
-        public Player MyPlayer { get; private set; }
+        public Player PlayerCharacter { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
         public int CurrentRoom { get; private set; }
         public int TimesSpotted { get; set; }
         public int TimesCaught { get; private set; }
         public Stopwatch MyStopwatch { get; private set; }
-
 
         /// <summary>
         /// Initializes all the required elements and run the game
@@ -39,6 +39,7 @@ namespace MazeGame
             saveSystem = new SaveSystem();
             TunePlayer = new ChiptunePlayer();
             MyStopwatch = new Stopwatch();
+            rng = new Random();
 
             playerHasBeenCaught = false;
             TimesCaught = 0;
@@ -90,8 +91,8 @@ namespace MazeGame
                 totalGold += levelInfo.TotalGold;
             }
 
-            MyPlayer = new Player(levels[startLevel].PlayerStartX, levels[startLevel].PlayerStartY);
-            MyPlayer.Booty = startBooty;
+            PlayerCharacter = new Player(levels[startLevel].PlayerStartX, levels[startLevel].PlayerStartY);
+            PlayerCharacter.Booty = startBooty;
         }
 
 
@@ -108,8 +109,8 @@ namespace MazeGame
                                      levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
             }
 
-            MyPlayer = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
-            MyPlayer.Booty = 0;
+            PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            PlayerCharacter.Booty = 0;
         }
         #endregion
 
@@ -120,7 +121,7 @@ namespace MazeGame
         {
             Clear();
             DisplayLoading();
-            InstantiateGameEntities("/Baron's Jails", startBooty, startRoom);
+            InstantiateGameEntities("/The Baron's Jails", startBooty, startRoom);
             RunGameLoop(startRoom);
             WinGame();
         }
@@ -154,7 +155,7 @@ namespace MazeGame
 
             while (true)
             {
-                MyPlayer.HasMoved = false;
+                PlayerCharacter.HasMoved = false;
 
                 if (playerHasBeenCaught)
                 {
@@ -179,35 +180,35 @@ namespace MazeGame
                     tutorial.DisplayTutorialInstructions(CurrentRoom);
                 }
 
-                string elementAtPlayerPosition = levels[CurrentRoom].GetElementAt(MyPlayer.X, MyPlayer.Y);
+                string elementAtPlayerPosition = levels[CurrentRoom].GetElementAt(PlayerCharacter.X, PlayerCharacter.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
                 {
                     TunePlayer.PlaySFX(1000, 100);
-                    levels[CurrentRoom].ChangeElementAt(MyPlayer.X, MyPlayer.Y, SymbolsConfig.EmptySpace.ToString());
-                    MyPlayer.Draw();
-                    MyPlayer.Booty += 100;
+                    levels[CurrentRoom].ChangeElementAt(PlayerCharacter.X, PlayerCharacter.Y, SymbolsConfig.EmptySpace.ToString());
+                    PlayerCharacter.Draw();
+                    PlayerCharacter.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
                     TunePlayer.PlaySFX(800, 100);
-                    levels[CurrentRoom].CollectKeyPiece(MyPlayer.X, MyPlayer.Y);
-                    MyPlayer.Draw();
+                    levels[CurrentRoom].CollectKeyPiece(PlayerCharacter.X, PlayerCharacter.Y);
+                    PlayerCharacter.Draw();
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
                     || elementAtPlayerPosition == SymbolsConfig.LeverOnChar.ToString())
-                    && MyPlayer.HasMoved)
+                    && PlayerCharacter.HasMoved)
                 {
                     TunePlayer.PlaySFX(100, 100);
-                    levels[CurrentRoom].ToggleLever(MyPlayer.X, MyPlayer.Y);
-                    MyPlayer.Draw();
+                    levels[CurrentRoom].ToggleLever(PlayerCharacter.X, PlayerCharacter.Y);
+                    PlayerCharacter.Draw();
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !levels[CurrentRoom].IsLocked)
                 {
                     if (levels.Count > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        MyPlayer.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
+                        PlayerCharacter.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
                         hasDrawnBackground = false;
 
                         if (tutorial == null)
@@ -239,7 +240,7 @@ namespace MazeGame
                     hasDrawnBackground = false;
                     playerHasBeenCaught = false;
                     TimesCaught = 0;
-                    MyPlayer.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
+                    PlayerCharacter.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
                     levels[CurrentRoom].Reset();
                     RunGameLoop(CurrentRoom, tutorial);
                 }
@@ -255,7 +256,7 @@ namespace MazeGame
 
         private bool HandleInputs(int currentLevel, int deltaTimeMS)
         {
-            if (!MyPlayer.HandlePlayerControls(levels[currentLevel], deltaTimeMS))
+            if (!PlayerCharacter.HandlePlayerControls(levels[currentLevel], deltaTimeMS))
             { 
                 MyStopwatch.Stop();
                 if (QuitGame())
@@ -280,7 +281,7 @@ namespace MazeGame
             if (!hasDrawnBackground)
             {
                 levels[currentRoom].Draw();
-                MyPlayer.Draw();
+                PlayerCharacter.Draw();
                 hasDrawnBackground = true;
             }
             levels[currentRoom].DrawGuards();
@@ -304,7 +305,7 @@ namespace MazeGame
             SetCursorPosition(35, CursorTop);
             Write($"Difficulty Level: {DifficultyLevel}");
             SetCursorPosition(70, CursorTop);
-            Write($"Tresure collected: $ {MyPlayer.Booty}");
+            Write($"Tresure collected: $ {PlayerCharacter.Booty}");
             string quitInfo = "Press Escape to quit.";
             SetCursorPosition(WindowWidth - quitInfo.Length - 3, WindowHeight - 2);
             Write(quitInfo);
@@ -316,13 +317,15 @@ namespace MazeGame
         {
             MyStopwatch.Stop();
 
-            if (DifficultyLevel == Difficulty.VeryHard || DifficultyLevel == Difficulty.Ironman || guard.HasBeenBribedBefore || !AttemptBribe())
+            bool canBeBribed = DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.VeryEasy || guard.TimesBribed < 1;
+
+            if (!canBeBribed || DifficultyLevel == Difficulty.VeryHard || DifficultyLevel == Difficulty.Ironman || !AttemptBribe(guard.TimesBribed))
             {
                 playerHasBeenCaught = true;
                 return;
             }
 
-            guard.BribeGuard(DifficultyLevel == Difficulty.Easy || DifficultyLevel == Difficulty.VeryEasy);
+            guard.BribeGuard();
 
             TimesCaught++;
             Clear();
@@ -333,7 +336,7 @@ namespace MazeGame
 
 
 
-        private bool AttemptBribe()
+        private bool AttemptBribe(int amountBribedBefore)
         {
             Clear();
             SetCursorPosition(0, 3);
@@ -409,12 +412,23 @@ namespace MazeGame
 
             int xPos = (WindowWidth / 4) * 3;
 
+            string guardCry;
+
+            if (amountBribedBefore > 0)
+            {
+                guardCry = ChooseSecondGuardCry();
+            }
+            else
+            {
+                guardCry = ChooseFirstGuardCry();
+            }
+
             string[] prompt =
             {
-                "'HALT!'",
+                $"\"{guardCry}\"",
                 " ",
                 "A guard caught you! Quick, maybe you can bribe them.",
-                $"You have collected ${MyPlayer.Booty} so far.",
+                $"You have collected ${PlayerCharacter.Booty} so far.",
             };
 
             string[] options =
@@ -433,7 +447,7 @@ namespace MazeGame
 
                     string message;
 
-                    if (MyPlayer.Booty >= bribeCost) 
+                    if (PlayerCharacter.Booty >= bribeCost) 
                     {
                         message = "The guard pockets your money and grumbles";
                         SetCursorPosition(xPos - message.Length/2, CursorTop + 4);
@@ -444,12 +458,12 @@ namespace MazeGame
                         message = "'I won't be so kind next time.'";
                         SetCursorPosition(xPos - message.Length / 2, CursorTop);
                         WriteLine(message);
-                        MyPlayer.Booty -= bribeCost;
+                        PlayerCharacter.Booty -= bribeCost;
                         ReadKey(true);
                         return true;
                     }
 
-                    if (MyPlayer.Booty > 0)
+                    if (PlayerCharacter.Booty > 0)
                     {
                         message = "The guard won't be swayed by the paltry sum you can offer.";
                     }
@@ -468,6 +482,43 @@ namespace MazeGame
 
                 default:
                     return false;
+            }
+
+            string ChooseFirstGuardCry()
+            {
+                string[] cries = new string[]
+                {
+                    "HALT!",
+                    "Freeze!",
+                    "Cought you!",
+                    "Hey!",
+                    "Stop right there!",
+                    "You can't be here!",
+                    "You are not allowed here!",
+                    "Thief!",
+                    "Show's over, thief!",
+                    "Who goes there?!"
+                };
+
+                int selection = rng.Next(0, cries.Length);
+
+                return cries[selection];
+            }
+
+            string ChooseSecondGuardCry()
+            {
+                string[] cries = new string[]
+                {
+                    "I told you not to show your face again!",
+                    "Hey! Why are you still around?",
+                    "This time you won't get off the hook so easily!",
+                    "You again?!",
+                    "I won't be so nice this time!",
+                };
+
+                int selection = rng.Next(0, cries.Length);
+
+                return cries[selection];
             }
         }
 
@@ -540,12 +591,15 @@ namespace MazeGame
             string[] gameOverOutro =
             {
                 "Oh, no!",
-                "You have been caught and brought back to your cell!",
+                "You have been caught and shackled! The guards drag you to a dingy cell.",
                 "  ",
-                $"The guards searched you and sequestered $ {MyPlayer.Booty} in treasures.",
+                $"You've been searched and the guards sequestered $ {PlayerCharacter.Booty} in treasures.",
+                "  ",
+                "Better luck next time.",
+                "Try Again!",
+                "  ",
                 "  ",
                 "Thank you for playing.",
-                "Try Again!",
                 "  ",
                 "  ",
                 "÷ GAME OVER ÷",
@@ -594,7 +648,7 @@ namespace MazeGame
                 "  ",
                 "You escaped the Baron's dungeon!",
                 "  ",
-                $"You collected $ {MyPlayer.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You collected $ {PlayerCharacter.Booty} in treasures, out of a total of $ {totalGold}.",
                 $"You have been spotted {TimesSpotted} times, and caught {TimesCaught} times.",
                 "  ",
                 "  ",
@@ -609,8 +663,8 @@ namespace MazeGame
             }
             else
             {
-                outro[7] = "You fled the prison and the Baron's guards are none the wiser!";
-                if (MyPlayer.Booty == totalGold)
+                outro[7] = "You sneaked right under the guards's noses!";
+                if (PlayerCharacter.Booty == totalGold)
                 {
                     outro[8] = "You really are the best of all thieves in the city.";
                 }
@@ -644,8 +698,8 @@ namespace MazeGame
         {
             playerHasBeenCaught = false;
             TimesCaught = 0;
-            MyPlayer.Booty = 0;
-            MyPlayer.SetStartingPosition(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            PlayerCharacter.Booty = 0;
+            PlayerCharacter.SetStartingPosition(levels[0].PlayerStartX, levels[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
             foreach (Level level in levels)
@@ -1017,7 +1071,7 @@ namespace MazeGame
             string[] options = { "Quit to Main Menu", "Quit to desktop", "Return to game" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2, 10, 2, 0, WindowWidth);
+            int selection = quitMenu.Run(WindowWidth/2, WindowHeight / 3, 2, 0, WindowWidth);
             if (selection == 0)
             {
                 RunMainMenu();
@@ -1046,7 +1100,7 @@ namespace MazeGame
             string[] options = { "Yes", "No" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);
-            int selection = quitMenu.Run(WindowWidth/2, 10, 2, 0, WindowWidth);
+            int selection = quitMenu.Run(WindowWidth/2, WindowHeight / 3, 2, 0, WindowWidth);
             if (selection == 0)
             {
                 Environment.Exit(0);
@@ -1115,8 +1169,8 @@ namespace MazeGame
             TimesSpotted = saveGame.TimesSpotted;
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
-            MyPlayer.Booty = saveGame.Booty;
-            MyPlayer.SetStartingPosition(levels[saveGame.CurrentLevel].PlayerStartX, levels[saveGame.CurrentLevel].PlayerStartY);
+            PlayerCharacter.Booty = saveGame.Booty;
+            PlayerCharacter.SetStartingPosition(levels[saveGame.CurrentLevel].PlayerStartX, levels[saveGame.CurrentLevel].PlayerStartY);
             levels[saveGame.CurrentLevel].Reset();
             RunGameLoop(saveGame.CurrentLevel);
         }

@@ -196,6 +196,8 @@ namespace MazeGame
 
         public void DisplayEndTutorial()
         {
+            //TODO: update this with an assessment of performance? If the player has not collected all gold and/or been caught, suggest new training session?
+
             Clear();
             string[] endMessage = new string[]
             {

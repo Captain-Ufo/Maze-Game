@@ -21,7 +21,20 @@ namespace MazeGame
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetConsoleWindow();
 
-        public static void SetConsole(string title, int width, int height, bool blockClosing, bool blockMinimize, bool blockMaximize, bool blockResize )
+        /// <summary>
+        /// Sets the console to the defined parameters.
+        /// </summary>
+        /// <param name="title">The title that appears in the console window bar.</param>
+        /// <param name="width">The console window's width.</param>
+        /// <param name="height">The console window's height.</param>
+        /// <param name="blockClosing">Set to true to disable the close button.</param>
+        /// <param name="blockMinimize">Set to true to disable the minimize button.</param>
+        /// <param name="blockMaximize">Set to true to disable the maximize button. Note that it won't prevent automatic mazimization
+        /// if the window is dragged to the top of the screen.</param>
+        /// <param name="blockResize">Set to true to prevent manual resizing of the window via dragging the edges.</param>
+        /// <param name="blockScrolling">Set to true to prevent manual scrolling. Note that the window will automatically scroll anyway if the displayed text
+        /// is larger than the window size.</param>
+        public static void SetConsole(string title, int width, int height, bool blockClosing, bool blockMinimize, bool blockMaximize, bool blockResize, bool blockScrolling )
         {
             IntPtr handle = GetConsoleWindow();
             IntPtr sysMenu = GetSystemMenu(handle, false);
@@ -39,7 +52,7 @@ namespace MazeGame
             try
             {
                 SetWindowSize(width, height);
-                SetBufferSize(width, height);
+                if (blockScrolling) { SetBufferSize(width, height); }
             }
             catch (ArgumentOutOfRangeException)
             {

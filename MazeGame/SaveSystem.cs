@@ -32,10 +32,10 @@ namespace MazeGame
         /// <param name="game">the current game, required to get the data to save</param>
         public void SaveGame(Game game)
         {
-            GameData data = new GameData(game.PlayerCharacter.Booty, game.CurrentRoom, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
+            GameData data = new GameData(game.ActiveCampaign.Name, game.CurrentRoom, game.PlayerCharacter.Booty, game.TimesSpotted, game.TimesCaught, game.DifficultyLevel);
 
             string saveGame = JsonSerializer.Serialize(data);
-            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.ActiveCampaign.Name + "_" + game.DifficultyLevel + ".sav";
             if (!Directory.Exists(saveGamesPath))
             {
                 Directory.CreateDirectory(saveGamesPath);
@@ -55,7 +55,7 @@ namespace MazeGame
             {
                 throw new Exception("LoadGame - Save file directory does not exists!");
             }
-            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.ActiveCampaign.Name + "_" + game.DifficultyLevel + ".sav";
             string saveFilePath = saveGamesPath + saveGameName;
 
             string loadedData = File.ReadAllText(saveFilePath);
@@ -90,7 +90,7 @@ namespace MazeGame
         /// <param name="game">the current game, from which the method access the difficulty level in order to chose which file to delete</param>
         public void DeleteSaveGame(Game game)
         {
-            string saveGameName = "/" + game.DifficultyLevel + "_Game.sav";
+            string saveGameName = "/" + game.ActiveCampaign.Name + "_" + game.DifficultyLevel + ".sav";
             string saveFilePath = saveGamesPath + saveGameName;
             if (File.Exists(saveFilePath))
             {
@@ -131,14 +131,16 @@ namespace MazeGame
     /// </summary>
     public class GameData
     {
+        public string CampaignName { get; set; }
         public int Booty { get; set; }
         public int CurrentLevel { get; set; }
         public int TimesSpotted { get; set; }
         public int TimesCaught { get; set; }
         public Difficulty DifficultyLevel { get; set; }
 
-        public GameData(int booty, int currentLevel, int timesSpotted, int timesCaught, Difficulty difficultyLevel)
+        public GameData(string campaignName, int currentLevel, int booty, int timesSpotted, int timesCaught, Difficulty difficultyLevel)
         {
+            CampaignName = campaignName;
             Booty = booty;
             CurrentLevel = currentLevel;
             TimesSpotted = timesSpotted;

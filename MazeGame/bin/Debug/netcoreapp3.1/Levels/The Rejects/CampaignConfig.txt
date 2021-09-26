@@ -1,0 +1,43 @@
+{
+	"Name":"The Rejects",
+
+	"LevelFiles":
+		[
+			"TestFloor",
+			"Labyrinth",
+			"Floor2Test"
+		],
+
+	"LevelBriefings":
+		[
+			[
+				"Yeah, this was made just to test functionalities.",
+				"Pretty crappy level. but at least it's fast and easy.",
+				"I hope you don't game over on this because that would be embarrassing."
+			],
+			[
+				"This used to be the first level of the first iteration of the game, a long while ago before I figured out a bunch of things.",
+				"As such, it's pretty barebone, but at least there's some gameplay."
+			],
+			[
+				"This used to be the second level of the first iteration of the game.",
+				"Still quite maze-like, but developing this is where I got the idea that lavels should be more like actual buildings floors or places.",
+				"I'm not entirely sure it can be completed without getting spotted, because it was designed before guards had the ability to spot",
+				"and persue you. Back then, the only way to get caught by a guard was to just get in their immediate vicinity"
+			]
+		],
+
+	"LevelOutros":
+		[
+			[
+				"One done, two more to go."
+			],
+			[
+				"Midway point reached."
+			],
+			[
+				"And this was the last one.",
+				"Not the most exciting trip ever, but it's just for testing."
+			]
+		]
+}

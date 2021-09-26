@@ -15,6 +15,9 @@
     <None Update="Levels\Labyrinth.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Levels\The Baron%27s Jails\CampaignConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Levels\The Baron's Jails\Deep Cells.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -36,9 +39,25 @@
     <None Update="Levels\TestFloor.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Levels\The Rejects\CampaignConfig.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Levels\The Rejects\Floor2Test.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Levels\The Rejects\Labyrinth.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Levels\The Rejects\TestFloor.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="RoomConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Levels\The Rejects\" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Text.Json;
 using static System.Console;
 
 namespace MazeGame
@@ -13,7 +14,7 @@ namespace MazeGame
     /// </summary>
     class Game
     {
-        private List<Level> levels;
+        //private List<Level> levels;
         private string[] availableMissions;
         private string[] availableCampaigns;
         private bool playerHasBeenCaught;
@@ -28,13 +29,14 @@ namespace MazeGame
         private SaveSystem saveSystem;
         private Random rng;
 
-        public ChiptunePlayer TunePlayer { get; private set; }
+        public Campaign ActiveCampaign { get; private set; }
         public Player PlayerCharacter { get; private set; }
         public Difficulty DifficultyLevel { get; private set; }
         public int CurrentRoom { get; private set; }
         public int TimesSpotted { get; set; }
         public int TimesCaught { get; private set; }
         public Stopwatch MyStopwatch { get; private set; }
+        public ChiptunePlayer TunePlayer { get; private set; }
 
         /// <summary>
         /// Initializes all the required elements and run the game
@@ -45,7 +47,7 @@ namespace MazeGame
             TunePlayer = new ChiptunePlayer();
             MyStopwatch = new Stopwatch();
             rng = new Random();
-            levels = new List<Level>();
+            //levels = new List<Level>();
 
             playerHasBeenCaught = false;
             TimesCaught = 0;
@@ -76,13 +78,147 @@ namespace MazeGame
 
         private void InstantiateCampaignEntities(string configFileDir, int startBooty, int startLevel)
         {
-            levels.Clear();
+            /*
+            string[] briefing1 =
+            {
+                "You are Gareth, the non-copyright infringing master thief.",
+                "The last heist you were tasked to do turned out to be a trap set up by the Watch.",
+                "You have been captured and locked deep in the dungeon of the Baron's castle.",
+                "They stripped you of all your gear, but they didn't check your clothes in depth. That was a mistake on their part.",
+                "Had they searched you more throughly, they would've found the emergency lockpick sown inside the hem of your shirt.",
+                "The meager lock of the cell's door is not going to resist it for too long.",
+                "Escape the dungeon and, to spite the Watch, try to collect as much treasure as you can!"
+            };
 
-            string configFilePath = "/" + configFileDir +"/FloorsConfig.txt";
+            string[] briefing2 =
+            {
+                "You emerge in a stone room that seems an almost perfect replica of the one you just left.",
+                "This should be where they keep less troublesome criminals. You seem to remember, on your way down, that the exit here has",
+                "Quite a lot of redundant security. You should keep an eye out for keys and levers...",
+            };
 
-            string[] levelFiles = File.ReadAllLines(levelFilesPath + configFilePath);
+            string[] briefing3 =
+            {
+                "You overheard guards talking about a vault where they store evidence and precious goods sequestered from the inmates...",
+                "Might be worth keeping an eye out for that.",
+                "After all, the Watch owes you some time, and the room service in this prison is horrible.",
+                "You feel entitled to a refound."
+            };
 
-            foreach (string levelFile in levelFiles)
+            string[] outro1 =
+            {
+                "If what you just escaped was the highest security floor of this facility, getting out of here will be a breeze."
+            };
+
+            string[] outro2 =
+            {
+                "And the 'amateurs' floor is done too. Piece of cake."
+            };
+
+            string[] outro3 =
+            {
+                "Freedom, at last!",
+                "You leave the castle behind your back, with your pockets full of gold for the inconvenience.",
+                "Being arrested by the Watch wasn't so bad after all.",
+                " ",
+                @"                                         o                                         ",
+                @"                                    .-'''|                                         ",
+                @"                                    |,-''|                                         ",
+                @"                                         |   _.- '`.                               ",
+                @"                                        _|-''_.-'|. `.                             ",
+                @"                                       |:^.-'_.-'`.;. `.                           ",
+                @"                                       | `.'.   ,-'_.-'|                           ",
+                @"                                       |   + '-'.-'   J                            ",
+                @"                    __.            .d88|    `.-'      |                            ",
+                @"               _.--'_..`.    .d88888888|     |       J'b.                          ",
+                @"            +:' ,--'_.|`.`.d88888888888|-.   |    _-.|888b.                        ",
+                @"            | \ \-'_.--'_.-+888888888+'  _>F F +:'   `88888bo.                     ",
+                @"             L \ +'_.--'   |88888+''  _.' J J J  `.    +8888888b.                  ",
+                @"             |  `+'        |8+''  _.-'    | | |    +    `+8888888._-'.             ",
+                @"           .d8L L          | _.-'         | | |     `.    `+888+^'.-|.`.           ",
+                @"          d888|  |         J-'            F F F       `.  _.-'_.-'_.+.`.`.         ",
+                @"         d88888L L     _.  !             J J J          `|. +'_.-'    `_+ `;       ",
+                @"         888888J  |  +-'  \ L         _.-+.|.+.          F `.`.     .-'_.-'J       ",
+                @"         8888888|  L L\    \|     _.-'     '   `.       J    `.`.,-'.-'    |       ",
+                @"         8888888PL | | \    `._.-'               `.     |      `..-'      J.b      ",
+                @"         8888888 |  L L `.    \     _.-+.          `.   L+`.     |        F88b     ",
+                @"         8888888  L | |   \   _..--'_.-|.`.          >-'    `., J        |8888b    ",
+                @"         8888888  |  L L   +:' _.--'_.-'.`.`.    _.-'     .-' | |       JY88888b   ",
+                @"         8888888   L | |   J \ \_.-'     `.`.`.-'     _.-'   J J        F Y88888b  ",
+                @"         Y888888    \ L L   L \ `.      _.-'_.-+  _.-'       | |       |   Y88888b ",
+                @"         `888888b    \| |   |  `. \ _.-'_.-'   |-'          J J       J     Y88888b",
+                @"          Y888888     +'\   J    \ '_.-'       F    ,-T'\   | |    .-'      )888888",
+                @"           Y88888b.      \   L    +'          J    /  | J  J J  .-'        .d888888",
+                @"            Y888888b      \  |    |           |    F  '.|.-'+|-'         .d88888888",
+                @"             Y888888b      \ J    |           F   J    -.              .od88888888P",
+                @"              Y888888b      \ L   |          J    | .' ` \d8888888888888888888888P ",
+                @"               Y888888b      \|   |          |  .-'`.  `\ `.88888888888888888888P  ",
+                @"                Y888888b.     J   |          F-'     \\ ` \ \88888888888888888P'   ",
+                @"                 Y8888888b     L  |         J     d8`.`\  \`.8888888888888P'       ",
+                @"                  Y8888888b    |  |        .+      d8888\  ` .'  `Y888888P'        ",
+                @"                  `88888888b   J  |     .-'     .od888888\.-'                      ",
+                @"                   Y88888888b   \ |  .-'     d888888888P'                          ",
+                @"                   `888888888b   \|-'       d888888888P       ,0\                  ",
+                @"                    `Y88888888b            d8888888P'        ,\'^6                 ",
+                @"                      Y88888888bo.      .od88888888 hs         988b                ",
+                @"                      `8888888888888888888888888888              §8                ",
+                @"                       Y88888888888888888888888888P                °               ",
+                @"                       `Y8888888888888888888888P'                                  ",
+                @"                         `Y8888888888888P'                                         ",
+                @"                              `Y88888P'                                            ",
+            };
+            */
+
+            string filePath = levelFilesPath + "/" + configFileDir + "/CampaignConfig.txt";
+
+            if (!File.Exists(filePath))
+            {
+                //Safeguard #1
+                Clear();
+                string warning = "! EROOR: invalid, misnamed or non existent campaign config file !";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 1);
+                WriteLine(warning);
+                warning = "If this is a custom campaign, check the manual for instructions on how to create it correctly";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2);
+                WriteLine(warning);
+                SetCursorPosition(0, WindowHeight - 1);
+                Write("Press any key to return to main menu...");
+                ReadKey(true);
+                RunMainMenu();
+            }
+
+            string configData = File.ReadAllText(filePath);
+            CampaignConfig config = default;
+
+            try
+            {
+                config = JsonSerializer.Deserialize<CampaignConfig>(configData);
+            }
+            catch (Exception e)
+            {
+                Clear();
+                ForegroundColor = ConsoleColor.Red;
+                string warning = "!!* ERROR: cannot extract campaign data from the campaign config file *!!";
+                ResetColor();
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
+                WriteLine(warning);
+                warning = "The campaign file contains missing or incorrectly formatted data";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
+                WriteLine(warning);
+                warning = "If this is a custom campaign or you edited an existing campaign, please check the manual for instructions on how to create the config file correctly";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 3);
+                WriteLine(warning);
+                SetCursorPosition((WindowWidth / 2) - (e.Message.Length / 2), WindowHeight / 2 - 1);
+                WriteLine(e.Message);
+                SetCursorPosition(0, WindowHeight - 1);
+                Write("Press any key to return to main menu...");
+                ReadKey(true);
+                RunMainMenu();
+            }
+
+            List<Level> levels = new List<Level>();
+
+            foreach (string levelFile in config.LevelFiles)
             {
                 string levelFilePath = levelFilesPath + "/" + configFileDir + "/" + levelFile + ".txt";
 
@@ -96,7 +232,9 @@ namespace MazeGame
                 totalGold += levelInfo.TotalGold;
             }
 
-            PlayerCharacter = new Player(levels[startLevel].PlayerStartX, levels[startLevel].PlayerStartY);
+            ActiveCampaign = new Campaign(config.Name, levels.ToArray(), config.LevelBriefings, config.LevelOutros);
+
+            PlayerCharacter = new Player(ActiveCampaign.Levels[startLevel].PlayerStartX, ActiveCampaign.Levels[startLevel].PlayerStartY);
             PlayerCharacter.Booty = startBooty;
         }
 
@@ -104,7 +242,7 @@ namespace MazeGame
 
         private void InstantiateMissionEntities(string levelFile)
         {
-            levels.Clear();
+            List<Level> levels = new List<Level>();
 
             string levelFilePath = levelFilesPath + "/" + levelFile + ".txt";
 
@@ -117,6 +255,28 @@ namespace MazeGame
 
             totalGold += levelInfo.TotalGold;
 
+            //We need to create empty lists of briefings and outros in order to create a campaign out of a single mission.
+            //Very kludgy.
+            //Consider finding alternative methods for developers to specify intros and outros for single missions.
+
+            string[][] briefings =
+            {
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+            };
+
+            string[][] outros =
+            {
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+            };
+
+            ActiveCampaign = new Campaign(levelFile, levels.ToArray(), briefings, outros);
+
             PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
             PlayerCharacter.Booty = 0;
         }
@@ -125,7 +285,7 @@ namespace MazeGame
 
         private void InstantiateTutorialEntities(Tutorial tutorial)
         {
-            levels = new List<Level>();
+            List<Level> levels = new List<Level>();
 
             for (int i = 0; i < tutorial.TutorialLevels.Length; i++)
             {
@@ -135,7 +295,30 @@ namespace MazeGame
                                      levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
             }
 
-            PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            //We need to create empty lists of briefings and outros in order to create a campaign out of the Tutorial.
+            //Consider using tutorial instructions as intros
+            //(although it's nice to have the instructions on screen at the same time as the player plays the level)
+            //Also consider adding outros.
+
+            string[][] briefings =
+            {
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+            };
+
+            string[][] outros =
+            {
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+                new string[]{ "" },
+            };
+
+            ActiveCampaign = new Campaign("Tutorial", levels.ToArray(), briefings, outros);
+
+            PlayerCharacter = new Player(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
             PlayerCharacter.Booty = 0;
         }
         #endregion
@@ -175,6 +358,7 @@ namespace MazeGame
             InstantiateTutorialEntities(tutorial);
             RunGameLoop(0, tutorial);
             tutorial.DisplayEndTutorial();
+            ResetGame(false);
             RunMainMenu();
         }
 
@@ -189,9 +373,19 @@ namespace MazeGame
 
             CurrentRoom = startRoom;
             hasDrawnBackground = false;
+            bool hasDisplayedBriefing = false;
 
             while (true)
             {
+                if (!hasDisplayedBriefing)
+                {
+                    MyStopwatch.Stop();
+                    DisplayMissionText(ActiveCampaign.LevelBriefings[CurrentRoom]);
+                    hasDisplayedBriefing = true;
+                }
+
+                MyStopwatch.Start();
+
                 PlayerCharacter.HasMoved = false;
 
                 if (playerHasBeenCaught)
@@ -207,7 +401,7 @@ namespace MazeGame
                     return;
                 }
 
-                levels[CurrentRoom].UpdateGuards(deltaTimeMS, this);
+                ActiveCampaign.Levels[CurrentRoom].UpdateGuards(deltaTimeMS, this);
 
                 
                 DrawFrame(CurrentRoom);
@@ -217,19 +411,19 @@ namespace MazeGame
                     tutorial.DisplayTutorialInstructions(CurrentRoom);
                 }
 
-                string elementAtPlayerPosition = levels[CurrentRoom].GetElementAt(PlayerCharacter.X, PlayerCharacter.Y);
+                string elementAtPlayerPosition = ActiveCampaign.Levels[CurrentRoom].GetElementAt(PlayerCharacter.X, PlayerCharacter.Y);
 
                 if (elementAtPlayerPosition == SymbolsConfig.TreasureChar.ToString())
                 {
                     TunePlayer.PlaySFX(1000, 100);
-                    levels[CurrentRoom].ChangeElementAt(PlayerCharacter.X, PlayerCharacter.Y, SymbolsConfig.EmptySpace.ToString());
+                    ActiveCampaign.Levels[CurrentRoom].ChangeElementAt(PlayerCharacter.X, PlayerCharacter.Y, SymbolsConfig.EmptySpace.ToString());
                     PlayerCharacter.Draw();
                     PlayerCharacter.Booty += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
                     TunePlayer.PlaySFX(800, 100);
-                    levels[CurrentRoom].CollectKeyPiece(PlayerCharacter.X, PlayerCharacter.Y);
+                    ActiveCampaign.Levels[CurrentRoom].CollectKeyPiece(PlayerCharacter.X, PlayerCharacter.Y);
                     PlayerCharacter.Draw();
                 }
                 else if ((elementAtPlayerPosition == SymbolsConfig.LeverOffChar.ToString()
@@ -237,16 +431,20 @@ namespace MazeGame
                     && PlayerCharacter.HasMoved)
                 {
                     TunePlayer.PlaySFX(100, 100);
-                    levels[CurrentRoom].ToggleLever(PlayerCharacter.X, PlayerCharacter.Y);
+                    ActiveCampaign.Levels[CurrentRoom].ToggleLever(PlayerCharacter.X, PlayerCharacter.Y);
                     PlayerCharacter.Draw();
                 }
-                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !levels[CurrentRoom].IsLocked)
+                else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !ActiveCampaign.Levels[CurrentRoom].IsLocked)
                 {
-                    if (levels.Count > CurrentRoom + 1)
+                    MyStopwatch.Stop();
+                    DisplayMissionText(ActiveCampaign.LevelOutros[CurrentRoom]);
+
+                    if (ActiveCampaign.Levels.Length > CurrentRoom + 1)
                     {
                         CurrentRoom++;
-                        PlayerCharacter.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
+                        PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[CurrentRoom].PlayerStartX, ActiveCampaign.Levels[CurrentRoom].PlayerStartY);
                         hasDrawnBackground = false;
+                        hasDisplayedBriefing = false;
 
                         if (tutorial == null)
                         {
@@ -267,8 +465,6 @@ namespace MazeGame
                 Thread.Sleep(20);
             }
 
-            MyStopwatch.Stop();
-
             if (playerHasBeenCaught)
             {
                 if (tutorial != null)
@@ -277,8 +473,8 @@ namespace MazeGame
                     hasDrawnBackground = false;
                     playerHasBeenCaught = false;
                     TimesCaught = 0;
-                    PlayerCharacter.SetStartingPosition(levels[CurrentRoom].PlayerStartX, levels[CurrentRoom].PlayerStartY);
-                    levels[CurrentRoom].Reset();
+                    PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[CurrentRoom].PlayerStartX, ActiveCampaign.Levels[CurrentRoom].PlayerStartY);
+                    ActiveCampaign.Levels[CurrentRoom].Reset();
                     RunGameLoop(CurrentRoom, tutorial);
                 }
                 else
@@ -293,7 +489,7 @@ namespace MazeGame
 
         private bool HandleInputs(int currentLevel, int deltaTimeMS)
         {
-            if (!PlayerCharacter.HandlePlayerControls(levels[currentLevel], deltaTimeMS))
+            if (!PlayerCharacter.HandlePlayerControls(ActiveCampaign.Levels[currentLevel], deltaTimeMS))
             { 
                 MyStopwatch.Stop();
                 if (QuitGame())
@@ -304,7 +500,7 @@ namespace MazeGame
                 {
                     Clear();
                     MyStopwatch.Start();
-                    levels[currentLevel].Draw();
+                    ActiveCampaign.Levels[currentLevel].Draw();
                     return true;
                 }
             }
@@ -317,11 +513,11 @@ namespace MazeGame
         {
             if (!hasDrawnBackground)
             {
-                levels[currentRoom].Draw();
+                ActiveCampaign.Levels[currentRoom].Draw();
                 PlayerCharacter.Draw();
                 hasDrawnBackground = true;
             }
-            levels[currentRoom].DrawGuards();
+            ActiveCampaign.Levels[currentRoom].DrawGuards();
             DrawUI(currentRoom);
             CursorVisible = false;
         }
@@ -338,7 +534,7 @@ namespace MazeGame
                 Write("_");
             }
             WriteLine("");
-            Write($"   {levels[currentLevel].Name}");
+            Write($"   {ActiveCampaign.Levels[currentLevel].Name}");
             SetCursorPosition(35, CursorTop);
             Write($"Difficulty Level: {DifficultyLevel}");
             SetCursorPosition(70, CursorTop);
@@ -736,10 +932,10 @@ namespace MazeGame
             playerHasBeenCaught = false;
             TimesCaught = 0;
             PlayerCharacter.Booty = 0;
-            PlayerCharacter.SetStartingPosition(levels[0].PlayerStartX, levels[0].PlayerStartY);
+            PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
-            foreach (Level level in levels)
+            foreach (Level level in ActiveCampaign.Levels)
             {
                 level.Reset();
             }
@@ -950,7 +1146,9 @@ namespace MazeGame
         private void LoadSaveMenu(string[] availableSaves)
         {
             //TODO: this doesn't support multiple campaigns. Update the save system for that
-
+            //It should be a pretty straightforward fix (at least for the bit that concerns this method): Since PlayCampaign needs the name of the directory
+            //of the campaign, it seems that retrieving it from the savegame itself is the easiest and more straighforward solution.
+            
             Clear();
 
             string prompt = "~·~ Which game do you want to load? ~·~";
@@ -978,7 +1176,7 @@ namespace MazeGame
                     TimesSpotted = saveGame.TimesSpotted;
                     TimesCaught = saveGame.TimesCaught;
                     DifficultyLevel = saveGame.DifficultyLevel;
-                    PlayGampaign("/The Baron's Jails", saveGame.CurrentLevel, saveGame.Booty);
+                    PlayGampaign(saveGame.CampaignName, saveGame.CurrentLevel, saveGame.Booty);
                     break;
             }
         }
@@ -1170,21 +1368,65 @@ namespace MazeGame
 
 
 
-        private void DisplayInstructions()
+        private void DisplayScreenDecoration()
         {
-            Clear();
-
-            string[] backStory =
+            SetCursorPosition(1, 0);
+            Write("╬");
+            for (int i = 2; i < WindowWidth - 1; i++)
             {
-                " ",
-                "You are Gareth, the non-copyright infringing master thief.",
-                "The last job you were tasked to do turned out to be a trap set up by the Watch.",
-                "You have been captured and locked deep in the dungeon of the Baron's castle.",
-                "They stripped you of all your gear, but they didn't check your clothes in depth. That was a mistake on their part.",
-                "Had they searched you more throughly, they would've found the emergency lockpick sown inside the hem of your shirt.",
-                "The meager lock of the cell's door is not going to resist it for too long.",
-                "Escape the dungeon and, to spite the Watch, try to collect as much treasure as you can!"
-            };
+                SetCursorPosition(i, 0);
+                Write("═");
+            }
+            SetCursorPosition(WindowWidth - 1, 0);
+            Write("╬");
+            for (int i = 1; i < WindowHeight - 2; i++)
+            {
+                SetCursorPosition(1, i);
+                Write("║");
+                SetCursorPosition(WindowWidth - 1, i);
+                Write("║");
+            }
+            SetCursorPosition(1, WindowHeight - 2);
+            Write("╬");
+            for (int i = 2; i < WindowWidth - 1; i++)
+            {
+                SetCursorPosition(i, WindowHeight - 2);
+                Write("═");
+            }
+            SetCursorPosition(WindowWidth - 1, WindowHeight - 2);
+            Write("╬");
+        }
+
+
+
+        private void DisplayMissionText(string[] text)
+        {
+            if (string.IsNullOrEmpty(text[0]))
+            {
+                return;
+            }
+
+            Clear();
+            DisplayScreenDecoration();
+
+            SetCursorPosition(0, (WindowHeight / 2) - (text.Length / 2));
+
+            foreach(string s in text)
+            {
+                SetCursorPosition((WindowWidth / 2) - (s.Length / 2), CursorTop);
+                WriteLine(s);
+            }
+
+            SetCursorPosition(0, CursorTop);
+            WriteLine();
+
+            string t = "Press any key to continue...";
+
+            SetCursorPosition((WindowWidth / 2) - (t.Length / 2), CursorTop);
+            WriteLine(t);
+
+            ReadKey(true);
+            Clear();
         }
 
 
@@ -1352,8 +1594,8 @@ namespace MazeGame
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
             PlayerCharacter.Booty = saveGame.Booty;
-            PlayerCharacter.SetStartingPosition(levels[saveGame.CurrentLevel].PlayerStartX, levels[saveGame.CurrentLevel].PlayerStartY);
-            levels[saveGame.CurrentLevel].Reset();
+            PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[saveGame.CurrentLevel].PlayerStartX, ActiveCampaign.Levels[saveGame.CurrentLevel].PlayerStartY);
+            ActiveCampaign.Levels[saveGame.CurrentLevel].Reset();
             RunGameLoop(saveGame.CurrentLevel);
         }
         #endregion;

@@ -1,0 +1,92 @@
+{
+	"Name":"The Baron's Jails",
+
+	"LevelFiles":
+		[
+			"Deep Cells",
+			"High Security Confinement",
+			"Stolen Goods Vault"
+		],
+
+	"LevelBriefings":
+		[
+			[
+				"You are Gareth, the non-copyright infringing master thief.",
+				"The last heist you were tasked to do turned out to be a trap set up by the Watch.",
+				"You have been captured and locked deep in the dungeon of the Baron\u0027s castle.",
+				"They stripped you of all your gear, but they didn\u0027t check your clothes in depth. That was a mistake on their part.",
+				"Had they searched you more throughly, they would\u0027ve found the emergency lockpick sown inside the hem of your shirt.",
+				"The meager lock of the cell\u0027s door is not going to resist it for too long.",
+				"Escape the dungeon and, to spite the Watch, try to collect as much treasure as you can!"
+			],
+			[
+				"You emerge in a stone room that seems an almost perfect replica of the one you just left.",
+				"This should be where they keep less troublesome criminals. You seem to remember, on your way down, that the exit here has",
+				"Quite a lot of redundant security. You should keep an eye out for keys and levers..."
+			],
+			[
+				"You overheard guards talking about a vault where they store evidence and precious goods sequestered from the inmates...",
+				"Might be worth keeping an eye out for that.",
+				"After all, the Watch owes you some time, and the room service in this prison is horrible.",
+				"You feel entitled to a refound."
+			]
+		],
+
+	"LevelOutros":
+		[
+			[
+				"If what you just escaped was the highest security floor of this facility, getting out of here will be a breeze."
+			],
+			[
+				"And the \u0027amateurs\u0027 floor is done too. Piece of cake."
+			],
+			[
+				"Freedom, at last!","You leave the castle behind your back, with your pockets full of gold for the inconvenience.",
+				"Being arrested by the Watch wasn\u0027t so bad after all.",
+				" ",
+				"                                         o                                         ",
+				"                                    .-\u0027\u0027\u0027|                                         ",
+				"                                    |,-\u0027\u0027|                                         ",
+				"                                         |   _.- \u0027\u0060.                               ",
+				"                                        _|-\u0027\u0027_.-\u0027|. \u0060.                             ",
+				"                                       |:^.-\u0027_.-\u0027\u0060.;. \u0060.                           ",
+				"                                       | \u0060.\u0027.   ,-\u0027_.-\u0027|                           ",
+				"                                       |   \u002B \u0027-\u0027.-\u0027   J                            ",
+				"                    __.            .d88|    \u0060.-\u0027      |                            ",
+				"               _.--\u0027_..\u0060.    .d88888888|     |       J\u0027b.                          ",
+				"            \u002B:\u0027 ,--\u0027_.|\u0060.\u0060.d88888888888|-.   |    _-.|888b.                        ",
+				"            | \\ \\-\u0027_.--\u0027_.-\u002B888888888\u002B\u0027  _\u003EF F \u002B:\u0027   \u006088888bo.                     ",
+				"             L \\ \u002B\u0027_.--\u0027   |88888\u002B\u0027\u0027  _.\u0027 J J J  \u0060.    \u002B8888888b.                  ",
+				"             |  \u0060\u002B\u0027        |8\u002B\u0027\u0027  _.-\u0027    | | |    \u002B    \u0060\u002B8888888._-\u0027.             ",
+				"           .d8L L         J _.-\u0027          | | |     \u0060.    \u0060\u002B888\u002B^\u0027.-|.\u0060.           ",
+				"          d888|  |         J-\u0027            F F F       \u0060.  _.-\u0027_.-\u0027_.\u002B.\u0060.\u0060.         ",
+				"         d88888L L     _.   L            J J J          \u0060|. \u002B\u0027_.-\u0027    \u0060_\u002B \u0060;       ",
+				"         888888J  |  \u002B-\u0027  \\ L         _.-\u002B.|.\u002B.          F \u0060.\u0060.     .-\u0027_.-\u0027J       ",
+				"         8888888|  L L\\    \\|     _.-\u0027     \u0027   \u0060.       J    \u0060.\u0060.,-\u0027.-\u0027    |       ",
+				"         8888888PL | | \\    \u0060._.-\u0027               \u0060.     |      \u0060..-\u0027      J.b      ",
+				"         8888888 |  L L \u0060.    \\     _.-\u002B.          \u0060.   L\u002B\u0060.     |        F88b     ",
+				"         8888888  L | |   \\   _..--\u0027_.-|.\u0060.          \u003E-\u0027    \u0060., J        |8888b    ",
+				"         8888888  |  L L   \u002B:\u0027 _.--\u0027_.-\u0027.\u0060.\u0060.    _.-\u0027     .-\u0027 | |       JY88888b   ",
+				"         8888888   L | |   J \\ \\_.-\u0027     \u0060.\u0060.\u0060.-\u0027     _.-\u0027   J J        F Y88888b  ",
+				"         Y888888    \\ L L   L \\ \u0060.      _.-\u0027_.-\u002B  _.-\u0027       | |       |   Y88888b ",
+				"         \u0060888888b    \\| |   |  \u0060. \\ _.-\u0027_.-\u0027   |-\u0027          J J       J     Y88888b",
+				"          Y888888     \u002B\u0027\\   J    \\ \u0027_.-\u0027       F    ,-T\u0027\\   | |    .-\u0027      )888888",
+				"           Y88888b.      \\   L    \u002B\u0027          J    /  | J  J J  .-\u0027        .d888888",
+				"            Y888888b      \\  |    |           |    F  \u0027.|.-\u0027\u002B|-\u0027         .d88888888",
+				"             Y888888b      \\ J    |           F   J    -.              .od88888888P",
+				"              Y888888b      \\ L   |          J    | .\u0027 \u0060 \\d8888888888888888888888P ",
+				"               Y888888b      \\|   |          |  .-\u0027\u0060.  \u0060\\ \u0060.88888888888888888888P  ",
+				"                Y888888b.     J   |          F-\u0027     \\\\ \u0060 \\ \\88888888888888888P\u0027   ",
+				"                 Y8888888b     L  |         J     d8\u0060.\u0060\\  \\\u0060.8888888888888P\u0027       ",
+				"                  Y8888888b    |  |        .\u002B      d8888\\  \u0060 .\u0027  \u0060Y888888P\u0027        ",
+				"                  \u006088888888b   J  |     .-\u0027     .od888888\\.-\u0027                      ",
+				"                   Y88888888b   \\ |  .-\u0027     d888888888P\u0027                          ",
+				"                   \u0060888888888b   \\|-\u0027       d888888888P       ,0\\                  ",
+				"                    \u0060Y88888888b            d8888888P\u0027        ,\\\u0027^6                 ",
+				"                      Y88888888bo.      .od88888888 hs         988b                ","                      \u00608888888888888888888888888888              \u00A78                ",
+				"                       Y88888888888888888888888888P                \u00B0               ",
+				"                       \u0060Y8888888888888888888888P\u0027                                  ",
+				"                         \u0060Y8888888888888P\u0027                                         ","                              \u0060Y88888P\u0027                                            "
+			]
+		]
+}

@@ -25,7 +25,7 @@ namespace MazeGame
         /// <summary>
         /// The current amount of collected treasure
         /// </summary>
-        public int Booty { get; set; }
+        public int Loot { get; set; }
         /// <summary>
         /// Whether the player has moved in the current frame or not
         /// </summary>

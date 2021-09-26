@@ -20,8 +20,3 @@ D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\n
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Floor2Test.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\Labyrinth.txt
 D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\TestFloor.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Rejects\CampaignConfig.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Rejects\Floor2Test.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Rejects\Labyrinth.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\The Rejects\TestFloor.txt
-D:\Prove Programmazione\C# Tutorial\Michael Hadley\MazeGame\MazeGame\bin\Debug\netcoreapp3.1\Levels\TestFloor2.txt

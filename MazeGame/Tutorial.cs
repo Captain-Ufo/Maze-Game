@@ -127,7 +127,7 @@ namespace MazeGame
                 case 1:
                     instructions = new string[]
                     {
-                        $"Treasures ({SymbolsConfig.TreasureChar}) are optional collectibles in each floor.",
+                        $"Loot ({SymbolsConfig.TreasureChar}) are optional collectibles in each floor.",
                         " ",
                         "If the exit is green, it means it's open and you are free to exit (assuming no other obstacles prevent you to reach it).",
                         $"If the exit is red, it means instead that you will need to find one or more Keys ({SymbolsConfig.KeyChar}) to unlock it.",

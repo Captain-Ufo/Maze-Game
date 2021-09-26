@@ -13,7 +13,7 @@ namespace MazeGame
         public const char EntranceChar = '≡';
         public const char KeyChar = '¶';
         public const char SpawnChar = 'X';
-        public const char EmptySpace = '░';
+        public const char EmptySpace = ' ';
         public const char TreasureChar = '$';
         public const char LeverOffChar = '\\';
         public const char LeverOnChar = '/';

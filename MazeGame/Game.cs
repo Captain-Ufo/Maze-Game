@@ -39,7 +39,7 @@ namespace MazeGame
         public ChiptunePlayer TunePlayer { get; private set; }
 
         /// <summary>
-        /// Initializes all the required elements and run the game
+        /// Initializes all the required elements and runs the game
         /// </summary>
         public void Start()
         {
@@ -78,106 +78,17 @@ namespace MazeGame
 
         private void InstantiateCampaignEntities(string configFileDir, int startBooty, int startLevel)
         {
-            /*
-            string[] briefing1 =
-            {
-                "You are Gareth, the non-copyright infringing master thief.",
-                "The last heist you were tasked to do turned out to be a trap set up by the Watch.",
-                "You have been captured and locked deep in the dungeon of the Baron's castle.",
-                "They stripped you of all your gear, but they didn't check your clothes in depth. That was a mistake on their part.",
-                "Had they searched you more throughly, they would've found the emergency lockpick sown inside the hem of your shirt.",
-                "The meager lock of the cell's door is not going to resist it for too long.",
-                "Escape the dungeon and, to spite the Watch, try to collect as much treasure as you can!"
-            };
-
-            string[] briefing2 =
-            {
-                "You emerge in a stone room that seems an almost perfect replica of the one you just left.",
-                "This should be where they keep less troublesome criminals. You seem to remember, on your way down, that the exit here has",
-                "Quite a lot of redundant security. You should keep an eye out for keys and levers...",
-            };
-
-            string[] briefing3 =
-            {
-                "You overheard guards talking about a vault where they store evidence and precious goods sequestered from the inmates...",
-                "Might be worth keeping an eye out for that.",
-                "After all, the Watch owes you some time, and the room service in this prison is horrible.",
-                "You feel entitled to a refound."
-            };
-
-            string[] outro1 =
-            {
-                "If what you just escaped was the highest security floor of this facility, getting out of here will be a breeze."
-            };
-
-            string[] outro2 =
-            {
-                "And the 'amateurs' floor is done too. Piece of cake."
-            };
-
-            string[] outro3 =
-            {
-                "Freedom, at last!",
-                "You leave the castle behind your back, with your pockets full of gold for the inconvenience.",
-                "Being arrested by the Watch wasn't so bad after all.",
-                " ",
-                @"                                         o                                         ",
-                @"                                    .-'''|                                         ",
-                @"                                    |,-''|                                         ",
-                @"                                         |   _.- '`.                               ",
-                @"                                        _|-''_.-'|. `.                             ",
-                @"                                       |:^.-'_.-'`.;. `.                           ",
-                @"                                       | `.'.   ,-'_.-'|                           ",
-                @"                                       |   + '-'.-'   J                            ",
-                @"                    __.            .d88|    `.-'      |                            ",
-                @"               _.--'_..`.    .d88888888|     |       J'b.                          ",
-                @"            +:' ,--'_.|`.`.d88888888888|-.   |    _-.|888b.                        ",
-                @"            | \ \-'_.--'_.-+888888888+'  _>F F +:'   `88888bo.                     ",
-                @"             L \ +'_.--'   |88888+''  _.' J J J  `.    +8888888b.                  ",
-                @"             |  `+'        |8+''  _.-'    | | |    +    `+8888888._-'.             ",
-                @"           .d8L L          | _.-'         | | |     `.    `+888+^'.-|.`.           ",
-                @"          d888|  |         J-'            F F F       `.  _.-'_.-'_.+.`.`.         ",
-                @"         d88888L L     _.  !             J J J          `|. +'_.-'    `_+ `;       ",
-                @"         888888J  |  +-'  \ L         _.-+.|.+.          F `.`.     .-'_.-'J       ",
-                @"         8888888|  L L\    \|     _.-'     '   `.       J    `.`.,-'.-'    |       ",
-                @"         8888888PL | | \    `._.-'               `.     |      `..-'      J.b      ",
-                @"         8888888 |  L L `.    \     _.-+.          `.   L+`.     |        F88b     ",
-                @"         8888888  L | |   \   _..--'_.-|.`.          >-'    `., J        |8888b    ",
-                @"         8888888  |  L L   +:' _.--'_.-'.`.`.    _.-'     .-' | |       JY88888b   ",
-                @"         8888888   L | |   J \ \_.-'     `.`.`.-'     _.-'   J J        F Y88888b  ",
-                @"         Y888888    \ L L   L \ `.      _.-'_.-+  _.-'       | |       |   Y88888b ",
-                @"         `888888b    \| |   |  `. \ _.-'_.-'   |-'          J J       J     Y88888b",
-                @"          Y888888     +'\   J    \ '_.-'       F    ,-T'\   | |    .-'      )888888",
-                @"           Y88888b.      \   L    +'          J    /  | J  J J  .-'        .d888888",
-                @"            Y888888b      \  |    |           |    F  '.|.-'+|-'         .d88888888",
-                @"             Y888888b      \ J    |           F   J    -.              .od88888888P",
-                @"              Y888888b      \ L   |          J    | .' ` \d8888888888888888888888P ",
-                @"               Y888888b      \|   |          |  .-'`.  `\ `.88888888888888888888P  ",
-                @"                Y888888b.     J   |          F-'     \\ ` \ \88888888888888888P'   ",
-                @"                 Y8888888b     L  |         J     d8`.`\  \`.8888888888888P'       ",
-                @"                  Y8888888b    |  |        .+      d8888\  ` .'  `Y888888P'        ",
-                @"                  `88888888b   J  |     .-'     .od888888\.-'                      ",
-                @"                   Y88888888b   \ |  .-'     d888888888P'                          ",
-                @"                   `888888888b   \|-'       d888888888P       ,0\                  ",
-                @"                    `Y88888888b            d8888888P'        ,\'^6                 ",
-                @"                      Y88888888bo.      .od88888888 hs         988b                ",
-                @"                      `8888888888888888888888888888              §8                ",
-                @"                       Y88888888888888888888888888P                °               ",
-                @"                       `Y8888888888888888888888P'                                  ",
-                @"                         `Y8888888888888P'                                         ",
-                @"                              `Y88888P'                                            ",
-            };
-            */
-
             string filePath = levelFilesPath + "/" + configFileDir + "/CampaignConfig.txt";
 
             if (!File.Exists(filePath))
             {
                 //Safeguard #1
                 Clear();
+                ForegroundColor = ConsoleColor.Red;
                 string warning = "! EROOR: invalid, misnamed or non existent campaign config file !";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 1);
                 WriteLine(warning);
+                ResetColor();
                 warning = "If this is a custom campaign, check the manual for instructions on how to create it correctly";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2);
                 WriteLine(warning);
@@ -199,9 +110,9 @@ namespace MazeGame
                 Clear();
                 ForegroundColor = ConsoleColor.Red;
                 string warning = "!!* ERROR: cannot extract campaign data from the campaign config file *!!";
-                ResetColor();
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
                 WriteLine(warning);
+                ResetColor();
                 warning = "The campaign file contains missing or incorrectly formatted data";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
                 WriteLine(warning);
@@ -235,7 +146,7 @@ namespace MazeGame
             ActiveCampaign = new Campaign(config.Name, levels.ToArray(), config.LevelBriefings, config.LevelOutros);
 
             PlayerCharacter = new Player(ActiveCampaign.Levels[startLevel].PlayerStartX, ActiveCampaign.Levels[startLevel].PlayerStartY);
-            PlayerCharacter.Booty = startBooty;
+            PlayerCharacter.Loot = startBooty;
         }
 
 
@@ -278,7 +189,7 @@ namespace MazeGame
             ActiveCampaign = new Campaign(levelFile, levels.ToArray(), briefings, outros);
 
             PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
-            PlayerCharacter.Booty = 0;
+            PlayerCharacter.Loot = 0;
         }
 
 
@@ -319,7 +230,7 @@ namespace MazeGame
             ActiveCampaign = new Campaign("Tutorial", levels.ToArray(), briefings, outros);
 
             PlayerCharacter = new Player(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
-            PlayerCharacter.Booty = 0;
+            PlayerCharacter.Loot = 0;
         }
         #endregion
 
@@ -418,7 +329,7 @@ namespace MazeGame
                     TunePlayer.PlaySFX(1000, 100);
                     ActiveCampaign.Levels[CurrentRoom].ChangeElementAt(PlayerCharacter.X, PlayerCharacter.Y, SymbolsConfig.EmptySpace.ToString());
                     PlayerCharacter.Draw();
-                    PlayerCharacter.Booty += 100;
+                    PlayerCharacter.Loot += 100;
                 }
                 else if (elementAtPlayerPosition == SymbolsConfig.KeyChar.ToString())
                 {
@@ -538,7 +449,7 @@ namespace MazeGame
             SetCursorPosition(35, CursorTop);
             Write($"Difficulty Level: {DifficultyLevel}");
             SetCursorPosition(70, CursorTop);
-            Write($"Tresure collected: $ {PlayerCharacter.Booty}");
+            Write($"Loot collected: $ {PlayerCharacter.Loot}");
             string quitInfo = "Press Escape to quit.";
             SetCursorPosition(WindowWidth - quitInfo.Length - 3, WindowHeight - 2);
             Write(quitInfo);
@@ -661,7 +572,7 @@ namespace MazeGame
                 $"\"{guardCry}\"",
                 " ",
                 "A guard caught you! Quick, maybe you can bribe them.",
-                $"You have collected ${PlayerCharacter.Booty} so far.",
+                $"You have collected ${PlayerCharacter.Loot} so far.",
             };
 
             string[] options =
@@ -680,7 +591,7 @@ namespace MazeGame
 
                     string message;
 
-                    if (PlayerCharacter.Booty >= bribeCost) 
+                    if (PlayerCharacter.Loot >= bribeCost) 
                     {
                         message = "The guard pockets your money and grumbles";
                         SetCursorPosition(xPos - message.Length/2, CursorTop + 4);
@@ -691,12 +602,12 @@ namespace MazeGame
                         message = "'I won't be so kind next time.'";
                         SetCursorPosition(xPos - message.Length / 2, CursorTop);
                         WriteLine(message);
-                        PlayerCharacter.Booty -= bribeCost;
+                        PlayerCharacter.Loot -= bribeCost;
                         ReadKey(true);
                         return true;
                     }
 
-                    if (PlayerCharacter.Booty > 0)
+                    if (PlayerCharacter.Loot > 0)
                     {
                         message = "The guard won't be swayed by the paltry sum you can offer.";
                     }
@@ -826,7 +737,7 @@ namespace MazeGame
                 "Oh, no!",
                 "You have been caught and shackled! The guards drag you to a dingy cell.",
                 "  ",
-                $"You've been searched and the guards sequestered $ {PlayerCharacter.Booty} in treasures.",
+                $"You've been searched and the guards sequestered $ {PlayerCharacter.Loot} in treasures.",
                 "  ",
                 "Better luck next time.",
                 "Try Again!",
@@ -881,7 +792,7 @@ namespace MazeGame
                 "  ",
                 "You successfully completed the heist!",
                 "  ",
-                $"You collected $ {PlayerCharacter.Booty} in treasures, out of a total of $ {totalGold}.",
+                $"You collected $ {PlayerCharacter.Loot} in treasures, out of a total of $ {totalGold}.",
                 $"You have been spotted {TimesSpotted} times, and caught {TimesCaught} times.",
                 "  ",
                 "  ",
@@ -897,7 +808,7 @@ namespace MazeGame
             else
             {
                 outro[7] = "You sneaked right under the guards's noses!";
-                if (PlayerCharacter.Booty == totalGold)
+                if (PlayerCharacter.Loot == totalGold)
                 {
                     outro[8] = "You really are the best of all thieves in the city.";
                 }
@@ -931,7 +842,7 @@ namespace MazeGame
         {
             playerHasBeenCaught = false;
             TimesCaught = 0;
-            PlayerCharacter.Booty = 0;
+            PlayerCharacter.Loot = 0;
             PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
             CurrentRoom = 0;
             totalGold = 0;
@@ -1144,11 +1055,7 @@ namespace MazeGame
 
 
         private void LoadSaveMenu(string[] availableSaves)
-        {
-            //TODO: this doesn't support multiple campaigns. Update the save system for that
-            //It should be a pretty straightforward fix (at least for the bit that concerns this method): Since PlayCampaign needs the name of the directory
-            //of the campaign, it seems that retrieving it from the savegame itself is the easiest and more straighforward solution.
-            
+        {           
             Clear();
 
             string prompt = "~·~ Which game do you want to load? ~·~";
@@ -1176,6 +1083,26 @@ namespace MazeGame
                     TimesSpotted = saveGame.TimesSpotted;
                     TimesCaught = saveGame.TimesCaught;
                     DifficultyLevel = saveGame.DifficultyLevel;
+                    if (!Directory.Exists(levelFilesPath + "/" + saveGame.CampaignName))
+                    {
+                        Clear();
+                        ForegroundColor = ConsoleColor.Red;
+                        string warning = "!!* ERROR: cannot find the correct campaign folder *!!";
+                        SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
+                        WriteLine(warning);
+                        ResetColor();
+                        warning = "The campaign might have been deleted, or its folder renamed.";
+                        SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
+                        WriteLine(warning);
+                        warning = "Please check that the campaign folder is in the correct place, or delete the save file";
+                        SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 3);
+                        WriteLine(warning);
+                        SetCursorPosition(0, WindowHeight - 1);
+                        Write("Press any key to return to main menu...");
+                        ReadKey(true);
+                        RunMainMenu();
+                        return;
+                    }
                     PlayGampaign(saveGame.CampaignName, saveGame.CurrentLevel, saveGame.Booty);
                     break;
             }
@@ -1593,7 +1520,7 @@ namespace MazeGame
             TimesSpotted = saveGame.TimesSpotted;
             TimesCaught = saveGame.TimesCaught;
             DifficultyLevel = saveGame.DifficultyLevel;
-            PlayerCharacter.Booty = saveGame.Booty;
+            PlayerCharacter.Loot = saveGame.Booty;
             PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[saveGame.CurrentLevel].PlayerStartX, ActiveCampaign.Levels[saveGame.CurrentLevel].PlayerStartY);
             ActiveCampaign.Levels[saveGame.CurrentLevel].Reset();
             RunGameLoop(saveGame.CurrentLevel);

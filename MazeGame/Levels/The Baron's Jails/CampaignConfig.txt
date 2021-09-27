@@ -36,13 +36,17 @@
 	"LevelOutros":
 		[
 			[
-				"If what you just escaped was the highest security floor of this facility, getting out of here will be a breeze."
+				"If what you just escaped was the highest security floor of this facility, getting out of here will be a breeze.",
+				"Don't get too cocky, yet, though. Your knowledge of the remaining floors of the prison is spotty at best.",
+				"There might be some nasty surprises around the corner."
 			],
 			[
-				"And the \u0027amateurs\u0027 floor is done too. Piece of cake."
+				"And the 'amateurs' floor is done too. Piece of cake.",
+				"You start thinking that you might write the Baron a suggestion or two about how to tighten security in his 'high security' prison."
 			],
 			[
-				"Freedom, at last!","You leave the castle behind your back, with your pockets full of gold for the inconvenience.",
+				"Freedom, at last!",
+				"You leave the castle behind your back, with your pockets full of gold for the inconvenience.",
 				"Being arrested by the Watch wasn\u0027t so bad after all.",
 				" ",
 				"                                         o                                         ",

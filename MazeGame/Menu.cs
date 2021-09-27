@@ -307,6 +307,10 @@ namespace MazeGame
             this.prompt = new string[] { prompt };
         }
 
+        /// <summary>
+        /// Updates the list of options in an already instantiated Menu object
+        /// </summary>
+        /// <param name="options">The new array of options</param>
         public void UpdateMenuOptions(string[] options)
         {
             this.options = options;

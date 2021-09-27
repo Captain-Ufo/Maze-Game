@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text.Json;
 
 namespace MazeGame
 {
@@ -6,8 +8,8 @@ namespace MazeGame
     {
         static void Main(string[] args)
         {
-            ConsoleHelper.SetConsole("Heist!", 180, 56, false, false, true, true, true);
-            
+            ConsoleHelper.SetConsole("Heist!", 180, 60, false, false, true, true, true);
+
             Game game = new Game();
             game.Start();
         }

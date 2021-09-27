@@ -85,11 +85,11 @@ namespace MazeGame
                 //Safeguard #1
                 Clear();
                 ForegroundColor = ConsoleColor.Red;
-                string warning = "! EROOR: invalid, misnamed or non existent campaign config file !";
+                string warning = "!!* ERROR: invalid, misnamed or non existent campaign config file *!!";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 1);
                 WriteLine(warning);
                 ResetColor();
-                warning = "If this is a custom campaign, check the manual for instructions on how to create it correctly";
+                warning = "If this is a custom campaign, check the manual for instructions on how to create it correctly.";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2);
                 WriteLine(warning);
                 SetCursorPosition(0, WindowHeight - 1);
@@ -107,16 +107,17 @@ namespace MazeGame
             }
             catch (Exception e)
             {
+                //Safeguard #2
                 Clear();
                 ForegroundColor = ConsoleColor.Red;
                 string warning = "!!* ERROR: cannot extract campaign data from the campaign config file *!!";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
                 WriteLine(warning);
                 ResetColor();
-                warning = "The campaign file contains missing or incorrectly formatted data";
+                warning = "The campaign file contains missing or incorrectly formatted data.";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
                 WriteLine(warning);
-                warning = "If this is a custom campaign or you edited an existing campaign, please check the manual for instructions on how to create the config file correctly";
+                warning = "If this is a custom campaign or you edited an existing campaign, please check the manual for instructions on how to create the config file correctly.";
                 SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 3);
                 WriteLine(warning);
                 SetCursorPosition((WindowWidth / 2) - (e.Message.Length / 2), WindowHeight / 2 - 1);
@@ -132,6 +133,24 @@ namespace MazeGame
             foreach (string levelFile in config.LevelFiles)
             {
                 string levelFilePath = levelFilesPath + "/" + configFileDir + "/" + levelFile + ".txt";
+
+                if (!File.Exists(levelFilePath))
+                {
+                    //safeguard #3
+                    Clear();
+                    ForegroundColor = ConsoleColor.Red;
+                    string warning = $"!!* ERROR: invalid, misnamed or non existent level file: {levelFile} *!!";
+                    SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 1);
+                    WriteLine(warning);
+                    ResetColor();
+                    warning = "If this is a custom campaign, check that all the level names in the config file match the level files in the folder,";
+                    SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2);
+                    WriteLine(warning);
+                    SetCursorPosition(0, WindowHeight - 1);
+                    Write("Press any key to return to main menu...");
+                    ReadKey(true);
+                    RunMainMenu();
+                }
 
                 string[] levelMap = File.ReadAllLines(levelFilePath);
 
@@ -695,7 +714,7 @@ namespace MazeGame
                 @"   _ _____ __|__ ____  %   \ !  ,%J___]>---.____\ \  ________|___\_____     ",
                 @"       |  \_       |    %,  \ `,% \  /   /'    (__/    |           |        ",
                 @"       |    \      |     `%-%-%/|  \/   /  / =\|88                 |        ",
-                @"                   |          | \      /   /888         |                    ",
+                @"                   |          | \      /   /888        |                    ",
                 @"    ___|________ __|_______   |  '----'   |8  _________|_______ ___|__      ",
                 @"             |           |     \          /8     |           |              ",
                 @"             |           |     |         |8      |           |              ",
@@ -1333,27 +1352,51 @@ namespace MazeGame
                 return;
             }
 
-            Clear();
-            DisplayScreenDecoration();
+            int firstLineToDisplay = 0;
+            int lastLineToDisplay;
+            if (text.Length > 48) { lastLineToDisplay = 48; }
+            else { lastLineToDisplay = text.Length; }
 
-            SetCursorPosition(0, (WindowHeight / 2) - (text.Length / 2));
+            List<string> textToDisplay = new List<string>();
 
-            foreach(string s in text)
+            do
             {
-                SetCursorPosition((WindowWidth / 2) - (s.Length / 2), CursorTop);
-                WriteLine(s);
+                textToDisplay.Clear();
+                for (int i = firstLineToDisplay; i < lastLineToDisplay; i++)
+                {
+                    textToDisplay.Add(text[i]);
+                }
+
+                Clear();
+                DisplayScreenDecoration();
+
+                SetCursorPosition(0, (WindowHeight / 2) - ((textToDisplay.Count / 2) + 2));
+
+                foreach (string s in textToDisplay)
+                {
+                    SetCursorPosition((WindowWidth / 2) - (s.Length / 2), CursorTop);
+                    WriteLine(s);
+                }
+
+                SetCursorPosition((WindowWidth / 2) - 2, CursorTop);
+                WriteLine("~··~");
+
+                string t = "Press any key to continue...";
+
+                SetCursorPosition((WindowWidth / 2) - (t.Length / 2), CursorTop);
+                WriteLine(t);
+
+                ReadKey(true);
+                Clear();
+
+                firstLineToDisplay += 48;
+                lastLineToDisplay += 48;
+                if (lastLineToDisplay > text.Length - 1)
+                {
+                    lastLineToDisplay = text.Length;
+                }
             }
-
-            SetCursorPosition(0, CursorTop);
-            WriteLine();
-
-            string t = "Press any key to continue...";
-
-            SetCursorPosition((WindowWidth / 2) - (t.Length / 2), CursorTop);
-            WriteLine(t);
-
-            ReadKey(true);
-            Clear();
+            while (firstLineToDisplay < text.Length);
         }
 
 
@@ -1369,14 +1412,14 @@ namespace MazeGame
                 "~·~ CREDITS: ~·~",
                 " ",
                 " ",
-                $"Escape from the Dungeon, a game by {authorName}",
+                $"Heist!, a commnd line stealth game by {authorName}",
                 " ",
                 $"Programming: {authorName}",
                 "Shoutout to Micheal Hadley's \"Intro To Programming in C#\" course:",
                 "https://www.youtube.com/channel/UC_x9TgYAIFHj1ulXjNgZMpQ",
                 " ",
                 $"Baron's Jail campaign level desing: {authorName}",
-                "(I'm not a level designer :P)",
+                "(I'm not a level designer :P I'm sure you guys can do a lot better!)",
                 " ",
                 $"Chiptune Music: {authorName}",
                 "(I'm not a musician either)",
@@ -1417,8 +1460,15 @@ namespace MazeGame
             string[] quitMenuPrompt =
              {
                 "Are you sure you want to quit?",
-                "The game automatically saved the last level you played, but all your progress in the current level will be lost.",
+                " ",
+                " "
              };
+
+            if (CurrentRoom > 0)
+            {
+                quitMenuPrompt[1] = "The game automatically saved the last level you played, but all your progress in the current level will be lost.";
+            }
+
             string[] options = { "Quit to Main Menu", "Quit to desktop", "Return to game" };
 
             Menu quitMenu = new Menu(quitMenuPrompt, options);

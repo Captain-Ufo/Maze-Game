@@ -21,6 +21,9 @@
     <None Update="Levels\Labyrinth.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Levels\TestLevel.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Levels\The Baron%27s Jails\CampaignConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

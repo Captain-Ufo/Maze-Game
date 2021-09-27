@@ -40,7 +40,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\The Baron's Jails\High Security Confinement.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Levels\The Baron's Jails\FloorsConfig.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

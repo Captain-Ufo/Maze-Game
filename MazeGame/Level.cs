@@ -63,6 +63,8 @@ namespace MazeGame
         /// <param name="treasures">The array containing the coordinates of all the treasures in the level</param>
         /// <param name="levers">The collection of levers in the level</param>
         /// <param name="guards">The collection of guards in the level</param>
+        /// <param name="briefing">The intro text to the level; an array of strings, one per each line.</param>
+        /// <param name="outro">The text to be displayed once the level is complete; an array of strings, one per each line.</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
         public Level(string name, string[,] grid, int startX, int startY, LevelLock levelLock, Vector2 exit,
                      Vector2[] treasures, Dictionary<Vector2, Lever> levers, Guard[] guards, string[] briefing, string[] outro, Stopwatch stopwatch)

@@ -8,15 +8,11 @@ namespace MazeGame
     {
         public string Name { get; private set; }
         public Level[] Levels { get; private set; }
-        public string[][] LevelBriefings { get; private set; }
-        public string[][] LevelOutros { get; private set; }
 
-        public Campaign(string name, Level[] levels, string[][] levelBriefings, string[][] levelOutros)
+        public Campaign(string name, Level[] levels)
         {
             Name = name;
             Levels = levels;
-            LevelBriefings = levelBriefings;
-            LevelOutros = levelOutros;
         }
     }
 
@@ -24,15 +20,11 @@ namespace MazeGame
     {
         public string Name { get; set; }
         public string[] LevelFiles { get; set; }
-        public string[][] LevelBriefings { get; set; }
-        public string[][] LevelOutros { get; set; }
 
-        public CampaignConfig(string name, string[] levels, string[][] levelBriefings, string[][] levelOutros)
+        public CampaignConfig(string name, string[] levels)
         {
             Name = name;
             LevelFiles = levels;
-            LevelBriefings = levelBriefings;
-            LevelOutros = levelOutros;
         }
 
         public CampaignConfig()

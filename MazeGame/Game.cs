@@ -152,17 +152,46 @@ namespace MazeGame
                     RunMainMenu();
                 }
 
-                string[] levelMap = File.ReadAllLines(levelFilePath);
+                string missionConfigData = File.ReadAllText(levelFilePath);
 
-                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelMap, DifficultyLevel);
+                MissionConfig missionConfig = default;
+
+                try
+                {
+                    missionConfig = JsonSerializer.Deserialize<MissionConfig>(missionConfigData);
+                }
+                catch (Exception e)
+                {
+                    //Safeguard #4
+                    Clear();
+                    ForegroundColor = ConsoleColor.Red;
+                    string warning = "!!* ERROR: cannot extract Level data from the level config file *!!";
+                    SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
+                    WriteLine(warning);
+                    ResetColor();
+                    warning = "The campaign file contains missing or incorrectly formatted data.";
+                    SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
+                    WriteLine(warning);
+                    warning = "If this is a custom mission or you edited an existing mission, please check the manual for instructions on how to create the config file correctly.";
+                    SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 3);
+                    WriteLine(warning);
+                    SetCursorPosition((WindowWidth / 2) - (e.Message.Length / 2), WindowHeight / 2 - 1);
+                    WriteLine(e.Message);
+                    SetCursorPosition(0, WindowHeight - 1);
+                    Write("Press any key to return to main menu...");
+                    ReadKey(true);
+                    RunMainMenu();
+                }
+
+                LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(missionConfig.LevelMap, DifficultyLevel);
 
                 levels.Add(new Level(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit, 
-                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, missionConfig.Briefing, missionConfig.Outro, MyStopwatch));
 
                 totalGold += levelInfo.TotalGold;
             }
 
-            ActiveCampaign = new Campaign(config.Name, levels.ToArray(), config.LevelBriefings, config.LevelOutros);
+            ActiveCampaign = new Campaign(config.Name, levels.ToArray());
 
             PlayerCharacter = new Player(ActiveCampaign.Levels[startLevel].PlayerStartX, ActiveCampaign.Levels[startLevel].PlayerStartY);
             PlayerCharacter.Loot = startBooty;
@@ -176,36 +205,45 @@ namespace MazeGame
 
             string levelFilePath = levelFilesPath + "/" + levelFile + ".txt";
 
-            string[] levelMap = File.ReadAllLines(levelFilePath);
+            string missionConfigData = File.ReadAllText(levelFilePath);
 
-            LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(levelMap, DifficultyLevel);
+            MissionConfig missionConfig = default;
+
+            try
+            {
+                missionConfig = JsonSerializer.Deserialize<MissionConfig>(missionConfigData);
+            }
+            catch (Exception e)
+            {
+                //Safeguard
+                Clear();
+                ForegroundColor = ConsoleColor.Red;
+                string warning = "!!* ERROR: cannot extract Level data from the level config file *!!";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 5);
+                WriteLine(warning);
+                ResetColor();
+                warning = "The campaign file contains missing or incorrectly formatted data.";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 4);
+                WriteLine(warning);
+                warning = "If this is a custom mission or you edited an existing mission, please check the manual for instructions on how to create the config file correctly.";
+                SetCursorPosition((WindowWidth / 2) - (warning.Length / 2), WindowHeight / 2 - 3);
+                WriteLine(warning);
+                SetCursorPosition((WindowWidth / 2) - (e.Message.Length / 2), WindowHeight / 2 - 1);
+                WriteLine(e.Message);
+                SetCursorPosition(0, WindowHeight - 1);
+                Write("Press any key to return to main menu...");
+                ReadKey(true);
+                RunMainMenu();
+            }
+
+            LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(missionConfig.LevelMap, DifficultyLevel);
 
             levels.Add(new Level(levelFile, levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit,
-                                 levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+                                 levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, missionConfig.Briefing, missionConfig.Outro, MyStopwatch));
 
             totalGold += levelInfo.TotalGold;
 
-            //We need to create empty lists of briefings and outros in order to create a campaign out of a single mission.
-            //Very kludgy.
-            //Consider finding alternative methods for developers to specify intros and outros for single missions.
-
-            string[][] briefings =
-            {
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-            };
-
-            string[][] outros =
-            {
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-            };
-
-            ActiveCampaign = new Campaign(levelFile, levels.ToArray(), briefings, outros);
+            ActiveCampaign = new Campaign(levelFile, levels.ToArray());
 
             PlayerCharacter = new Player(levels[0].PlayerStartX, levels[0].PlayerStartY);
             PlayerCharacter.Loot = 0;
@@ -222,31 +260,10 @@ namespace MazeGame
                 LevelInfo levelInfo = LevelParser.ParseFileToLevelInfo(tutorial.TutorialLevels[i], DifficultyLevel);
 
                 levels.Add(new Level("Tutorial " + (i + 1), levelInfo.Grid, levelInfo.PlayerStartX, levelInfo.PlayerStartY, levelInfo.LevLock, levelInfo.Exit,
-                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, MyStopwatch));
+                                     levelInfo.Treasures, levelInfo.LeversDictionary, levelInfo.Guards, null, null, MyStopwatch));
             }
 
-            //We need to create empty lists of briefings and outros in order to create a campaign out of the Tutorial.
-            //Consider using tutorial instructions as intros
-            //(although it's nice to have the instructions on screen at the same time as the player plays the level)
-            //Also consider adding outros.
-
-            string[][] briefings =
-            {
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-            };
-
-            string[][] outros =
-            {
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-                new string[]{ "" },
-            };
-
-            ActiveCampaign = new Campaign("Tutorial", levels.ToArray(), briefings, outros);
+            ActiveCampaign = new Campaign("Tutorial", levels.ToArray());
 
             PlayerCharacter = new Player(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
             PlayerCharacter.Loot = 0;
@@ -310,7 +327,7 @@ namespace MazeGame
                 if (!hasDisplayedBriefing)
                 {
                     MyStopwatch.Stop();
-                    DisplayMissionText(ActiveCampaign.LevelBriefings[CurrentRoom]);
+                    DisplayMissionText(ActiveCampaign.Levels[CurrentRoom].Briefing);
                     hasDisplayedBriefing = true;
                 }
 
@@ -367,7 +384,7 @@ namespace MazeGame
                 else if (elementAtPlayerPosition == SymbolsConfig.ExitChar.ToString() && !ActiveCampaign.Levels[CurrentRoom].IsLocked)
                 {
                     MyStopwatch.Stop();
-                    DisplayMissionText(ActiveCampaign.LevelOutros[CurrentRoom]);
+                    DisplayMissionText(ActiveCampaign.Levels[CurrentRoom].Outro);
 
                     if (ActiveCampaign.Levels.Length > CurrentRoom + 1)
                     {
@@ -1347,10 +1364,9 @@ namespace MazeGame
 
         private void DisplayMissionText(string[] text)
         {
-            if (string.IsNullOrEmpty(text[0]))
-            {
-                return;
-            }
+            if (text == null) { return; }
+
+            if (string.IsNullOrEmpty(text[0])) { return; }
 
             int firstLineToDisplay = 0;
             int lastLineToDisplay;

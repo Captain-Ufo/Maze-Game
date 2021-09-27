@@ -28,6 +28,16 @@ namespace MazeGame
         public string Name { get; private set; }
 
         /// <summary>
+        /// The briefing tetx to be displayed before a level starts
+        /// </summary>
+        public string[] Briefing { get; private set; }
+
+        /// <summary>
+        /// The outro text to be displayed once the level has been completed
+        /// </summary>
+        public string[] Outro { get; private set; }
+
+        /// <summary>
         /// Whether the exit is open (either because there's no key in the level or because the player has collected the key) or not
         /// </summary>
         public bool IsLocked { get; private set; }
@@ -55,9 +65,11 @@ namespace MazeGame
         /// <param name="guards">The collection of guards in the level</param>
         /// <param name="stopwatch">The game's Stopwatch field</param>
         public Level(string name, string[,] grid, int startX, int startY, LevelLock levelLock, Vector2 exit,
-                     Vector2[] treasures, Dictionary<Vector2, Lever> levers, Guard[] guards, Stopwatch stopwatch)
+                     Vector2[] treasures, Dictionary<Vector2, Lever> levers, Guard[] guards, string[] briefing, string[] outro, Stopwatch stopwatch)
         {
             Name = name;
+            Briefing = briefing;
+            Outro = outro;
 
             this.grid = grid;
 

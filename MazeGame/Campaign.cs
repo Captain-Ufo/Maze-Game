@@ -21,12 +21,6 @@ namespace MazeGame
         public string Name { get; set; }
         public string[] LevelFiles { get; set; }
 
-        public CampaignConfig(string name, string[] levels)
-        {
-            Name = name;
-            LevelFiles = levels;
-        }
-
         public CampaignConfig()
         {
             //The deserialization requires a default, parameterless constructor

@@ -7,17 +7,34 @@ namespace MazeGame
     /// </summary>
     class LevelLock
     {
-        private int revealedKeyPieces = 0;
-        private List<Vector2> hiddenKeyPieces;
-        private List<Vector2> revealedKeyPiecesBackup;
-        private List<Vector2> hiddenKeyPiecesBackUp;
+        private int revealedKeyPieces;
+        private int hiddenKeyPieces;
+        private int hiddenKeyGroup;
+
+        private Dictionary<int, List<Vector2>> levelKeys;
+        private List<Vector2> keysGroup1;
+        private List<Vector2> keysGroup2;
+        private List<Vector2> keysGroup3;
+        private List<Vector2> keysGroup4;
+
 
         public LevelLock()
         {
-            hiddenKeyPieces = new List<Vector2>();
+            hiddenKeyGroup = 2;
+            revealedKeyPieces = 0;
 
-            revealedKeyPiecesBackup = new List<Vector2>();
-            hiddenKeyPiecesBackUp = new List<Vector2>();
+            keysGroup1 = new List<Vector2>();
+            keysGroup2 = new List<Vector2>();
+            keysGroup3 = new List<Vector2>();
+            keysGroup4 = new List<Vector2>();
+
+            levelKeys = new Dictionary<int, List<Vector2>>
+            {
+                [1] = keysGroup1,
+                [2] = keysGroup2,
+                [3] = keysGroup3,
+                [4] = keysGroup4
+            };
         }
 
         /// <summary>
@@ -35,12 +52,9 @@ namespace MazeGame
 
             if (revealedKeyPieces <= 0)
             {
-                if (hiddenKeyPieces.Count > 0)
+                if (hiddenKeyPieces > 0)
                 {
-                    Vector2 nextPiece = hiddenKeyPieces[0];
-                    level.ChangeElementAt(nextPiece.X, nextPiece.Y, SymbolsConfig.KeyChar.ToString(), false);
-                    revealedKeyPieces++;
-                    hiddenKeyPieces.RemoveAt(0);
+                    RevealKeys(level);
                     return true;
                 }
                 return false;
@@ -55,34 +69,22 @@ namespace MazeGame
         }
 
         /// <summary>
-        /// Increases the revelaed key pieces counter
+        /// Adds the key to the correct group, and increases the relevant counter (revealedKeyPieces for the first group, hiddenKeyPieces for any other)
         /// </summary>
-        public void AddRevealedKeyPiece(int x, int y)
+        /// <param name="x">The x coordinate of the key</param>
+        /// <param name="y">The y coordinate of the key</param>
+        /// <param name="group">The group where the key belong (used to distinguish between revealed and hidden keys)</param>
+        public void AddKey(int x, int y, int group)
         {
-            revealedKeyPieces++;
+            levelKeys[group].Add(new Vector2(x, y));
 
-            revealedKeyPiecesBackup.Add(new Vector2(x, y));
-        }
-
-        /// <summary>
-        /// Adds a key piece in the specified position in the piece list
-        /// </summary>
-        /// <param name="x">The X coordinate of the piece to add</param>
-        /// <param name="y">The Y coordinate of the piece to add</param>
-        /// <param name="index">The sequence order of the piece
-        /// (use 1 for first position, and so on. The method automatically translates it to a correct list index)</param>
-        public void AddHiddenKeyPiece(int x, int y, int index)
-        {
-            while (hiddenKeyPieces.Count < index + 1)
+            if (group == 1)
             {
-                hiddenKeyPieces.Add(new Vector2(0, 0));
+                revealedKeyPieces++;
             }
-
-            hiddenKeyPieces[index] = new Vector2(x, y);
-
-            foreach (Vector2 c in hiddenKeyPieces)
+            else if (group > 1)
             {
-                hiddenKeyPiecesBackUp.Add(c);
+                hiddenKeyPieces++;
             }
         }
 
@@ -92,20 +94,37 @@ namespace MazeGame
         /// <param name="level">The level the lock is in</param>
         public void ResetKeys(Level level)
         {
-            revealedKeyPieces = revealedKeyPiecesBackup.Count;
+            revealedKeyPieces = 0;
+            hiddenKeyPieces = 0;
+            hiddenKeyGroup = 2;
 
-            foreach (Vector2 key in revealedKeyPiecesBackup)
+            for (int i = 1; i <= levelKeys.Count; i++)
             {
-                level.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false, false);
+                foreach(Vector2 key in levelKeys[i])
+                {
+                    if (i == 1)
+                    {
+                        revealedKeyPieces++;
+                        level.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false);
+                    }
+                    else
+                    {
+                        hiddenKeyPieces++;
+                        level.ChangeElementAt(key.X, key.Y, SymbolsConfig.EmptySpace.ToString(), false);
+                    }
+                }
             }
+        }
 
-            hiddenKeyPieces = new List<Vector2>();
-
-            foreach (Vector2 key in hiddenKeyPiecesBackUp)
+        private void RevealKeys(Level level)
+        {
+            foreach(Vector2 key in levelKeys[hiddenKeyGroup])
             {
-                hiddenKeyPieces.Add(key);
-                level.ChangeElementAt(key.X, key.Y, SymbolsConfig.EmptySpace.ToString(), false, false);
+                revealedKeyPieces++;
+                hiddenKeyPieces--;
+                level.ChangeElementAt(key.X, key.Y, SymbolsConfig.KeyChar.ToString(), false);
             }
+            hiddenKeyGroup++;
         }
     }
 }

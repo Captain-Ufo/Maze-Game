@@ -279,7 +279,6 @@ namespace MazeGame
             DisplayLoading();
             InstantiateCampaignEntities(missionDirectory, startBooty, startRoom);
             RunGameLoop(startRoom);
-            WinGame();
         }
 
 
@@ -290,7 +289,6 @@ namespace MazeGame
             DisplayLoading();
             InstantiateMissionEntities(mission);
             RunGameLoop(0);
-            WinGame();
         }
 
 
@@ -429,6 +427,10 @@ namespace MazeGame
                     GameOver();
                 }
                 return;
+            }
+            else if (tutorial == null)
+            {
+                WinGame();
             }
         }
 
@@ -878,6 +880,7 @@ namespace MazeGame
         {
             playerHasBeenCaught = false;
             TimesCaught = 0;
+            TimesSpotted = 0;
             PlayerCharacter.Loot = 0;
             PlayerCharacter.SetStartingPosition(ActiveCampaign.Levels[0].PlayerStartX, ActiveCampaign.Levels[0].PlayerStartY);
             CurrentRoom = 0;
@@ -1420,7 +1423,7 @@ namespace MazeGame
         private void DisplayAboutInfo()
         {
             Clear();
-            string authorName = "Cristian Baldi";
+            string authorName = "Bear789";
             string[] credits = new string[]
             {
                 " ",

@@ -183,19 +183,21 @@ namespace MazeGame
                             break;
                         //keys
                         case SymbolsConfig.KeyChar:
-                            levLock.AddRevealedKeyPiece(x, y);
-                            break;
                         case '1':
-                            currentChar = SymbolsConfig.EmptySpace;
-                            levLock.AddHiddenKeyPiece(x, y, 0);
+                            currentChar = SymbolsConfig.KeyChar;
+                            levLock.AddKey(x, y, 1);
                             break;
                         case '2':
                             currentChar = SymbolsConfig.EmptySpace;
-                            levLock.AddHiddenKeyPiece(x, y, 1);
+                            levLock.AddKey(x, y, 2);
                             break;
                         case '3':
                             currentChar = SymbolsConfig.EmptySpace;
-                            levLock.AddHiddenKeyPiece(x, y, 2);
+                            levLock.AddKey(x, y, 3);
+                            break;
+                        case '4':
+                            currentChar = SymbolsConfig.EmptySpace;
+                            levLock.AddKey(x, y, 4);
                             break;
                         //treasures
                         case SymbolsConfig.TreasureChar:

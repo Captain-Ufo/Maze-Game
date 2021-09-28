@@ -1,10 +1,12 @@
-D:\Release\netcoreapp3.1\publish\Levels\Floor1.txt
-D:\Release\netcoreapp3.1\publish\Levels\Floor2.txt
-D:\Release\netcoreapp3.1\publish\Levels\Floor3.txt
-D:\Release\netcoreapp3.1\publish\Levels\FloorsConfig.txt
-D:\Release\netcoreapp3.1\publish\Levels\TestFloor.txt
+D:\Release\netcoreapp3.1\publish\Levels\Labyrinth.txt
+D:\Release\netcoreapp3.1\publish\Levels\Old Level 2.txt
+D:\Release\netcoreapp3.1\publish\Levels\TestLevel.txt
+D:\Release\netcoreapp3.1\publish\Levels\The Baron's Jails\CampaignConfig.txt
+D:\Release\netcoreapp3.1\publish\Levels\The Baron's Jails\Deep Cells.txt
+D:\Release\netcoreapp3.1\publish\Levels\The Baron's Jails\Guards Barracks.txt
+D:\Release\netcoreapp3.1\publish\Levels\The Baron's Jails\High Security Confinement.txt
+D:\Release\netcoreapp3.1\publish\Levels\The Baron's Jails\Stolen Goods Vault.txt
 D:\Release\netcoreapp3.1\publish\MazeGame.exe
-D:\Release\netcoreapp3.1\publish\Levels\Floor4.txt
 D:\Release\netcoreapp3.1\publish\MazeGame.dll
 D:\Release\netcoreapp3.1\publish\MazeGame.deps.json
 D:\Release\netcoreapp3.1\publish\MazeGame.runtimeconfig.json
